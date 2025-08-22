@@ -12,6 +12,9 @@ const contactForm = ref({
   message: ''
 })
 
+// Loading state
+const isLoading = ref(true)
+
 // Admin authentication state
 const isAdmin = ref(false)
 const adminPanelOpen = ref(false)
@@ -47,31 +50,90 @@ onMounted(async () => {
 
 // Load all data from data service
 const loadData = async () => {
+  isLoading.value = true
   try {
     const [eventsData, contentData] = await Promise.all([
       dataService.getEvents(),
       dataService.getContent()
     ])
     
-    recurringEvents.value = eventsData.recurringEvents
-    specialEvents.value = eventsData.specialEvents
-    clubContent.value = contentData
+    // Ensure events data is properly structured
+    if (eventsData && typeof eventsData === 'object') {
+      recurringEvents.value = eventsData.recurringEvents || []
+      specialEvents.value = eventsData.specialEvents || []
+    } else {
+      recurringEvents.value = []
+      specialEvents.value = []
+    }
+    
+    // Ensure content data is properly structured
+    if (contentData && typeof contentData === 'object') {
+      clubContent.value = {
+        clubDescription: contentData.clubDescription || '',
+        walkingSchedule: {
+          sundaySummer: contentData.walkingSchedule?.sundaySummer || '09:00',
+          sundayWinter: contentData.walkingSchedule?.sundayWinter || '09:30',
+          tuesday: contentData.walkingSchedule?.tuesday || '10:00'
+        },
+        lastUpdated: contentData.lastUpdated || new Date().toISOString()
+      }
+    } else {
+      clubContent.value = {
+        clubDescription: '',
+        walkingSchedule: {
+          sundaySummer: '09:00',
+          sundayWinter: '09:30',
+          tuesday: '10:00'
+        },
+        lastUpdated: new Date().toISOString()
+      }
+    }
     
     // Fallback to localStorage if needed
     if (!recurringEvents.value.length && !specialEvents.value.length) {
       const storedEvents = dataService.getEventsFromStorage()
       if (storedEvents) {
-        recurringEvents.value = storedEvents.recurringEvents
-        specialEvents.value = storedEvents.specialEvents
+        recurringEvents.value = storedEvents.recurringEvents || []
+        specialEvents.value = storedEvents.specialEvents || []
       }
     }
     
     if (!clubContent.value.clubDescription) {
       const storedContent = dataService.getContentFromStorage()
-      if (storedContent) clubContent.value = storedContent
+      if (storedContent) {
+        clubContent.value = {
+          clubDescription: storedContent.clubDescription || '',
+          walkingSchedule: {
+            sundaySummer: storedContent.walkingSchedule?.sundaySummer || '09:00',
+            sundayWinter: storedContent.walkingSchedule?.sundayWinter || '09:30',
+            tuesday: storedContent.walkingSchedule?.tuesday || '10:00'
+          },
+          lastUpdated: storedContent.lastUpdated || new Date().toISOString()
+        }
+      }
     }
+    
+    console.log('✅ App.vue: Data loaded successfully:', { 
+      recurringEvents: recurringEvents.value, 
+      specialEvents: specialEvents.value,
+      clubContent: clubContent.value 
+    })
   } catch (error) {
-    console.error('Error loading data:', error)
+    console.error('❌ App.vue: Error loading data:', error)
+    // Ensure we have fallback data even on error
+    recurringEvents.value = []
+    specialEvents.value = []
+    clubContent.value = {
+      clubDescription: '',
+      walkingSchedule: {
+        sundaySummer: '09:00',
+        sundayWinter: '09:30',
+        tuesday: '10:00'
+      },
+      lastUpdated: new Date().toISOString()
+    }
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -148,6 +210,14 @@ const scrollEvents = (direction: 'left' | 'right') => {
   }
 }
 
+const debugAdminState = () => {
+  console.log('🔍 Admin State Debug:', {
+    isAdmin: isAdmin.value,
+    adminPanelOpen: adminPanelOpen.value,
+    showLoginModal: showLoginModal.value
+  })
+}
+
 const formatEventDate = (dateString: string) => {
   const date = new Date(dateString)
   return date.toLocaleDateString('en-NZ', { 
@@ -155,19 +225,21 @@ const formatEventDate = (dateString: string) => {
     day: 'numeric' 
   })
 }
-
-const debugAdminState = () => {
-  console.log('isAdmin:', isAdmin.value)
-  console.log('adminPanelOpen:', adminPanelOpen.value)
-  console.log('showLoginModal:', showLoginModal.value)
-  console.log('loginForm:', loginForm.value)
-}
 </script>
 
 <template>
-  <div id="app" class="min-h-screen bg-gray-50">
+  <!-- Loading State -->
+  <div v-if="isLoading" class="min-h-screen flex items-center justify-center bg-gray-50">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
+      <p class="text-xl text-gray-600">Loading Walk4Health...</p>
+    </div>
+  </div>
+
+  <!-- Main Content (only show when not loading) -->
+  <div v-else>
     <!-- Navigation -->
-    <nav class="bg-white/90 backdrop-blur-sm sticky top-0 z-50">
+    <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
       <div class="max-w-7xl mx-auto px-8">
         <div class="flex justify-between items-center h-24">
           <!-- Logo -->
@@ -585,67 +657,47 @@ const debugAdminState = () => {
     />
 
     <!-- Admin Login Modal -->
-    <div v-if="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-gray-900">Admin Login</h3>
-          <button @click="closeLoginModal" class="text-gray-400 hover:text-gray-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
+    <div v-if="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+      <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
+        <h3 class="text-2xl font-bold text-gray-900 mb-6">Admin Login</h3>
         
         <form @submit.prevent="handleLogin" class="space-y-4">
           <div>
-            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
             <input 
-              id="username"
               v-model="loginForm.username" 
               type="text" 
               required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              placeholder="Enter username"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-200"
             >
           </div>
           
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <input 
-              id="password"
               v-model="loginForm.password" 
               type="password" 
               required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              placeholder="Enter password"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-200"
             >
           </div>
           
-          <div v-if="loginError" class="text-red-600 text-sm text-center">
-            {{ loginError }}
-          </div>
+          <div v-if="loginError" class="text-red-600 text-sm">{{ loginError }}</div>
           
-          <button 
-            type="submit" 
-            class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
-          >
-            Login
-          </button>
+          <div class="flex space-x-3">
+            <button type="submit" class="btn-primary flex-1">Login</button>
+            <button type="button" @click="closeLoginModal" class="btn-secondary flex-1">Cancel</button>
+          </div>
         </form>
-        
-        <div class="mt-4 text-center">
-          <button @click="closeLoginModal" class="text-gray-500 hover:text-gray-700 text-sm">
-            Cancel
-          </button>
-        </div>
       </div>
     </div>
 
-    <!-- Admin Toggle Button - Show when admin is logged in -->
+    <!-- Admin Toggle Button - Show when admin IS logged in -->
     <button 
       v-if="isAdmin"
       @click="toggleAdminPanel" 
-      class="fixed right-4 top-4 z-[9999] bg-primary-600 text-white p-3 rounded-full shadow-lg hover:bg-primary-700 transition-colors"
+      class="fixed right-4 top-4 z-[9999] bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+      title="Toggle Admin Panel"
     >
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
