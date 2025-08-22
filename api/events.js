@@ -99,7 +99,7 @@ export default async function handler(req, res) {
         // Try both endpoint formats - Upstash Redis might use different format
         const setEndpoint = `${redisUrl}/set/walk4health:events`
         console.log('💾 POST Events - Making request to:', setEndpoint)
-        console.log('💾 POST Events - Request body:', JSON.stringify(JSON.stringify(eventsData)))
+        console.log('💾 POST Events - Request body:', JSON.stringify(eventsData))
 
         const response = await fetch(setEndpoint, {
           method: 'POST',
@@ -107,7 +107,7 @@ export default async function handler(req, res) {
             'Authorization': `Bearer ${redisToken}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(JSON.stringify(eventsData))
+          body: JSON.stringify(eventsData)
         })
         
         console.log('💾 POST Events - Response status:', response.status)
@@ -126,7 +126,7 @@ export default async function handler(req, res) {
           const altEndpoint = `${redisUrl}/set`
           const altBody = JSON.stringify({
             key: 'walk4health:events',
-            value: JSON.stringify(eventsData)
+            value: eventsData
           })
           
           console.log('🔄 Alternative endpoint:', altEndpoint)

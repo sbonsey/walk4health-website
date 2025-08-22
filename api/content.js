@@ -102,7 +102,7 @@ export default async function handler(req, res) {
         })
 
         console.log('💾 POST Content - Making request to:', `${redisUrl}/set/walk4health:content`)
-        console.log('💾 POST Content - Request body:', JSON.stringify(JSON.stringify(contentData)))
+        console.log('💾 POST Content - Request body:', JSON.stringify(contentData))
 
         const response = await fetch(`${redisUrl}/set/walk4health:content`, {
           method: 'POST',
@@ -110,7 +110,7 @@ export default async function handler(req, res) {
             'Authorization': `Bearer ${redisToken}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(JSON.stringify(contentData))
+          body: JSON.stringify(contentData)
         })
         
         console.log('💾 POST Content - Response status:', response.status)
