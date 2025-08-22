@@ -363,13 +363,23 @@ onMounted(async () => {
 
 // Load all data
 const loadData = async () => {
+  console.log('🔄 AdminPanel: loadData() called')
   loading.value = true
   try {
+    console.log('🔄 AdminPanel: Starting to load data from API...')
+    console.log('🔄 AdminPanel: Current hostname:', window.location.hostname)
+    
     const [eventsData, contentData, galleriesData] = await Promise.all([
       dataService.getEvents(),
       dataService.getContent(),
       dataService.getGalleries()
     ])
+    
+    console.log('🔄 AdminPanel: API responses received:', {
+      eventsData,
+      contentData,
+      galleriesData
+    })
     
     // Ensure events data is properly structured
     if (eventsData && typeof eventsData === 'object') {

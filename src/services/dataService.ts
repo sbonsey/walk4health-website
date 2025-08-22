@@ -50,9 +50,17 @@ class DataService {
   // Events
   async getEvents(): Promise<EventsData> {
     try {
+      console.log('🔄 DataService: getEvents() called')
+      console.log('🌐 Current hostname:', window.location.hostname)
+      console.log('🏭 Production mode:', this.isProduction())
+      
       const response = await fetch('/api/events')
+      console.log('🔄 DataService: getEvents API response status:', response.status)
+      
       if (!response.ok) throw new Error('Failed to fetch events')
-      return await response.json()
+      const data = await response.json()
+      console.log('🔄 DataService: getEvents API response data:', data)
+      return data
     } catch (error) {
       console.error('Error fetching events:', error)
       // Only fallback to localStorage in development
@@ -124,9 +132,17 @@ class DataService {
   // Content
   async getContent(): Promise<ClubContent> {
     try {
+      console.log('🔄 DataService: getContent() called')
+      console.log('🌐 Current hostname:', window.location.hostname)
+      console.log('🏭 Production mode:', this.isProduction())
+      
       const response = await fetch('/api/content')
+      console.log('🔄 DataService: getContent API response status:', response.status)
+      
       if (!response.ok) throw new Error('Failed to fetch content')
-      return await response.json()
+      const data = await response.json()
+      console.log('🔄 DataService: getContent API response data:', data)
+      return data
     } catch (error) {
       console.error('Error fetching content:', error)
       // Only fallback to localStorage in development
