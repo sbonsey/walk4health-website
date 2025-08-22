@@ -8,7 +8,7 @@
 - ✅ **Data Service**: Modified to work with Redis API
 - ✅ **Configuration**: Added vercel.json with Redis environment variables
 
-### **What You Need to Do:**
+### **What You Need to Do Next:**
 
 #### **Step 1: Create Upstash Redis Database (Marketplace)**
 1. **Go to [vercel.com/dashboard](https://vercel.com/dashboard)**
