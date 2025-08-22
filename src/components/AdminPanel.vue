@@ -36,11 +36,24 @@
           
           <!-- Test API Connection Button -->
           <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
-            <button @click="testApiConnection" class="btn-secondary text-sm w-full">
-              🔍 Test API Connection
-            </button>
+            <div class="flex space-x-2 mb-2">
+              <button @click="testApiConnection" class="btn-secondary text-sm flex-1">
+                🔍 Test API Connection
+              </button>
+              <button @click="pingApi" class="btn-secondary text-sm flex-1">
+                🏓 Ping API
+              </button>
+            </div>
             <div v-if="apiTestResult" class="mt-2 text-xs">
               <pre class="bg-white p-2 rounded border text-left overflow-auto max-h-32">{{ JSON.stringify(apiTestResult, null, 2) }}</pre>
+            </div>
+            <div v-if="pingResult" class="mt-2 text-xs">
+              <div class="bg-white p-2 rounded border">
+                <span class="font-medium">Ping Result:</span> 
+                <span :class="pingResult ? 'text-green-600' : 'text-red-600'">
+                  {{ pingResult ? '✅ API Reachable' : '❌ API Not Reachable' }}
+                </span>
+              </div>
             </div>
           </div>
           
@@ -550,6 +563,21 @@ const testApiConnection = async () => {
   } catch (error) {
     apiTestResult.value = { success: false, error: error instanceof Error ? error.message : String(error) }
     saveStatus.value = `API Connection Test: Failed`
+    setTimeout(() => saveStatus.value = '', 5000)
+  }
+}
+
+// Ping API
+const pingResult = ref<boolean | null>(null)
+const pingApi = async () => {
+  try {
+    const result = await dataService.pingApi()
+    pingResult.value = result
+    saveStatus.value = `Ping API: ${result ? 'Success' : 'Failed'}`
+    setTimeout(() => saveStatus.value = '', 5000)
+  } catch (error) {
+    pingResult.value = false
+    saveStatus.value = `Ping API: Failed`
     setTimeout(() => saveStatus.value = '', 5000)
   }
 }

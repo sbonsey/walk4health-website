@@ -60,8 +60,9 @@ class DataService {
       console.log('🔄 DataService: Attempting to save events via API...')
       console.log('🌐 Current hostname:', window.location.hostname)
       console.log('🔗 API endpoint:', '/api/events')
+      console.log('📊 Events data to save:', events)
       
-      // Save via API (now using Vercel KV)
+      // Save via API (now using Upstash Redis)
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: {
@@ -71,6 +72,7 @@ class DataService {
       })
       
       console.log('📡 API Response status:', response.status)
+      console.log('📡 API Response headers:', Object.fromEntries(response.headers.entries()))
       
       if (response.ok) {
         const result = await response.json()
@@ -230,7 +232,11 @@ class DataService {
   async testApiConnection(): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
       console.log('🧪 Testing API connection...')
+      console.log('🌐 Current hostname:', window.location.hostname)
+      
       const response = await fetch('/api/test')
+      
+      console.log('📡 Test API Response status:', response.status)
       
       if (response.ok) {
         const data = await response.json()
@@ -247,6 +253,19 @@ class DataService {
         success: false, 
         error: error instanceof Error ? error.message : String(error)
       }
+    }
+  }
+
+  // Simple ping test to check if API is reachable
+  async pingApi(): Promise<boolean> {
+    try {
+      console.log('🏓 Pinging API endpoint...')
+      const response = await fetch('/api/test', { method: 'HEAD' })
+      console.log('🏓 Ping response status:', response.status)
+      return response.ok
+    } catch (error) {
+      console.error('🏓 Ping failed:', error)
+      return false
     }
   }
 }
