@@ -57,6 +57,10 @@ class DataService {
 
   async saveEvents(events: EventsData): Promise<boolean> {
     try {
+      console.log('🔄 DataService: Attempting to save events via API...')
+      console.log('🌐 Current hostname:', window.location.hostname)
+      console.log('🔗 API endpoint:', '/api/events')
+      
       // Save via API (now using Vercel KV)
       const response = await fetch('/api/events', {
         method: 'POST',
@@ -66,17 +70,24 @@ class DataService {
         body: JSON.stringify(events)
       })
       
+      console.log('📡 API Response status:', response.status)
+      
       if (response.ok) {
+        const result = await response.json()
+        console.log('✅ API save successful:', result)
         // Store in localStorage as backup
         localStorage.setItem('walk4health-events', JSON.stringify(events))
         return true
       } else {
-        throw new Error('API save failed')
+        const errorText = await response.text()
+        console.error('❌ API save failed:', response.status, errorText)
+        throw new Error(`API save failed: ${response.status} ${errorText}`)
       }
     } catch (error) {
-      console.error('Error saving events via API:', error)
+      console.error('❌ Error saving events via API:', error)
       
       // Fallback to localStorage only
+      console.log('🔄 Falling back to localStorage...')
       localStorage.setItem('walk4health-events', JSON.stringify(events))
       return true
     }

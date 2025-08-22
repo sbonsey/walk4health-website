@@ -29,6 +29,11 @@
       <div class="space-y-6">
         <!-- Events Tab -->
         <div v-if="activeTab === 'events'" class="space-y-4">
+          <!-- Status Display -->
+          <div v-if="saveStatus" class="p-3 rounded-lg text-sm" :class="saveStatus.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'">
+            {{ saveStatus }}
+          </div>
+          
           <div class="flex justify-between items-center">
             <h3 class="text-lg font-semibold text-gray-900">Manage Events</h3>
             <div class="flex space-x-2">
@@ -358,15 +363,20 @@ const loadData = async () => {
 // Save events
 const saveEvents = async () => {
   try {
+    console.log('🔄 Saving events:', events.value)
     const success = await dataService.saveEvents(events.value)
     if (success) {
       saveStatus.value = 'Events saved successfully!'
       emit('eventsUpdated', events.value)
+      console.log('✅ Events saved successfully')
       setTimeout(() => saveStatus.value = '', 3000)
+    } else {
+      saveStatus.value = 'Failed to save events'
+      console.error('❌ Events save returned false')
     }
   } catch (error) {
     saveStatus.value = 'Error saving events'
-    console.error('Error saving events:', error)
+    console.error('❌ Error saving events:', error)
   }
 }
 
