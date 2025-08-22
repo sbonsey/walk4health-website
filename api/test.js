@@ -5,8 +5,8 @@ export default async function handler(req, res) {
     const hostname = req.headers.host || 'unknown'
     
     // Check Redis environment variables
-    const redisUrl = process.env.UPSTASH_REDIS_REST_URL
-    const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN
+    const redisUrl = process.env.KV_REST_API_URL
+    const redisToken = process.env.KV_REST_API_TOKEN
     
     const status = {
       environment: process.env.NODE_ENV || 'unknown',

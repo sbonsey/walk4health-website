@@ -5,8 +5,8 @@ export default async function handler(req, res) {
     case 'GET':
       try {
         // Get content from Upstash Redis
-        const redisUrl = process.env.UPSTASH_REDIS_REST_URL
-        const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN
+        const redisUrl = process.env.KV_REST_API_URL
+        const redisToken = process.env.KV_REST_API_TOKEN
         
         if (!redisUrl || !redisToken) {
           console.error('Redis environment variables not set')
@@ -61,8 +61,8 @@ export default async function handler(req, res) {
         }
 
         // Save to Upstash Redis
-        const redisUrl = process.env.UPSTASH_REDIS_REST_URL
-        const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN
+        const redisUrl = process.env.KV_REST_API_URL
+        const redisToken = process.env.KV_REST_API_TOKEN
         
         if (!redisUrl || !redisToken) {
           console.error('Redis environment variables not set')
