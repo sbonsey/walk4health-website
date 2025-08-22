@@ -284,7 +284,7 @@ const formatEventDate = (dateString: string) => {
     </nav>
 
     <!-- Main Content -->
-    <main>
+    <main class="pt-24">
       <!-- Home Section -->
       <section id="home" class="section bg-gradient-to-br from-primary-50 to-secondary-50 relative overflow-hidden">
         <!-- Background Image -->
