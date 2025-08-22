@@ -1,31 +1,30 @@
-# Vercel KV Setup Guide
+# Vercel KV Setup Guide (Updated for Marketplace)
 
-## 🚀 **Setting Up Vercel KV for Walk4Health**
+## 🚀 **Setting Up Upstash Redis for Walk4Health**
 
 ### **What We've Implemented:**
-- ✅ **Vercel KV Integration**: Replaced file system with database
-- ✅ **API Endpoints**: Updated to use KV instead of files
-- ✅ **Data Service**: Modified to work with KV API
-- ✅ **Configuration**: Added vercel.json with KV environment variables
+- ✅ **Upstash Redis Integration**: Replaced file system with Redis database
+- ✅ **API Endpoints**: Updated to use Redis instead of files
+- ✅ **Data Service**: Modified to work with Redis API
+- ✅ **Configuration**: Added vercel.json with Redis environment variables
 
 ### **What You Need to Do:**
 
-#### **Step 1: Create Vercel KV Database**
+#### **Step 1: Create Upstash Redis Database (Marketplace)**
 1. **Go to [vercel.com/dashboard](https://vercel.com/dashboard)**
 2. **Select your Walk4Health project**
 3. **Go to "Storage" tab**
 4. **Click "Create Database"**
-5. **Select "KV" (Key-Value)**
-6. **Choose a plan** (Free tier: 100MB storage)
-7. **Select a region** (closest to your users)
-8. **Click "Create"**
+5. **Select "Marketplace Database Providers"**
+6. **Choose "Upstash"** (Serverless DB with Redis)
+7. **Click "Create"**
+8. **Follow Upstash setup** (create account if needed)
+9. **Choose a plan** (Free tier: 10,000 requests/month, 256MB storage)
 
 #### **Step 2: Get Environment Variables**
-After creating the KV database, Vercel will show you these values:
-- `KV_URL`
-- `KV_REST_API_URL`
-- `KV_REST_API_TOKEN`
-- `KV_REST_API_READ_ONLY_TOKEN`
+After creating the Upstash Redis database, Vercel will show you these values:
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
 
 #### **Step 3: Add Environment Variables to Vercel**
 1. **In your Vercel project dashboard**
@@ -42,13 +41,14 @@ After creating the KV database, Vercel will show you these values:
 ## 🎯 **What This Gives You:**
 
 ### **✅ Real Persistence:**
-- Events saved to Vercel KV database
-- Content saved to Vercel KV database
+- Events saved to Upstash Redis database
+- Content saved to Upstash Redis database
 - Data survives all deployments
 - No more read-only file system errors
 
 ### **✅ Free Tier Benefits:**
-- 100MB storage (plenty for events and content)
+- 10,000 requests/month (plenty for events and content)
+- 256MB storage (more than enough)
 - Global edge network
 - Automatic scaling
 - No database management needed
@@ -61,20 +61,21 @@ After creating the KV database, Vercel will show you these values:
 ## 🔧 **How It Works Now:**
 
 1. **Admin adds event** → API endpoint receives data
-2. **API saves to Vercel KV** → Database stores the data
-3. **Website reads from KV** → Shows updated content
+2. **API saves to Upstash Redis** → Database stores the data
+3. **Website reads from Redis** → Shows updated content
 4. **Data persists** → Survives all deployments and refreshes
 
 ## 🚨 **Important Notes:**
 
 - **Local Development**: Still works with localStorage fallback
-- **Vercel Production**: Uses KV database for real persistence
+- **Vercel Production**: Uses Upstash Redis database for real persistence
 - **Environment Variables**: Must be set in Vercel dashboard
 - **Redeploy Required**: After setting environment variables
+- **Marketplace Service**: Upstash Redis is a third-party service (very reliable)
 
 ## 🎉 **After Setup:**
 
-Once KV is configured:
+Once Upstash Redis is configured:
 - ✅ **Events will persist** across deployments
 - ✅ **Content will persist** across deployments
 - ✅ **No more 500 errors** in Vercel logs
@@ -83,9 +84,9 @@ Once KV is configured:
 ## 💡 **Need Help?**
 
 If you encounter issues:
-1. **Check Vercel logs** for KV connection errors
+1. **Check Vercel logs** for Redis connection errors
 2. **Verify environment variables** are set correctly
-3. **Ensure KV database** is created and active
+3. **Ensure Upstash Redis database** is created and active
 4. **Redeploy** after any configuration changes
 
-**This setup will give you a production-ready, persistent admin system that works perfectly on Vercel!** 🚀
+**This setup will give you a production-ready, persistent admin system that works perfectly on Vercel using Upstash Redis!** 🚀

@@ -19,7 +19,6 @@
     "@headlessui/vue": "^1.7.23",
     "@heroicons/vue": "^2.2.0",
     "@unocss/vite": "^66.4.2",
-    "@vercel/kv": "^3.0.0",
     "@vueuse/core": "^13.7.0",
     "pinia": "^3.0.3",
     "unocss": "^66.4.2",

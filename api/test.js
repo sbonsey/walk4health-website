@@ -4,22 +4,19 @@ export default async function handler(req, res) {
     const isDev = process.env.NODE_ENV === 'development'
     const hostname = req.headers.host || 'unknown'
     
-    // Check KV environment variables
-    const kvUrl = process.env.KV_URL
-    const kvRestApiUrl = process.env.KV_REST_API_URL
-    const kvRestApiToken = process.env.KV_REST_API_TOKEN
+    // Check Redis environment variables
+    const redisUrl = process.env.UPSTASH_REDIS_REST_URL
+    const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN
     
     const status = {
       environment: process.env.NODE_ENV || 'unknown',
       hostname,
       timestamp: new Date().toISOString(),
-      kv: {
-        hasKvUrl: !!kvUrl,
-        hasKvRestApiUrl: !!kvRestApiUrl,
-        hasKvRestApiToken: !!kvRestApiToken,
-        kvUrl: kvUrl ? '***SET***' : 'NOT SET',
-        kvRestApiUrl: kvRestApiUrl ? '***SET***' : 'NOT SET',
-        kvRestApiToken: kvRestApiToken ? '***SET***' : 'NOT SET'
+      redis: {
+        hasRedisUrl: !!redisUrl,
+        hasRedisToken: !!redisToken,
+        redisUrl: redisUrl ? '***SET***' : 'NOT SET',
+        redisToken: redisToken ? '***SET***' : 'NOT SET'
       },
       message: 'API test endpoint working'
     }
