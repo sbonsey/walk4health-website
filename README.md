@@ -1,6 +1,8 @@
 # Walk4Health Website
 
-A modern, professional website for the Walk4Health walking club in the Hutt Valley, New Zealand.
+A Vue.js website for the Walk4Health walking club.
+
+<!-- Last updated: 2025-01-22 - Redis integration complete -->
 
 ## Features
 
