@@ -12,200 +12,223 @@
         </button>
       </div>
 
-      <!-- Navigation Tabs -->
-      <div class="flex space-x-1 mb-6 bg-gray-100 rounded-lg p-1">
-        <button 
-          v-for="tab in tabs" 
-          :key="tab.id"
-          @click="activeTab = tab.id"
-          class="flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors"
-          :class="activeTab === tab.id ? 'bg-white text-primary-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
-        >
-          {{ tab.name }}
-        </button>
+      <!-- Loading State -->
+      <div v-if="loading" class="text-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+        <p class="text-gray-600">Loading admin data...</p>
       </div>
 
-      <!-- Content based on active tab -->
-      <div class="space-y-6">
-        <!-- Events Tab -->
-        <div v-if="activeTab === 'events'" class="space-y-4">
-          <!-- Status Display -->
-          <div v-if="saveStatus" class="p-3 rounded-lg text-sm" :class="saveStatus.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'">
-            {{ saveStatus }}
-          </div>
-          
-          <!-- Test API Connection Button -->
-          <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
-            <div class="flex space-x-2 mb-2">
-              <button @click="testApiConnection" class="btn-secondary text-sm flex-1">
-                🔍 Test API Connection
-              </button>
-              <button @click="pingApi" class="btn-secondary text-sm flex-1">
-                🏓 Ping API
-              </button>
-            </div>
-            <div v-if="apiTestResult" class="mt-2 text-xs">
-              <pre class="bg-white p-2 rounded border text-left overflow-auto max-h-32">{{ JSON.stringify(apiTestResult, null, 2) }}</pre>
-            </div>
-            <div v-if="pingResult" class="mt-2 text-xs">
-              <div class="bg-white p-2 rounded border">
-                <span class="font-medium">Ping Result:</span> 
-                <span :class="pingResult ? 'text-green-600' : 'text-red-600'">
-                  {{ pingResult ? '✅ API Reachable' : '❌ API Not Reachable' }}
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          <div class="flex justify-between items-center">
-            <h3 class="text-lg font-semibold text-gray-900">Manage Events</h3>
-            <div class="flex space-x-2">
-              <button @click="showAddRecurringForm = true" class="btn-primary text-sm">
-                Add Recurring
-              </button>
-              <button @click="showAddSpecialForm = true" class="btn-primary text-sm">
-                Add Special
-              </button>
-            </div>
-          </div>
-          
-          <!-- Add Recurring Event Form -->
-          <div v-if="showAddRecurringForm" class="bg-gray-50 p-4 rounded-lg space-y-3">
-            <h4 class="font-medium text-gray-900">Add Recurring Event</h4>
-            <input v-model="newRecurringEvent.title" type="text" placeholder="Event Title (e.g., Sunday Walk)" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-            <select v-model="newRecurringEvent.day" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-              <option value="">Select Day</option>
-              <option value="sunday">Sunday</option>
-              <option value="monday">Monday</option>
-              <option value="tuesday">Tuesday</option>
-              <option value="wednesday">Wednesday</option>
-              <option value="thursday">Thursday</option>
-              <option value="friday">Friday</option>
-              <option value="saturday">Saturday</option>
-            </select>
-            <input v-model="newRecurringEvent.time" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-            <textarea v-model="newRecurringEvent.message" placeholder="Optional message or description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
-            <div class="flex space-x-2">
-              <button @click="addRecurringEvent" class="btn-primary text-sm flex-1">Save Event</button>
-              <button @click="showAddRecurringForm = false" class="btn-secondary text-sm flex-1">Cancel</button>
-            </div>
-          </div>
-
-          <!-- Add Special Event Form -->
-          <div v-if="showAddSpecialForm" class="bg-gray-50 p-4 rounded-lg space-y-3">
-            <h4 class="font-medium text-gray-900">Add Special Event</h4>
-            <input v-model="newSpecialEvent.title" type="text" placeholder="Event Title" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-            <input v-model="newSpecialEvent.date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-            <input v-model="newSpecialEvent.time" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-            <textarea v-model="newSpecialEvent.message" placeholder="Event description or message" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
-            <div class="flex space-x-2">
-              <button @click="addSpecialEvent" class="btn-primary text-sm flex-1">Save Event</button>
-              <button @click="showAddSpecialForm = false" class="btn-secondary text-sm flex-1">Cancel</button>
-            </div>
-          </div>
-
-          <!-- Events List -->
-          <div class="space-y-3">
-            <!-- Recurring Events -->
-            <div v-if="events.recurringEvents.length > 0">
-              <h4 class="font-medium text-gray-700 mb-2 text-sm">Recurring Events</h4>
-              <div class="space-y-2">
-                <div v-for="event in events.recurringEvents" :key="event.id" class="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <h5 class="font-medium text-gray-900">{{ event.title }}</h5>
-                      <p class="text-sm text-gray-600">{{ event.day }} at {{ event.time }}</p>
-                      <p v-if="event.message" class="text-sm text-gray-600 mt-1">{{ event.message }}</p>
-                    </div>
-                    <button @click="deleteRecurringEvent(event.id)" class="text-red-600 hover:text-red-800">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Special Events -->
-            <div v-if="events.specialEvents.length > 0">
-              <h4 class="font-medium text-gray-700 mb-2 text-sm">Special Events</h4>
-              <div class="space-y-2">
-                <div v-for="event in events.specialEvents" :key="event.id" class="bg-orange-50 p-3 rounded-lg border border-orange-200">
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <h5 class="font-medium text-gray-900">{{ event.title }}</h5>
-                      <p class="text-sm text-gray-600">{{ formatDate(event.date) }} at {{ event.time }}</p>
-                      <p v-if="event.message" class="text-sm text-gray-600 mt-1">{{ event.message }}</p>
-                    </div>
-                    <button @click="deleteSpecialEvent(event.id)" class="text-red-600 hover:text-red-800">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- No Events Message -->
-            <div v-if="events.recurringEvents.length === 0 && events.specialEvents.length === 0" class="text-center text-gray-500 py-8">
-              <p>No events added yet.</p>
-              <p class="text-sm">Add recurring or special events to get started.</p>
-            </div>
-          </div>
+      <!-- Content (only show when not loading) -->
+      <div v-else class="space-y-6">
+        <!-- Navigation Tabs -->
+        <div class="flex space-x-1 mb-6 bg-gray-100 rounded-lg p-1">
+          <button 
+            v-for="tab in tabs" 
+            :key="tab.id"
+            @click="activeTab = tab.id"
+            class="flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors"
+            :class="activeTab === tab.id ? 'bg-white text-primary-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+          >
+            {{ tab.name }}
+          </button>
         </div>
 
-        <!-- Photos Tab -->
-        <div v-if="activeTab === 'photos'" class="space-y-4">
-          <div class="flex justify-between items-center">
-            <h3 class="text-lg font-semibold text-gray-900">Manage Photos</h3>
-            <div class="flex space-x-2">
-              <button @click="showAddGalleryForm = true" class="btn-primary text-sm">
-                Add Gallery
-              </button>
-              <button @click="showPhotoUpload = true" class="btn-primary text-sm">
-                Upload Photos
-              </button>
+        <!-- Content based on active tab -->
+        <div class="space-y-6">
+          <!-- Events Tab -->
+          <div v-if="activeTab === 'events'" class="space-y-4">
+            <!-- Status Display -->
+            <div v-if="saveStatus" class="p-3 rounded-lg text-sm" :class="saveStatus.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'">
+              {{ saveStatus }}
             </div>
-          </div>
-          
-          <!-- Add Gallery Form -->
-          <div v-if="showAddGalleryForm" class="bg-gray-50 p-4 rounded-lg space-y-3">
-            <h4 class="font-medium text-gray-900">Create New Gallery</h4>
-            <input v-model="newGallery.title" type="text" placeholder="Gallery Title" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-            <textarea v-model="newGallery.description" placeholder="Gallery Description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
-            <input v-model="newGallery.date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-            <input v-model="newGallery.location" type="text" placeholder="Location (optional)" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-            <div class="flex space-x-2">
-              <button @click="createGallery" class="btn-primary text-sm flex-1">Create Gallery</button>
-              <button @click="showAddGalleryForm = false" class="btn-secondary text-sm flex-1">Cancel</button>
+            
+            <!-- Test API Connection Button -->
+            <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+              <div class="flex space-x-2 mb-2">
+                <button @click="testApiConnection" class="btn-secondary text-sm flex-1">
+                  🔍 Test API Connection
+                </button>
+                <button @click="pingApi" class="btn-secondary text-sm flex-1">
+                  🏓 Ping API
+                </button>
+              </div>
+              <div v-if="apiTestResult" class="mt-2 text-xs">
+                <pre class="bg-white p-2 rounded border text-left overflow-auto max-h-32">{{ JSON.stringify(apiTestResult, null, 2) }}</pre>
+              </div>
+              <div v-if="pingResult" class="mt-2 text-xs">
+                <div class="bg-white p-2 rounded border">
+                  <span class="font-medium">Ping Result:</span> 
+                  <span :class="pingResult ? 'text-green-600' : 'text-red-600'">
+                    {{ pingResult ? '✅ API Reachable' : '❌ API Not Reachable' }}
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-          
-          <!-- Photo Upload -->
-          <div v-if="showPhotoUpload" class="bg-gray-50 p-4 rounded-lg space-y-3">
-            <input type="file" @change="handlePhotoUpload" multiple accept="image/*" class="w-full">
-            <div class="flex space-x-2">
-              <button @click="uploadPhotos" class="btn-primary text-sm flex-1">Upload</button>
-              <button @click="showPhotoUpload = false" class="btn-secondary text-sm flex-1">Cancel</button>
+            
+            <div class="flex justify-between items-center">
+              <h3 class="text-lg font-semibold text-gray-900">Manage Events</h3>
+              <div class="flex space-x-2">
+                <button @click="showAddRecurringForm = true" class="btn-primary text-sm">
+                  Add Recurring
+                </button>
+                <button @click="showAddSpecialForm = true" class="btn-primary text-sm">
+                  Add Special
+                </button>
+              </div>
+            </div>
+            
+            <!-- Add Recurring Event Form -->
+            <div v-if="showAddRecurringForm" class="bg-gray-50 p-4 rounded-lg space-y-3">
+              <h4 class="font-medium text-gray-900">Add Recurring Event</h4>
+              <input v-model="newRecurringEvent.title" type="text" placeholder="Event Title (e.g., Sunday Walk)" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              <select v-model="newRecurringEvent.day" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                <option value="">Select Day</option>
+                <option value="sunday">Sunday</option>
+                <option value="monday">Monday</option>
+                <option value="tuesday">Tuesday</option>
+                <option value="wednesday">Wednesday</option>
+                <option value="thursday">Thursday</option>
+                <option value="friday">Friday</option>
+                <option value="saturday">Saturday</option>
+              </select>
+              <input v-model="newRecurringEvent.time" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              <textarea v-model="newRecurringEvent.message" placeholder="Optional message or description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+              <div class="flex space-x-2">
+                <button @click="addRecurringEvent" class="btn-primary text-sm flex-1">Save Event</button>
+                <button @click="showAddRecurringForm = false" class="btn-secondary text-sm flex-1">Cancel</button>
+              </div>
+            </div>
+
+            <!-- Add Special Event Form -->
+            <div v-if="showAddSpecialForm" class="bg-gray-50 p-4 rounded-lg space-y-3">
+              <h4 class="font-medium text-gray-900">Add Special Event</h4>
+              <input v-model="newSpecialEvent.title" type="text" placeholder="Event Title" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              <input v-model="newSpecialEvent.date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              <input v-model="newSpecialEvent.time" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              <textarea v-model="newSpecialEvent.message" placeholder="Event description or message" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+              <div class="flex space-x-2">
+                <button @click="addSpecialEvent" class="btn-primary text-sm flex-1">Save Event</button>
+                <button @click="showAddSpecialForm = false" class="btn-secondary text-sm flex-1">Cancel</button>
+              </div>
+            </div>
+
+            <!-- Events List -->
+            <div class="space-y-3">
+              <!-- Recurring Events -->
+              <div v-if="events.recurringEvents.length > 0">
+                <h4 class="font-medium text-gray-700 mb-2 text-sm">Recurring Events</h4>
+                <div class="space-y-2">
+                  <div v-for="event in events.recurringEvents" :key="event.id" class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <h5 class="font-medium text-gray-900">{{ event.title }}</h5>
+                        <p class="text-sm text-gray-600">{{ event.day }} at {{ event.time }}</p>
+                        <p v-if="event.message" class="text-sm text-gray-600 mt-1">{{ event.message }}</p>
+                      </div>
+                      <button @click="deleteRecurringEvent(event.id)" class="text-red-600 hover:text-red-800">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Special Events -->
+              <div v-if="events.specialEvents.length > 0">
+                <h4 class="font-medium text-gray-700 mb-2 text-sm">Special Events</h4>
+                <div class="space-y-2">
+                  <div v-for="event in events.specialEvents" :key="event.id" class="bg-orange-50 p-3 rounded-lg border border-orange-200">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <h5 class="font-medium text-gray-900">{{ event.title }}</h5>
+                        <p class="text-sm text-gray-600">{{ formatDate(event.date) }} at {{ event.time }}</p>
+                        <p v-if="event.message" class="text-sm text-gray-600 mt-1">{{ event.message }}</p>
+                      </div>
+                      <button @click="deleteSpecialEvent(event.id)" class="text-red-600 hover:text-red-800">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- No Events Message -->
+              <div v-if="events.recurringEvents.length === 0 && events.specialEvents.length === 0" class="text-center text-gray-500 py-8">
+                <p>No events added yet.</p>
+                <p class="text-sm">Add recurring or special events to get started.</p>
+              </div>
             </div>
           </div>
 
-          <!-- Galleries List -->
-          <div v-if="galleries.length > 0" class="space-y-4">
-            <h4 class="font-medium text-gray-700 mb-2 text-sm">Photo Galleries</h4>
-            <div class="space-y-3">
-              <div v-for="gallery in galleries" :key="gallery.id" class="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <h5 class="font-medium text-gray-900">{{ gallery.title }}</h5>
-                    <p class="text-sm text-gray-600">{{ gallery.description }}</p>
-                    <p class="text-sm text-gray-500">{{ formatDate(gallery.date) }} • {{ gallery.location }}</p>
-                    <p class="text-xs text-gray-400">{{ gallery.images.length }} images</p>
+          <!-- Photos Tab -->
+          <div v-if="activeTab === 'photos'" class="space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-lg font-semibold text-gray-900">Manage Photos</h3>
+              <div class="flex space-x-2">
+                <button @click="showAddGalleryForm = true" class="btn-primary text-sm">
+                  Add Gallery
+                </button>
+                <button @click="showPhotoUpload = true" class="btn-primary text-sm">
+                  Upload Photos
+                </button>
+              </div>
+            </div>
+            
+            <!-- Add Gallery Form -->
+            <div v-if="showAddGalleryForm" class="bg-gray-50 p-4 rounded-lg space-y-3">
+              <h4 class="font-medium text-gray-900">Create New Gallery</h4>
+              <input v-model="newGallery.title" type="text" placeholder="Gallery Title" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              <textarea v-model="newGallery.description" placeholder="Gallery Description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+              <input v-model="newGallery.date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              <input v-model="newGallery.location" type="text" placeholder="Location (optional)" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              <div class="flex space-x-2">
+                <button @click="createGallery" class="btn-primary text-sm flex-1">Create Gallery</button>
+                <button @click="showAddGalleryForm = false" class="btn-secondary text-sm flex-1">Cancel</button>
+              </div>
+            </div>
+            
+            <!-- Photo Upload -->
+            <div v-if="showPhotoUpload" class="bg-gray-50 p-4 rounded-lg space-y-3">
+              <input type="file" @change="handlePhotoUpload" multiple accept="image/*" class="w-full">
+              <div class="flex space-x-2">
+                <button @click="uploadPhotos" class="btn-primary text-sm flex-1">Upload</button>
+                <button @click="showPhotoUpload = false" class="btn-secondary text-sm flex-1">Cancel</button>
+              </div>
+            </div>
+
+            <!-- Galleries List -->
+            <div v-if="galleries.length > 0" class="space-y-4">
+              <h4 class="font-medium text-gray-700 mb-2 text-sm">Photo Galleries</h4>
+              <div class="space-y-3">
+                <div v-for="gallery in galleries" :key="gallery.id" class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <h5 class="font-medium text-gray-900">{{ gallery.title }}</h5>
+                      <p class="text-sm text-gray-600">{{ gallery.description }}</p>
+                      <p class="text-sm text-gray-500">{{ formatDate(gallery.date) }} • {{ gallery.location }}</p>
+                      <p class="text-xs text-gray-400">{{ gallery.images.length }} images</p>
+                    </div>
+                    <button @click="deleteGallery(gallery.id)" class="text-red-600 hover:text-red-800">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </button>
                   </div>
-                  <button @click="deleteGallery(gallery.id)" class="text-red-600 hover:text-red-800">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                </div>
+              </div>
+            </div>
+
+            <!-- Photos Grid -->
+            <div class="grid grid-cols-2 gap-3">
+              <div v-for="photo in photos" :key="photo.id" class="relative group">
+                <img :src="photo.url" :alt="photo.title" class="w-full h-24 object-cover rounded-lg">
+                <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                  <button @click="deletePhoto(photo.id)" class="text-white hover:text-red-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
                   </button>
@@ -214,50 +237,36 @@
             </div>
           </div>
 
-          <!-- Photos Grid -->
-          <div class="grid grid-cols-2 gap-3">
-            <div v-for="photo in photos" :key="photo.id" class="relative group">
-              <img :src="photo.url" :alt="photo.title" class="w-full h-24 object-cover rounded-lg">
-              <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                <button @click="deletePhoto(photo.id)" class="text-white hover:text-red-300">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                  </svg>
-                </button>
-                </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Content Tab -->
-        <div v-if="activeTab === 'content'" class="space-y-4">
-          <h3 class="text-lg font-semibold text-gray-900">Manage Content</h3>
-          
-          <div class="space-y-3">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Club Description</label>
-              <textarea v-model="content.clubDescription" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
-            </div>
+          <!-- Content Tab -->
+          <div v-if="activeTab === 'content'" class="space-y-4">
+            <h3 class="text-lg font-semibold text-gray-900">Manage Content</h3>
             
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Walking Schedule</label>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-xs text-gray-600 mb-1">Sunday Summer</label>
-                  <input v-model="content.walkingSchedule.sundaySummer" type="time" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
-                </div>
-                <div>
-                  <label class="block text-xs text-gray-600 mb-1">Sunday Winter</label>
-                  <input v-model="content.walkingSchedule.sundayWinter" type="time" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
-                </div>
-                <div>
-                  <label class="block text-xs text-gray-600 mb-1">Tuesday</label>
-                  <input v-model="content.walkingSchedule.tuesday" type="time" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Club Description</label>
+                <textarea v-model="content.clubDescription" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Walking Schedule</label>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs text-gray-600 mb-1">Sunday Summer</label>
+                    <input v-model="content.walkingSchedule.sundaySummer" type="time" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-600 mb-1">Sunday Winter</label>
+                    <input v-model="content.walkingSchedule.sundayWinter" type="time" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-600 mb-1">Tuesday</label>
+                    <input v-model="content.walkingSchedule.tuesday" type="time" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                  </div>
                 </div>
               </div>
+              
+              <button @click="saveContent" class="btn-primary w-full">Save Changes</button>
             </div>
-            
-            <button @click="saveContent" class="btn-primary w-full">Save Changes</button>
           </div>
         </div>
       </div>
@@ -362,22 +371,87 @@ const loadData = async () => {
       dataService.getGalleries()
     ])
     
-    events.value = eventsData
-    content.value = contentData
-    galleries.value = galleriesData
+    // Ensure events data is properly structured
+    if (eventsData && typeof eventsData === 'object') {
+      events.value = {
+        recurringEvents: eventsData.recurringEvents || [],
+        specialEvents: eventsData.specialEvents || []
+      }
+    } else {
+      events.value = { recurringEvents: [], specialEvents: [] }
+    }
+    
+    // Ensure content data is properly structured
+    if (contentData && typeof contentData === 'object') {
+      content.value = {
+        clubDescription: contentData.clubDescription || '',
+        walkingSchedule: {
+          sundaySummer: contentData.walkingSchedule?.sundaySummer || '09:00',
+          sundayWinter: contentData.walkingSchedule?.sundayWinter || '09:30',
+          tuesday: contentData.walkingSchedule?.tuesday || '10:00'
+        },
+        lastUpdated: contentData.lastUpdated || new Date().toISOString()
+      }
+    } else {
+      content.value = {
+        clubDescription: '',
+        walkingSchedule: {
+          sundaySummer: '09:00',
+          sundayWinter: '09:30',
+          tuesday: '10:00'
+        },
+        lastUpdated: new Date().toISOString()
+      }
+    }
+    
+    // Ensure galleries data is properly structured
+    if (Array.isArray(galleriesData)) {
+      galleries.value = galleriesData
+    } else {
+      galleries.value = []
+    }
     
     // Fallback to localStorage if needed
     if (!events.value.recurringEvents.length && !events.value.specialEvents.length) {
       const storedEvents = dataService.getEventsFromStorage()
-      if (storedEvents) events.value = storedEvents
+      if (storedEvents) {
+        events.value = {
+          recurringEvents: storedEvents.recurringEvents || [],
+          specialEvents: storedEvents.specialEvents || []
+        }
+      }
     }
     
     if (!content.value.clubDescription) {
       const storedContent = dataService.getContentFromStorage()
-      if (storedContent) content.value = storedContent
+      if (storedContent) {
+        content.value = {
+          clubDescription: storedContent.clubDescription || '',
+          walkingSchedule: {
+            sundaySummer: storedContent.walkingSchedule?.sundaySummer || '09:00',
+            sundayWinter: storedContent.walkingSchedule?.sundayWinter || '09:30',
+            tuesday: storedContent.walkingSchedule?.tuesday || '10:00'
+          },
+          lastUpdated: storedContent.lastUpdated || new Date().toISOString()
+        }
+      }
     }
+    
+    console.log('✅ Data loaded successfully:', { events: events.value, content: content.value })
   } catch (error) {
-    console.error('Error loading data:', error)
+    console.error('❌ Error loading data:', error)
+    // Ensure we have fallback data even on error
+    events.value = { recurringEvents: [], specialEvents: [] }
+    content.value = {
+      clubDescription: '',
+      walkingSchedule: {
+        sundaySummer: '09:00',
+        sundayWinter: '09:30',
+        tuesday: '10:00'
+      },
+      lastUpdated: new Date().toISOString()
+    }
+    galleries.value = []
   } finally {
     loading.value = false
   }
