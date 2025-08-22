@@ -460,36 +460,65 @@ const loadData = async () => {
 // Save events
 const saveEvents = async () => {
   try {
-    console.log('🔄 Saving events:', events.value)
+    console.log('🔄 AdminPanel: Starting to save events...')
+    console.log('🔄 AdminPanel: Events data to save:', events.value)
+    console.log('🔄 AdminPanel: Current hostname:', window.location.hostname)
+    console.log('🔄 AdminPanel: Is production:', window.location.hostname !== 'localhost' && !window.location.hostname.includes('localhost'))
+    
     const success = await dataService.saveEvents(events.value)
+    
+    console.log('🔄 AdminPanel: DataService.saveEvents result:', success)
+    
     if (success) {
       saveStatus.value = 'Events saved successfully!'
       emit('eventsUpdated', events.value)
-      console.log('✅ Events saved successfully')
+      console.log('✅ AdminPanel: Events saved successfully')
       setTimeout(() => saveStatus.value = '', 3000)
     } else {
       saveStatus.value = 'Failed to save events'
-      console.error('❌ Events save returned false')
+      console.error('❌ AdminPanel: Events save returned false')
     }
   } catch (error) {
     saveStatus.value = 'Error saving events'
-    console.error('❌ Error saving events:', error)
+    console.error('❌ AdminPanel: Error saving events:', error)
+    console.error('❌ AdminPanel: Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : 'No stack trace'
+    })
   }
 }
 
 // Save content
 const saveContent = async () => {
   try {
+    console.log('🔄 AdminPanel: Starting to save content...')
+    console.log('🔄 AdminPanel: Content data to save:', content.value)
+    console.log('🔄 AdminPanel: Current hostname:', window.location.hostname)
+    console.log('🔄 AdminPanel: Is production:', window.location.hostname !== 'localhost' && !window.location.hostname.includes('localhost'))
+    
     content.value.lastUpdated = new Date().toISOString()
     const success = await dataService.saveContent(content.value)
+    
+    console.log('🔄 AdminPanel: DataService.saveContent result:', success)
+    
     if (success) {
       saveStatus.value = 'Content saved successfully!'
       emit('contentUpdated', content.value)
+      console.log('✅ AdminPanel: Content saved successfully')
       setTimeout(() => saveStatus.value = '', 3000)
+    } else {
+      saveStatus.value = 'Failed to save content'
+      console.error('❌ AdminPanel: Content save returned false')
     }
   } catch (error) {
     saveStatus.value = 'Error saving content'
-    console.error('Error saving content:', error)
+    console.error('❌ AdminPanel: Error saving content:', error)
+    console.error('❌ AdminPanel: Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : 'No stack trace'
+    })
   }
 }
 

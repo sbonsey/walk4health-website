@@ -93,6 +93,14 @@ export default async function handler(req, res) {
           return res.status(500).json({ error: 'Redis not configured' })
         }
 
+        // Log URL structure for debugging (without exposing full URL)
+        const urlParts = redisUrl.split('/')
+        console.log('💾 POST Content - Redis URL structure:', {
+          protocol: urlParts[0],
+          hostname: urlParts[2]?.split('.')[0] + '.***',
+          path: urlParts.slice(3).join('/')
+        })
+
         console.log('💾 POST Content - Making request to:', `${redisUrl}/set/walk4health:content`)
         console.log('💾 POST Content - Request body:', JSON.stringify(JSON.stringify(contentData)))
 

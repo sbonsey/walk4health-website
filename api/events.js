@@ -88,10 +88,20 @@ export default async function handler(req, res) {
           return res.status(500).json({ error: 'Redis not configured' })
         }
 
-        console.log('💾 POST Events - Making request to:', `${redisUrl}/set/walk4health:events`)
+        // Log URL structure for debugging (without exposing full URL)
+        const urlParts = redisUrl.split('/')
+        console.log('💾 POST Events - Redis URL structure:', {
+          protocol: urlParts[0],
+          hostname: urlParts[2]?.split('.')[0] + '.***',
+          path: urlParts.slice(3).join('/')
+        })
+
+        // Try both endpoint formats - Upstash Redis might use different format
+        const setEndpoint = `${redisUrl}/set/walk4health:events`
+        console.log('💾 POST Events - Making request to:', setEndpoint)
         console.log('💾 POST Events - Request body:', JSON.stringify(JSON.stringify(eventsData)))
 
-        const response = await fetch(`${redisUrl}/set/walk4health:events`, {
+        const response = await fetch(setEndpoint, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${redisToken}`,
@@ -110,7 +120,38 @@ export default async function handler(req, res) {
         } else {
           const errorText = await response.text()
           console.error('💾 POST Events - Redis SET failed:', response.status, errorText)
-          throw new Error(`Redis SET failed: ${response.status} - ${errorText}`)
+          
+          // Try alternative endpoint format if first one failed
+          console.log('🔄 Trying alternative endpoint format...')
+          const altEndpoint = `${redisUrl}/set`
+          const altBody = JSON.stringify({
+            key: 'walk4health:events',
+            value: JSON.stringify(eventsData)
+          })
+          
+          console.log('🔄 Alternative endpoint:', altEndpoint)
+          console.log('🔄 Alternative body:', altBody)
+          
+          const altResponse = await fetch(altEndpoint, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${redisToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: altBody
+          })
+          
+          console.log('🔄 Alternative response status:', altResponse.status)
+          
+          if (altResponse.ok) {
+            const altResult = await altResponse.json()
+            console.log('🔄 Alternative endpoint success:', altResult)
+            res.status(200).json({ success: true, message: 'Events saved successfully via alternative endpoint' })
+          } else {
+            const altErrorText = await altResponse.text()
+            console.error('🔄 Alternative endpoint also failed:', altResponse.status, altErrorText)
+            throw new Error(`Redis SET failed: ${response.status} - ${errorText} (Alternative: ${altResponse.status} - ${altErrorText})`)
+          }
         }
       } catch (error) {
         console.error('Error saving events to Redis:', error)
