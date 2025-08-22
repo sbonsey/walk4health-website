@@ -34,6 +34,16 @@
             {{ saveStatus }}
           </div>
           
+          <!-- Test API Connection Button -->
+          <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+            <button @click="testApiConnection" class="btn-secondary text-sm w-full">
+              🔍 Test API Connection
+            </button>
+            <div v-if="apiTestResult" class="mt-2 text-xs">
+              <pre class="bg-white p-2 rounded border text-left overflow-auto max-h-32">{{ JSON.stringify(apiTestResult, null, 2) }}</pre>
+            </div>
+          </div>
+          
           <div class="flex justify-between items-center">
             <h3 class="text-lg font-semibold text-gray-900">Manage Events</h3>
             <div class="flex space-x-2">
@@ -524,6 +534,24 @@ const uploadPhotos = () => {
 
 const deletePhoto = (id: number) => {
   photos.value = photos.value.filter(photo => photo.id !== id)
+}
+
+// Test API Connection
+const apiTestResult = ref<any>(null)
+const testApiConnection = async () => {
+  try {
+    const result = await dataService.testApiConnection()
+    apiTestResult.value = result
+    saveStatus.value = `API Connection Test: ${result.success ? 'Success' : 'Failed'}`
+    if (!result.success) {
+      saveStatus.value += `\nError: ${result.error}`
+    }
+    setTimeout(() => saveStatus.value = '', 5000)
+  } catch (error) {
+    apiTestResult.value = { success: false, error: error instanceof Error ? error.message : String(error) }
+    saveStatus.value = `API Connection Test: Failed`
+    setTimeout(() => saveStatus.value = '', 5000)
+  }
 }
 </script>
 

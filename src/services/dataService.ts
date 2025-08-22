@@ -81,10 +81,16 @@ class DataService {
       } else {
         const errorText = await response.text()
         console.error('❌ API save failed:', response.status, errorText)
+        console.error('❌ Full response:', response)
         throw new Error(`API save failed: ${response.status} ${errorText}`)
       }
     } catch (error) {
       console.error('❌ Error saving events via API:', error)
+      console.error('❌ Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : 'No stack trace'
+      })
       
       // Fallback to localStorage only
       console.log('🔄 Falling back to localStorage...')
@@ -217,6 +223,30 @@ class DataService {
       return stored ? JSON.parse(stored) : null
     } catch {
       return null
+    }
+  }
+
+  // Test API connection
+  async testApiConnection(): Promise<{ success: boolean; data?: any; error?: string }> {
+    try {
+      console.log('🧪 Testing API connection...')
+      const response = await fetch('/api/test')
+      
+      if (response.ok) {
+        const data = await response.json()
+        console.log('✅ API test successful:', data)
+        return { success: true, data }
+      } else {
+        const errorText = await response.text()
+        console.error('❌ API test failed:', response.status, errorText)
+        return { success: false, error: `HTTP ${response.status}: ${errorText}` }
+      }
+    } catch (error) {
+      console.error('❌ API test error:', error)
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error)
+      }
     }
   }
 }
