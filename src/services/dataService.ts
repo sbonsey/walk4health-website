@@ -40,12 +40,10 @@ export interface GalleryMeta {
 }
 
 class DataService {
-  private baseUrl = '/data'
-
   // Events
   async getEvents(): Promise<EventsData> {
     try {
-      const response = await fetch(`${this.baseUrl}/events.json`)
+      const response = await fetch('/api/events')
       if (!response.ok) throw new Error('Failed to fetch events')
       return await response.json()
     } catch (error) {
@@ -59,7 +57,7 @@ class DataService {
 
   async saveEvents(events: EventsData): Promise<boolean> {
     try {
-      // Try to save via API first
+      // Save via API (now using Vercel KV)
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: {
@@ -76,18 +74,9 @@ class DataService {
         throw new Error('API save failed')
       }
     } catch (error) {
-      console.error('Error saving events via API, falling back to localStorage:', error)
+      console.error('Error saving events via API:', error)
       
-      // In development, try to update the local file
-      if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-        try {
-          await this.updateLocalFile('events.json', events)
-        } catch (localError) {
-          console.log('Local file update not available, using localStorage only')
-        }
-      }
-      
-      // Store in localStorage as backup
+      // Fallback to localStorage only
       localStorage.setItem('walk4health-events', JSON.stringify(events))
       return true
     }
@@ -96,7 +85,7 @@ class DataService {
   // Content
   async getContent(): Promise<ClubContent> {
     try {
-      const response = await fetch(`${this.baseUrl}/content.json`)
+      const response = await fetch('/api/content')
       if (!response.ok) throw new Error('Failed to fetch content')
       return await response.json()
     } catch (error) {
@@ -115,7 +104,7 @@ class DataService {
 
   async saveContent(content: ClubContent): Promise<boolean> {
     try {
-      // Try to save via API first
+      // Save via API (now using Vercel KV)
       const response = await fetch('/api/content', {
         method: 'POST',
         headers: {
@@ -132,18 +121,9 @@ class DataService {
         throw new Error('API save failed')
       }
     } catch (error) {
-      console.error('Error saving content via API, falling back to localStorage:', error)
+      console.error('Error saving content via API:', error)
       
-      // In development, try to update the local file
-      if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-        try {
-          await this.updateLocalFile('content.json', content)
-        } catch (localError) {
-          console.log('Local file update not available, using localStorage only')
-        }
-      }
-      
-      // Store in localStorage as backup
+      // Fallback to localStorage only
       localStorage.setItem('walk4health-content', JSON.stringify(content))
       return true
     }
@@ -226,30 +206,6 @@ class DataService {
       return stored ? JSON.parse(stored) : null
     } catch {
       return null
-    }
-  }
-
-  // Development mode: Try to update local files
-  private async updateLocalFile(filename: string, data: any): Promise<void> {
-    try {
-      // In development, we can't directly write to files from the browser
-      // But we can show instructions to the user
-      console.log(`📝 Development Mode: To update ${filename}, manually update the file:`)
-      console.log(`📁 File path: public/data/${filename}`)
-      console.log(`📊 New data:`, data)
-      
-      // Show a user-friendly message
-      if (typeof window !== 'undefined') {
-        const message = `Development Mode: To persist changes to ${filename}, manually update the file at public/data/${filename} with the new data shown in the console.`
-        console.log(message)
-        
-        // Optionally show an alert for development
-        if (confirm(`${message}\n\nClick OK to see the data in console.`)) {
-          console.log('Updated data for', filename, ':', data)
-        }
-      }
-    } catch (error) {
-      console.log('Local file update not available')
     }
   }
 }

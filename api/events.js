@@ -1,26 +1,18 @@
-import fs from 'fs'
-import path from 'path'
-
-const dataDir = path.join(process.cwd(), 'public', 'data')
+import { kv } from '@vercel/kv'
 
 export default async function handler(req, res) {
   const { method } = req
 
-  // Ensure data directory exists
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true })
-  }
-
-  const eventsFile = path.join(dataDir, 'events.json')
-
   switch (method) {
     case 'GET':
       try {
-        if (fs.existsSync(eventsFile)) {
-          const data = fs.readFileSync(eventsFile, 'utf8')
-          res.status(200).json(JSON.parse(data))
+        // Get events from Vercel KV
+        const events = await kv.get('walk4health:events')
+        
+        if (events) {
+          res.status(200).json(events)
         } else {
-          // Return default structure if file doesn't exist
+          // Return default structure if no data exists
           const defaultData = {
             recurringEvents: [],
             specialEvents: []
@@ -28,7 +20,7 @@ export default async function handler(req, res) {
           res.status(200).json(defaultData)
         }
       } catch (error) {
-        console.error('Error reading events:', error)
+        console.error('Error reading events from KV:', error)
         res.status(500).json({ error: 'Failed to read events' })
       }
       break
@@ -48,12 +40,12 @@ export default async function handler(req, res) {
           lastUpdated: new Date().toISOString()
         }
 
-        // Write to file
-        fs.writeFileSync(eventsFile, JSON.stringify(eventsData, null, 2))
+        // Save to Vercel KV
+        await kv.set('walk4health:events', eventsData)
         
         res.status(200).json({ success: true, message: 'Events saved successfully' })
       } catch (error) {
-        console.error('Error saving events:', error)
+        console.error('Error saving events to KV:', error)
         res.status(500).json({ error: 'Failed to save events' })
       }
       break

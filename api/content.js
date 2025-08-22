@@ -1,26 +1,18 @@
-import fs from 'fs'
-import path from 'path'
-
-const dataDir = path.join(process.cwd(), 'public', 'data')
+import { kv } from '@vercel/kv'
 
 export default async function handler(req, res) {
   const { method } = req
 
-  // Ensure data directory exists
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true })
-  }
-
-  const contentFile = path.join(dataDir, 'content.json')
-
   switch (method) {
     case 'GET':
       try {
-        if (fs.existsSync(contentFile)) {
-          const data = fs.readFileSync(contentFile, 'utf8')
-          res.status(200).json(JSON.parse(data))
+        // Get content from Vercel KV
+        const content = await kv.get('walk4health:content')
+        
+        if (content) {
+          res.status(200).json(content)
         } else {
-          // Return default structure if file doesn't exist
+          // Return default structure if no data exists
           const defaultData = {
             clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
             walkingSchedule: {
@@ -33,7 +25,7 @@ export default async function handler(req, res) {
           res.status(200).json(defaultData)
         }
       } catch (error) {
-        console.error('Error reading content:', error)
+        console.error('Error reading content from KV:', error)
         res.status(500).json({ error: 'Failed to read content' })
       }
       break
@@ -53,12 +45,12 @@ export default async function handler(req, res) {
           lastUpdated: new Date().toISOString()
         }
 
-        // Write to file
-        fs.writeFileSync(contentFile, JSON.stringify(contentData, null, 2))
+        // Save to Vercel KV
+        await kv.set('walk4health:content', contentData)
         
         res.status(200).json({ success: true, message: 'Content saved successfully' })
       } catch (error) {
-        console.error('Error saving content:', error)
+        console.error('Error saving content to KV:', error)
         res.status(500).json({ error: 'Failed to save content' })
       }
       break
