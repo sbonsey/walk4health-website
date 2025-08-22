@@ -1,0 +1,748 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import AdminPanel from './components/AdminPanel.vue'
+import { dataService, type EventsData, type ClubContent } from './services/dataService'
+
+// Reactive data
+const mobileMenuOpen = ref(false)
+const contactForm = ref({
+  name: '',
+  email: '',
+  subject: '',
+  message: ''
+})
+
+// Admin authentication state
+const isAdmin = ref(false)
+const adminPanelOpen = ref(false)
+const showLoginModal = ref(false)
+const loginError = ref('')
+const loginForm = ref({
+  username: '',
+  password: ''
+})
+
+// Event data - loaded from data service
+const recurringEvents = ref<EventsData['recurringEvents']>([])
+const specialEvents = ref<EventsData['specialEvents']>([])
+
+// Club content - loaded from data service
+const clubContent = ref<ClubContent>({
+  clubDescription: '',
+  walkingSchedule: {
+    sundaySummer: '09:00',
+    sundayWinter: '09:30',
+    tuesday: '10:00'
+  },
+  lastUpdated: new Date().toISOString()
+})
+
+// Template refs
+const eventsContainer = ref<HTMLElement>()
+
+// Load data on mount
+onMounted(async () => {
+  await loadData()
+})
+
+// Load all data from data service
+const loadData = async () => {
+  try {
+    const [eventsData, contentData] = await Promise.all([
+      dataService.getEvents(),
+      dataService.getContent()
+    ])
+    
+    recurringEvents.value = eventsData.recurringEvents
+    specialEvents.value = eventsData.specialEvents
+    clubContent.value = contentData
+    
+    // Fallback to localStorage if needed
+    if (!recurringEvents.value.length && !specialEvents.value.length) {
+      const storedEvents = dataService.getEventsFromStorage()
+      if (storedEvents) {
+        recurringEvents.value = storedEvents.recurringEvents
+        specialEvents.value = storedEvents.specialEvents
+      }
+    }
+    
+    if (!clubContent.value.clubDescription) {
+      const storedContent = dataService.getContentFromStorage()
+      if (storedContent) clubContent.value = storedContent
+    }
+  } catch (error) {
+    console.error('Error loading data:', error)
+  }
+}
+
+// Handle events updates from admin panel
+const handleEventsUpdated = (events: EventsData) => {
+  recurringEvents.value = events.recurringEvents
+  specialEvents.value = events.specialEvents
+}
+
+// Handle content updates from admin panel
+const handleContentUpdated = (content: ClubContent) => {
+  clubContent.value = content
+}
+
+// Methods
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value
+}
+
+const closeMobileMenu = () => {
+  mobileMenuOpen.value = false
+}
+
+const submitContactForm = () => {
+  // Handle contact form submission
+  console.log('Contact form submitted:', contactForm.value)
+  // Reset form
+  contactForm.value = {
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  }
+}
+
+const toggleAdminPanel = () => {
+  adminPanelOpen.value = !adminPanelOpen.value
+}
+
+const closeLoginModal = () => {
+  showLoginModal.value = false
+  loginError.value = ''
+  loginForm.value = { username: '', password: '' }
+}
+
+const handleLogin = () => {
+  // Simple authentication - in production, this would connect to a backend
+  if (loginForm.value.username === 'admin' && loginForm.value.password === 'walk4health2025') {
+    isAdmin.value = true
+    showLoginModal.value = false
+    loginError.value = ''
+    loginForm.value = { username: '', password: '' }
+  } else {
+    loginError.value = 'Invalid username or password'
+  }
+}
+
+const scrollEvents = (direction: 'left' | 'right') => {
+  if (eventsContainer.value) {
+    const scrollAmount = 400 // Adjust scroll amount as needed
+    const currentScroll = eventsContainer.value.scrollLeft
+    
+    if (direction === 'left') {
+      eventsContainer.value.scrollTo({
+        left: currentScroll - scrollAmount,
+        behavior: 'smooth'
+      })
+    } else {
+      eventsContainer.value.scrollTo({
+        left: currentScroll + scrollAmount,
+        behavior: 'smooth'
+      })
+    }
+  }
+}
+
+const formatEventDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-NZ', { 
+    month: 'long', 
+    day: 'numeric' 
+  })
+}
+
+const debugAdminState = () => {
+  console.log('isAdmin:', isAdmin.value)
+  console.log('adminPanelOpen:', adminPanelOpen.value)
+  console.log('showLoginModal:', showLoginModal.value)
+  console.log('loginForm:', loginForm.value)
+}
+</script>
+
+<template>
+  <div id="app" class="min-h-screen bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-sm sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-8">
+        <div class="flex justify-between items-center h-24">
+          <!-- Logo -->
+          <div class="flex items-center">
+            <h1 class="text-3xl font-light tracking-wide text-gray-800">WALK4HEALTH</h1>
+          </div>
+          
+          <!-- Desktop Navigation -->
+          <div class="hidden md:flex items-center space-x-12">
+            <a href="#home" class="nav-item-elegant">HOME</a>
+            <a href="#about" class="nav-item-elegant">ABOUT</a>
+            <a href="#events" class="nav-item-elegant">EVENTS</a>
+            <a href="#gallery" class="nav-item-elegant">GALLERY</a>
+            <a href="#contact" class="nav-item-elegant">CONTACT</a>
+          </div>
+          
+
+          <!-- Mobile menu button -->
+          <div class="md:hidden">
+            <button @click="toggleMobileMenu" class="text-gray-700 hover:text-gray-900 transition-colors duration-200">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Elegant Separator Line -->
+        <div class="w-full h-px bg-gray-300"></div>
+        
+        <!-- Mobile Navigation -->
+        <div v-if="mobileMenuOpen" class="md:hidden py-8 bg-white/95 backdrop-blur-sm">
+          <div class="flex flex-col space-y-6">
+            <a href="#home" @click="closeMobileMenu" class="mobile-nav-item-elegant">HOME</a>
+            <a href="#about" @click="closeMobileMenu" class="mobile-nav-item-elegant">ABOUT</a>
+            <a href="#events" @click="closeMobileMenu" class="mobile-nav-item-elegant">EVENTS</a>
+            <a href="#gallery" @click="closeMobileMenu" class="mobile-nav-item-elegant">GALLERY</a>
+            <a href="#contact" @click="closeMobileMenu" class="mobile-nav-item-elegant">CONTACT</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+      <!-- Home Section -->
+      <section id="home" class="section bg-gradient-to-br from-primary-50 to-secondary-50 relative overflow-hidden">
+        <!-- Background Image -->
+        <div class="absolute inset-0 z-0">
+          <img src="/src/assets/kitera-dent-jWv1ILisuSc-unsplash.jpg" 
+               alt="Group of people walking together" 
+               class="w-full h-full object-cover opacity-20">
+        </div>
+        
+        <div class="container relative z-10">
+          <div class="text-center">
+            <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+              Walk4Health
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
+              {{ clubContent.clubDescription }}
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <a href="#events" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold text-lg px-8 py-4 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-200 shadow-lg">
+                Join Our Walks
+              </a>
+              <a href="#contact" class="bg-white hover:bg-gray-50 text-gray-800 font-semibold text-lg px-8 py-4 rounded-lg border-2 border-gray-200 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-gray-200 shadow-lg">
+                Get in Touch
+              </a>
+            </div>
+          </div>
+          
+          <!-- Walking Schedule -->
+          <div class="mt-16 grid md:grid-cols-2 gap-8">
+            <div class="card bg-white/90 backdrop-blur-sm">
+              <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
+                  <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900">Sunday Walks</h3>
+              </div>
+              <p class="text-gray-600 mb-2">Summer: {{ clubContent.walkingSchedule.sundaySummer }}</p>
+              <p class="text-gray-600 mb-2">Winter: {{ clubContent.walkingSchedule.sundayWinter }}</p>
+              <p class="text-gray-600">Various locations around Hutt Valley</p>
+            </div>
+            <div class="card bg-white/90 backdrop-blur-sm">
+              <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
+                  <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900">Tuesday Walks</h3>
+              </div>
+              <p class="text-gray-600 mb-2">{{ clubContent.walkingSchedule.tuesday }}</p>
+              <p class="text-gray-600">Lower Hutt, Upper Hutt, Petone, Wellington, Coast</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- About Section -->
+      <section id="about" class="section bg-white">
+        <div class="container">
+          <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">About Our Club</h2>
+          
+          <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h3 class="text-2xl font-bold text-gray-900 mb-4">24 Years of Walking</h3>
+              <p class="text-gray-600 mb-6">
+                {{ clubContent.clubDescription }}
+              </p>
+              
+              <!-- Walking Stats -->
+              <div class="grid grid-cols-3 gap-4 mt-8">
+                <div class="text-center">
+                  <div class="text-3xl font-bold text-primary-600">24</div>
+                  <div class="text-sm text-gray-600">Years Active</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-3xl font-bold text-primary-600">50+</div>
+                  <div class="text-sm text-gray-600">Members</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-3xl font-bold text-primary-600">2</div>
+                  <div class="text-sm text-gray-600">Walks/Week</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="space-y-6">
+              <!-- Club Image -->
+              <div class="relative rounded-xl overflow-hidden shadow-lg">
+                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                     alt="Walking group on trail" 
+                     class="w-full h-64 object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                <div class="absolute bottom-4 left-4 text-white">
+                  <p class="text-sm font-medium">Walking together since 2001</p>
+                </div>
+              </div>
+              
+              <!-- Committee Info -->
+              <div class="bg-primary-50 p-6 rounded-xl border border-primary-100">
+                <h4 class="text-xl font-bold text-primary-800 mb-4">Our Committee 2025/26</h4>
+                <div class="grid grid-cols-1 gap-2 text-primary-700 text-sm">
+                  <div class="flex justify-between">
+                    <span class="font-medium">Chairperson:</span>
+                    <span>Lynn Young</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="font-medium">Secretary:</span>
+                    <span>Neil Edwards</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="font-medium">Treasurer:</span>
+                    <span>Nina Wortman</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="font-medium">Membership:</span>
+                    <span>Andrew Young</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="font-medium">Website & Sunday:</span>
+                    <span>Dave Morrell</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="font-medium">Tuesday walking:</span>
+                    <span>Lyne Morrell, Ian Andrews, Patsie Barltrop</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="font-medium">Events:</span>
+                    <span>Kaye Plunket</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="font-medium">Financial Reviewer:</span>
+                    <span>Bob Metcalf</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Events Section -->
+      <section id="events" class="section bg-gray-50">
+        <div class="container">
+          <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Upcoming Events</h2>
+          
+          <!-- Events Container with Horizontal Scroll -->
+          <div class="relative">
+            <!-- Scroll Buttons for Desktop -->
+            <button @click="scrollEvents('left')" class="hidden lg:block absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-900 p-2 rounded-full shadow-lg border border-gray-200 transition-all duration-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+            
+            <button @click="scrollEvents('right')" class="hidden lg:block absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-900 p-2 rounded-full shadow-lg border border-gray-200 transition-all duration-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+            
+            <!-- Events Grid - Fixed width to show exactly 3 panels -->
+            <div ref="eventsContainer" class="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
+              <!-- Recurring Events -->
+              <div v-for="event in recurringEvents" :key="`recurring-${event.id}`" class="card group hover:shadow-xl transition-all duration-300 w-[calc(33.333%-1rem)] min-w-0 flex-shrink-0">
+                <div class="relative mb-4">
+                  <img src="/src/assets/upcoming-image-1.jpg" 
+                       :alt="event.title" 
+                       class="w-full h-48 object-cover rounded-lg">
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">{{ event.title }}</h3>
+                <p class="text-gray-600 mb-4">{{ event.message || `Join us for our regular ${event.day} walk around the beautiful Hutt Valley trails.` }}</p>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center text-sm text-gray-500">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>{{ event.time }}</span>
+                  </div>
+                  <button class="bg-white hover:bg-gray-50 text-primary-600 font-medium px-4 py-2 rounded-lg border border-primary-200 transition-all duration-200 hover:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 text-sm">
+                    Join Walk
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Special Events -->
+              <div v-for="event in specialEvents" :key="`special-${event.id}`" class="card group hover:shadow-xl transition-all duration-300 w-[calc(33.333%-1rem)] min-w-0 flex-shrink-0">
+                <div class="relative mb-4">
+                  <img src="/src/assets/upcoming-image-3.jpg" 
+                       :alt="event.title" 
+                       class="w-full h-48 object-cover rounded-lg">
+                  <div class="absolute top-3 right-3 bg-primary-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    {{ formatEventDate(event.date) }}
+                  </div>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">{{ event.title }}</h3>
+                <p class="text-gray-600 mb-4">{{ event.message || 'Join us for this special walking event and community activity.' }}</p>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center text-sm text-gray-500">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>{{ event.time }}</span>
+                  </div>
+                  <button class="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-200 text-sm">
+                    More Info
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Scroll Indicator for Mobile -->
+            <div class="lg:hidden flex justify-center mt-4 space-x-2">
+              <div v-for="(_, index) in Math.ceil((recurringEvents.length + specialEvents.length) / 3)" :key="index" 
+                   class="w-2 h-2 rounded-full bg-gray-300"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Gallery Section -->
+      <section id="gallery" class="section bg-white">
+        <div class="container">
+          <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Photo Gallery</h2>
+          
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Walking Trail -->
+            <div class="group relative overflow-hidden rounded-lg aspect-square cursor-pointer">
+              <img src="https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                   alt="Beautiful walking trail" 
+                   class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
+              <div class="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <p class="font-medium">Hutt Valley Trail</p>
+                <p class="text-sm">Beautiful walking paths</p>
+              </div>
+            </div>
+            
+            <!-- Club Members -->
+            <div class="group relative overflow-hidden rounded-lg aspect-square cursor-pointer">
+              <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                   alt="Club members walking" 
+                   class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
+              <div class="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <p class="font-medium">Club Members</p>
+                <p class="text-sm">Walking together</p>
+              </div>
+            </div>
+            
+            <!-- Scenic View -->
+            <div class="group relative overflow-hidden rounded-lg aspect-square cursor-pointer">
+              <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                   alt="Scenic mountain view" 
+                   class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
+              <div class="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <p class="font-medium">Mountain Views</p>
+                <p class="text-sm">Stunning scenery</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact Section -->
+      <section id="contact" class="section bg-gray-50">
+        <div class="container">
+          <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Contact Us</h2>
+          
+          <div class="grid md:grid-cols-2 gap-12">
+            <div>
+              <h3 class="text-2xl font-bold text-gray-900 mb-6">Get in Touch</h3>
+              <div class="space-y-6">
+                <div class="flex items-start p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+                  <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-bold text-gray-900 mb-1">Email</p>
+                    <p class="text-gray-700 text-lg">walk4healthhutt@gmail.com</p>
+                  </div>
+                </div>
+                
+                <div class="flex items-start p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+                  <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-bold text-gray-900 mb-1">Phone</p>
+                    <p class="text-gray-700 text-lg">Lynn Young (Chairperson): 021 0482790</p>
+                  </div>
+                </div>
+                
+                <div class="flex items-start p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+                  <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-bold text-gray-900 mb-1">Location</p>
+                    <p class="text-gray-700 text-lg">Hutt Valley, New Zealand</p>
+                    <p class="text-gray-700">Lower Hutt, Upper Hutt, Petone, Wellington, Coast</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card bg-white shadow-lg">
+              <h3 class="text-xl font-bold text-gray-900 mb-4">Send us a Message</h3>
+              <form @submit.prevent="submitContactForm" class="space-y-4">
+                <div>
+                  <label for="name" class="block text-sm font-semibold text-gray-800 mb-2">Name</label>
+                  <input type="text" id="name" v-model="contactForm.name" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all duration-200 bg-white text-gray-900 placeholder-gray-500">
+                </div>
+                
+                <div>
+                  <label for="email" class="block text-sm font-semibold text-gray-800 mb-2">Email</label>
+                  <input type="email" id="email" v-model="contactForm.email" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all duration-200 bg-white text-gray-900 placeholder-gray-500">
+                </div>
+                
+                <div>
+                  <label for="subject" class="block text-sm font-semibold text-gray-800 mb-2">Subject</label>
+                  <select id="subject" v-model="contactForm.subject" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all duration-200 bg-white text-gray-900">
+                    <option value="">Select a subject</option>
+                    <option value="general">General Inquiry</option>
+                    <option value="membership">Membership Question</option>
+                    <option value="event">Event Information</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label for="message" class="block text-sm font-semibold text-gray-800 mb-2">Message</label>
+                  <textarea id="message" v-model="contactForm.message" rows="4" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all duration-200 bg-white text-gray-900 placeholder-gray-500 resize-none"></textarea>
+                </div>
+                
+                <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-300 text-base">
+                  Send Message
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+      <div class="container text-center">
+        <p>&copy; 2025 Walk4Health | 24 Years of Walking in the Hutt Valley</p>
+        <p class="text-gray-400 mt-2">© 2012 WEBFUSION SOFTWARE</p>
+      </div>
+    </footer>
+
+    <!-- Admin Panel -->
+    <AdminPanel 
+      :is-admin="isAdmin" 
+      :is-open="adminPanelOpen"
+      @close="adminPanelOpen = false"
+      @events-updated="handleEventsUpdated"
+      @content-updated="handleContentUpdated"
+    />
+
+    <!-- Admin Login Modal -->
+    <div v-if="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-gray-900">Admin Login</h3>
+          <button @click="closeLoginModal" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <form @submit.prevent="handleLogin" class="space-y-4">
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+            <input 
+              id="username"
+              v-model="loginForm.username" 
+              type="text" 
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              placeholder="Enter username"
+            >
+          </div>
+          
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input 
+              id="password"
+              v-model="loginForm.password" 
+              type="password" 
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              placeholder="Enter password"
+            >
+          </div>
+          
+          <div v-if="loginError" class="text-red-600 text-sm text-center">
+            {{ loginError }}
+          </div>
+          
+          <button 
+            type="submit" 
+            class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
+          >
+            Login
+          </button>
+        </form>
+        
+        <div class="mt-4 text-center">
+          <button @click="closeLoginModal" class="text-gray-500 hover:text-gray-700 text-sm">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Toggle Button - Show when admin is logged in -->
+    <button 
+      v-if="isAdmin"
+      @click="toggleAdminPanel" 
+      class="fixed right-4 top-4 z-[9999] bg-primary-600 text-white p-3 rounded-full shadow-lg hover:bg-primary-700 transition-colors"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+      </svg>
+    </button>
+
+    <!-- Admin Login Button - Show when admin is NOT logged in -->
+    <button 
+      v-else
+      @click="showLoginModal = true" 
+      class="fixed right-4 top-4 z-[9999] bg-gray-600 text-white p-3 rounded-full shadow-lg hover:bg-gray-700 transition-colors"
+      title="Admin Login"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+      </svg>
+    </button>
+
+    <!-- Debug Button - Temporary, remove after testing -->
+    <button 
+      @click="debugAdminState"
+      class="fixed left-4 top-20 z-[9999] bg-red-600 text-white p-3 rounded-full shadow-lg hover:bg-red-700 transition-colors"
+      title="Debug Admin State"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+      </svg>
+    </button>
+  </div>
+</template>
+
+<style scoped>
+/* Elegant Desktop Navigation Items */
+.nav-item-elegant {
+  @apply text-gray-700 hover:text-gray-900 font-light tracking-wide text-sm uppercase transition-colors duration-200;
+}
+
+/* Elegant Mobile Navigation Items */
+.mobile-nav-item-elegant {
+  @apply text-gray-700 hover:text-gray-900 font-light tracking-wide text-lg uppercase transition-colors duration-200;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #f97316;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ea580c;
+}
+
+/* Hide scrollbar for events container */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
+/* Button styles */
+.btn-primary {
+  @apply bg-primary-600 hover:bg-primary-700 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-200;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-200;
+}
+
+/* Events container styling */
+#events .container {
+  max-width: 1200px;
+}
+
+#events .card {
+  flex: 0 0 calc(33.333% - 1rem);
+  max-width: calc(33.333% - 1rem);
+}
+
+/* Ensure smooth scrolling */
+#events .flex {
+  scroll-behavior: smooth;
+}
+</style>

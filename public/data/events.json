@@ -1,0 +1,29 @@
+{
+  "recurringEvents": [
+    {
+      "id": 1,
+      "title": "Sunday Walk",
+      "day": "sunday",
+      "time": "09:00",
+      "message": "Regular Sunday walk around the beautiful Hutt Valley trails. Summer time: 9:00 AM, Winter time: 9:30 AM."
+    },
+    {
+      "id": 2,
+      "title": "Tuesday Walk",
+      "day": "tuesday",
+      "time": "10:00",
+      "message": "Midweek walking session exploring different routes around Lower Hutt, Upper Hutt, Petone, Wellington, and Coast."
+    }
+  ],
+  "specialEvents": [
+    {
+      "id": 1,
+      "title": "Christmas Walk",
+      "date": "2025-12-25",
+      "time": "10:00",
+      "message": "Special Christmas morning walk with festive treats and community celebration."
+    }
+  ]
+}
+
+
