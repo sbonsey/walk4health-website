@@ -40,6 +40,13 @@ export interface GalleryMeta {
 }
 
 class DataService {
+  // Check if we're in production (Vercel)
+  private isProduction(): boolean {
+    return window.location.hostname !== 'localhost' && 
+           window.location.hostname !== '127.0.0.1' &&
+           !window.location.hostname.includes('localhost')
+  }
+
   // Events
   async getEvents(): Promise<EventsData> {
     try {
@@ -48,6 +55,11 @@ class DataService {
       return await response.json()
     } catch (error) {
       console.error('Error fetching events:', error)
+      // Only fallback to localStorage in development
+      if (!this.isProduction()) {
+        const stored = this.getEventsFromStorage()
+        if (stored) return stored
+      }
       return {
         recurringEvents: [],
         specialEvents: []
@@ -59,10 +71,11 @@ class DataService {
     try {
       console.log('🔄 DataService: Attempting to save events via API...')
       console.log('🌐 Current hostname:', window.location.hostname)
+      console.log('🏭 Production mode:', this.isProduction())
       console.log('🔗 API endpoint:', '/api/events')
       console.log('📊 Events data to save:', events)
       
-      // Save via API (now using Upstash Redis)
+      // Always try API first in production
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: {
@@ -77,8 +90,10 @@ class DataService {
       if (response.ok) {
         const result = await response.json()
         console.log('✅ API save successful:', result)
-        // Store in localStorage as backup
-        localStorage.setItem('walk4health-events', JSON.stringify(events))
+        // Only store in localStorage as backup in development
+        if (!this.isProduction()) {
+          localStorage.setItem('walk4health-events', JSON.stringify(events))
+        }
         return true
       } else {
         const errorText = await response.text()
@@ -94,10 +109,15 @@ class DataService {
         stack: error instanceof Error ? error.stack : 'No stack trace'
       })
       
-      // Fallback to localStorage only
-      console.log('🔄 Falling back to localStorage...')
-      localStorage.setItem('walk4health-events', JSON.stringify(events))
-      return true
+      // Only fallback to localStorage in development
+      if (!this.isProduction()) {
+        console.log('🔄 Falling back to localStorage (development mode)...')
+        localStorage.setItem('walk4health-events', JSON.stringify(events))
+        return true
+      } else {
+        // In production, fail if API doesn't work
+        throw error
+      }
     }
   }
 
@@ -109,6 +129,11 @@ class DataService {
       return await response.json()
     } catch (error) {
       console.error('Error fetching content:', error)
+      // Only fallback to localStorage in development
+      if (!this.isProduction()) {
+        const stored = this.getContentFromStorage()
+        if (stored) return stored
+      }
       return {
         clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
         walkingSchedule: {
@@ -123,6 +148,11 @@ class DataService {
 
   async saveContent(content: ClubContent): Promise<boolean> {
     try {
+      console.log('🔄 DataService: Attempting to save content via API...')
+      console.log('🌐 Current hostname:', window.location.hostname)
+      console.log('🏭 Production mode:', this.isProduction())
+      console.log('🔗 API endpoint:', '/api/content')
+      
       // Save via API (now using Vercel KV)
       const response = await fetch('/api/content', {
         method: 'POST',
@@ -133,18 +163,29 @@ class DataService {
       })
       
       if (response.ok) {
-        // Store in localStorage as backup
-        localStorage.setItem('walk4health-content', JSON.stringify(content))
+        console.log('✅ Content saved successfully via API')
+        // Only store in localStorage as backup in development
+        if (!this.isProduction()) {
+          localStorage.setItem('walk4health-content', JSON.stringify(content))
+        }
         return true
       } else {
-        throw new Error('API save failed')
+        const errorText = await response.text()
+        console.error('❌ API save failed:', response.status, errorText)
+        throw new Error(`API save failed: ${response.status} ${errorText}`)
       }
     } catch (error) {
       console.error('Error saving content via API:', error)
       
-      // Fallback to localStorage only
-      localStorage.setItem('walk4health-content', JSON.stringify(content))
-      return true
+      // Only fallback to localStorage in development
+      if (!this.isProduction()) {
+        console.log('🔄 Falling back to localStorage (development mode)...')
+        localStorage.setItem('walk4health-content', JSON.stringify(content))
+        return true
+      } else {
+        // In production, fail if API doesn't work
+        throw error
+      }
     }
   }
 

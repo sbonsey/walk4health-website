@@ -4,12 +4,13 @@ export default async function handler(req, res) {
   switch (method) {
     case 'GET':
       try {
-        // Get content from Upstash Redis
-        const redisUrl = process.env.KV_REST_API_URL
-        const redisToken = process.env.KV_REST_API_TOKEN
+        // Get content from Vercel KV (Upstash Redis)
+        const redisUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
+        const redisToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
         
         if (!redisUrl || !redisToken) {
           console.error('Redis environment variables not set')
+          console.error('Available env vars:', Object.keys(process.env).filter(key => key.includes('KV') || key.includes('UPSTASH')))
           return res.status(500).json({ error: 'Redis not configured' })
         }
 
@@ -60,12 +61,13 @@ export default async function handler(req, res) {
           lastUpdated: new Date().toISOString()
         }
 
-        // Save to Upstash Redis
-        const redisUrl = process.env.KV_REST_API_URL
-        const redisToken = process.env.KV_REST_API_TOKEN
+        // Save to Vercel KV (Upstash Redis)
+        const redisUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
+        const redisToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
         
         if (!redisUrl || !redisToken) {
           console.error('Redis environment variables not set')
+          console.error('Available env vars:', Object.keys(process.env).filter(key => key.includes('KV') || key.includes('UPSTASH')))
           return res.status(500).json({ error: 'Redis not configured' })
         }
 
