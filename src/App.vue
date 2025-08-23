@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import AdminPanel from './components/AdminPanel.vue'
 import { dataService, type EventsData, type ClubContent, type GalleryMeta } from './services/dataService'
 
@@ -74,6 +74,34 @@ const canScrollGalleriesRight = computed(() => {
 // Load data on mount
 onMounted(async () => {
   await loadData()
+  
+  // Add keyboard navigation for lightbox
+  const handleKeydown = (event: KeyboardEvent) => {
+    if (!lightboxImage.value) return
+    
+    switch (event.key) {
+      case 'Escape':
+        closeLightbox()
+        break
+      case 'ArrowLeft':
+        if (selectedGallery.value && lightboxIndex.value > 0) {
+          previousImage()
+        }
+        break
+      case 'ArrowRight':
+        if (selectedGallery.value && lightboxIndex.value < selectedGallery.value.images.length - 1) {
+          nextImage()
+        }
+        break
+    }
+  }
+  
+  document.addEventListener('keydown', handleKeydown)
+  
+  // Cleanup
+  onUnmounted(() => {
+    document.removeEventListener('keydown', handleKeydown)
+  })
 })
 
 // Load all data from data service
@@ -225,10 +253,42 @@ const formatDate = (dateString: string) => {
 
 // Gallery methods
 const openGallery = (gallery: GalleryMeta) => {
-  // TODO: Navigate to individual gallery page
-  console.log('Opening gallery:', gallery)
-  // For now, just log the gallery data
-  alert(`Opening gallery: ${gallery.title}\nThis will navigate to a detailed gallery view in the future.`)
+  selectedGallery.value = gallery
+}
+
+// Gallery modal state
+const selectedGallery = ref<GalleryMeta | null>(null)
+const lightboxImage = ref<string | null>(null)
+const lightboxIndex = ref<number>(0)
+
+const closeGalleryModal = () => {
+  selectedGallery.value = null
+  lightboxImage.value = null
+  lightboxIndex.value = 0
+}
+
+const openImageLightbox = (image: string, index: number) => {
+  lightboxImage.value = image
+  lightboxIndex.value = index
+}
+
+const closeLightbox = () => {
+  lightboxImage.value = null
+  lightboxIndex.value = 0
+}
+
+const previousImage = () => {
+  if (selectedGallery.value && lightboxIndex.value > 0) {
+    lightboxIndex.value--
+    lightboxImage.value = selectedGallery.value.images[lightboxIndex.value]
+  }
+}
+
+const nextImage = () => {
+  if (selectedGallery.value && lightboxIndex.value < selectedGallery.value.images.length - 1) {
+    lightboxIndex.value++
+    lightboxImage.value = selectedGallery.value.images[lightboxIndex.value]
+  }
 }
 
 const scrollGalleries = (direction: 'left' | 'right') => {
@@ -772,6 +832,107 @@ const formatEventDate = (dateString: string) => {
         </div>
       </section>
     </main>
+
+    <!-- Gallery Detail Modal -->
+    <div v-if="selectedGallery" 
+         class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
+         @click="closeGalleryModal">
+      <!-- Modal Content -->
+      <div class="bg-white rounded-2xl max-w-7xl w-full max-h-[90vh] overflow-hidden"
+           @click.stop>
+        <!-- Modal Header -->
+        <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-3xl font-bold mb-2">{{ selectedGallery.title }}</h2>
+              <p class="text-orange-100 mb-1">{{ selectedGallery.description }}</p>
+              <div class="flex items-center space-x-4 text-sm text-orange-100">
+                <span>{{ formatDate(selectedGallery.date) }}</span>
+                <span>•</span>
+                <span>{{ selectedGallery.location }}</span>
+                <span>•</span>
+                <span>{{ selectedGallery.images.length }} photos</span>
+              </div>
+            </div>
+            <button @click="closeGalleryModal" 
+                    class="text-white hover:text-orange-100 p-2 rounded-full hover:bg-white/10 transition-colors">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Gallery Images Grid -->
+        <div class="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+          <div v-if="selectedGallery && selectedGallery.images.length > 0" 
+               class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div v-for="(image, index) in selectedGallery.images" :key="index" 
+                 class="group relative aspect-square overflow-hidden rounded-lg cursor-pointer"
+                 @click="openImageLightbox(image, index)">
+              <img :src="image" 
+                   :alt="`${selectedGallery.title} - Image ${index + 1}`"
+                   class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
+              <div class="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                {{ index + 1 }}
+              </div>
+            </div>
+          </div>
+          
+          <!-- Empty State -->
+          <div v-else class="text-center py-12">
+            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <p class="text-gray-500 text-lg">No photos in this gallery yet</p>
+            <p class="text-gray-400 text-sm">Add some photos through the admin panel</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Image Lightbox Modal -->
+    <div v-if="lightboxImage" 
+         class="fixed inset-0 bg-black z-[60] flex items-center justify-center p-4"
+         @click="closeLightbox">
+      <div class="relative max-w-7xl max-h-[90vh]">
+        <!-- Navigation Arrows -->
+        <button v-if="lightboxIndex > 0" 
+                @click="previousImage"
+                class="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all z-10">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        
+        <button v-if="selectedGallery && lightboxIndex < selectedGallery.images.length - 1" 
+                @click="nextImage"
+                class="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all z-10">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+        
+        <!-- Close Button -->
+        <button @click="closeLightbox" 
+                class="absolute top-4 right-4 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all z-10">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+        
+        <!-- Image Counter -->
+        <div class="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm z-10">
+          {{ lightboxIndex + 1 }} / {{ selectedGallery?.images.length || 0 }}
+        </div>
+        
+        <!-- Main Image -->
+        <img :src="lightboxImage" 
+             :alt="`${selectedGallery?.title || 'Gallery'} - Image ${lightboxIndex + 1}`"
+             class="max-w-full max-h-[90vh] object-contain rounded-lg">
+      </div>
+    </div>
 
     <!-- Footer -->
     <footer class="bg-gray-800 text-white py-8">
