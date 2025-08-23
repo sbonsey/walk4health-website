@@ -589,10 +589,10 @@ const formatEventDate = (dateString: string) => {
                    alt="Club members walking" 
                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
               <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
-                                <div class="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <p class="font-medium">Club Members</p>
-                    <p class="text-sm">Walking together</p>
-                  </div>
+              <div class="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <p class="font-medium">Club Members</p>
+                <p class="text-sm">Walking together</p>
+              </div>
             </div>
             
             <!-- Scenic View -->

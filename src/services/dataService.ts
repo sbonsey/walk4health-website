@@ -284,6 +284,35 @@ class DataService {
     }
   }
 
+  async updateGallery(galleryId: string, updates: Partial<GalleryMeta>): Promise<boolean> {
+    try {
+      if (this.isProduction()) {
+        const response = await fetch(`/api/galleries/${galleryId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updates)
+        })
+        return response.ok
+      } else {
+        // Development fallback
+        const existing = this.getGalleries()
+        const galleries = await existing
+        const index = galleries.findIndex(g => g.id === galleryId)
+        if (index !== -1) {
+          galleries[index] = { ...galleries[index], ...updates }
+          localStorage.setItem('walk4health_galleries', JSON.stringify(galleries))
+          return true
+        }
+        return false
+      }
+    } catch (error) {
+      console.error('Error updating gallery:', error)
+      return false
+    }
+  }
+
   // Image upload
   async uploadImage(file: File): Promise<{ url: string; filename: string }> {
     try {

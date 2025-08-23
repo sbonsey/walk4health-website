@@ -170,8 +170,73 @@ export default async function handler(req, res) {
       }
       break
 
+    case 'PUT':
+      try {
+        const { galleryId } = req.query
+        const updates = req.body
+        
+        if (!galleryId) {
+          return res.status(400).json({ error: 'Missing gallery ID' })
+        }
+
+        // Get existing galleries
+        const redisUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
+        const redisToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
+        
+        if (!redisUrl || !redisToken) {
+          console.error('Redis environment variables not set')
+          return res.status(500).json({ error: 'Redis not configured' })
+        }
+
+        const getResponse = await fetch(`${redisUrl}/get/walk4health:galleries`, {
+          headers: {
+            'Authorization': `Bearer ${redisToken}`
+          }
+        })
+
+        let existingGalleries = []
+        if (getResponse.ok) {
+          const result = await getResponse.json()
+          if (result.result) {
+            existingGalleries = JSON.parse(result.result)
+          }
+        }
+
+        // Update gallery by ID
+        const galleryIndex = existingGalleries.findIndex(g => g.id === galleryId)
+        if (galleryIndex === -1) {
+          return res.status(404).json({ error: 'Gallery not found' })
+        }
+
+        existingGalleries[galleryIndex] = { ...existingGalleries[galleryIndex], ...updates }
+
+        // Save updated galleries
+        const saveResponse = await fetch(`${redisUrl}/set/walk4health:galleries`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${redisToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(existingGalleries)
+        })
+        
+        if (saveResponse.ok) {
+          res.status(200).json({ 
+            success: true, 
+            message: 'Gallery updated successfully'
+          })
+        } else {
+          const errorText = await saveResponse.text()
+          throw new Error(`Redis SET failed: ${saveResponse.status} - ${errorText}`)
+        }
+      } catch (error) {
+        console.error('Error updating gallery:', error)
+        res.status(500).json({ error: 'Failed to update gallery', details: error.message })
+      }
+      break
+
     default:
-      res.setHeader('Allow', ['GET', 'POST', 'DELETE'])
+      res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE'])
       res.status(405).end(`Method ${method} Not Allowed`)
   }
 }

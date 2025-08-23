@@ -170,48 +170,103 @@
               </div>
             </div>
             
-            <!-- Photo Upload -->
-            <div v-if="showPhotoUpload" class="bg-gray-50 p-4 rounded-lg space-y-3">
-              <input type="file" @change="handlePhotoUpload" multiple accept="image/*" class="w-full">
-              <div class="flex space-x-2">
-                <button @click="uploadPhotos" class="btn-primary text-sm flex-1">Upload</button>
-                <button @click="showPhotoUpload = false" class="btn-secondary text-sm flex-1">Cancel</button>
-              </div>
-            </div>
-
-            <!-- Galleries List -->
-            <div v-if="galleries.length > 0" class="space-y-4">
-              <h4 class="font-medium text-gray-700 mb-2 text-sm">Photo Galleries</h4>
-              <div class="space-y-3">
-                <div v-for="gallery in galleries" :key="gallery.id" class="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <h5 class="font-medium text-gray-900">{{ gallery.title }}</h5>
-                      <p class="text-sm text-gray-600">{{ gallery.description }}</p>
-                      <p class="text-sm text-gray-500">{{ formatDate(gallery.date) }} • {{ gallery.location }}</p>
-                      <p class="text-xs text-gray-400">{{ gallery.images.length }} images</p>
-                    </div>
-                    <button @click="deleteGallery(gallery.id)" class="text-red-600 hover:text-red-800">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                      </svg>
-                    </button>
+            <!-- Gallery Management -->
+            <div class="space-y-6">
+              <!-- Create New Gallery -->
+              <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h4 class="font-medium text-blue-900 mb-3">Create New Gallery</h4>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs text-blue-700 mb-1">Title</label>
+                    <input v-model="newGallery.title" type="text" placeholder="Gallery title" class="w-full px-2 py-1 border border-blue-300 rounded text-sm">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-blue-700 mb-1">Date</label>
+                    <input v-model="newGallery.date" type="date" class="w-full px-2 py-1 border border-blue-300 rounded text-sm">
+                  </div>
+                  <div class="col-span-2">
+                    <label class="block text-xs text-blue-700 mb-1">Description</label>
+                    <input v-model="newGallery.description" type="text" placeholder="Gallery description" class="w-full px-2 py-1 border border-blue-300 rounded text-sm">
+                  </div>
+                  <div class="col-span-2">
+                    <label class="block text-xs text-blue-700 mb-1">Location</label>
+                    <input v-model="newGallery.location" type="text" placeholder="Location" class="w-full px-2 py-1 border border-blue-300 rounded text-sm">
+                  </div>
+                  <div class="col-span-2">
+                    <button @click="createGallery" class="btn-primary text-sm w-full">Create Gallery</button>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Photos Grid -->
-            <div class="grid grid-cols-2 gap-3">
-              <div v-for="photo in photos" :key="photo.id" class="relative group">
-                <img :src="photo.url" :alt="photo.title" class="w-full h-24 object-cover rounded-lg">
-                <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                  <button @click="deletePhoto(photo.id)" class="text-white hover:text-red-300">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                  </button>
+              <!-- Existing Galleries -->
+              <div v-if="galleries.length > 0" class="space-y-4">
+                <h4 class="font-medium text-gray-700 mb-3">Manage Galleries</h4>
+                <div class="space-y-4">
+                  <div v-for="gallery in galleries" :key="gallery.id" class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <!-- Gallery Header -->
+                    <div class="flex justify-between items-start mb-3">
+                      <div class="flex-1">
+                        <h5 class="font-medium text-gray-900">{{ gallery.title }}</h5>
+                        <p class="text-sm text-gray-600">{{ gallery.description }}</p>
+                        <p class="text-sm text-gray-500">{{ formatDate(gallery.date) }} • {{ gallery.location }}</p>
+                        <p class="text-xs text-gray-400">{{ gallery.images.length }} images</p>
+                      </div>
+                      <div class="flex space-x-2">
+                        <button @click="editGallery(gallery.id)" class="text-blue-600 hover:text-blue-800">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                          </svg>
+                        </button>
+                        <button @click="deleteGallery(gallery.id)" class="text-red-600 hover:text-red-800">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Add Photos to Gallery -->
+                    <div class="mb-3 p-3 bg-white rounded border border-gray-200">
+                      <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-gray-700">Add Photos</span>
+                        <button @click="showPhotoUploadForGallery(gallery.id)" class="text-sm text-blue-600 hover:text-blue-800">
+                          {{ showPhotoUploadFor === gallery.id ? 'Cancel' : 'Add Photos' }}
+                        </button>
+                      </div>
+                      
+                      <div v-if="showPhotoUploadFor === gallery.id" class="space-y-3">
+                        <input type="file" @change="handlePhotoUpload" multiple accept="image/*" class="w-full">
+                        <div class="flex space-x-2">
+                          <button @click="uploadPhotosToGallery(gallery.id)" class="btn-primary text-sm flex-1">Upload to Gallery</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Gallery Images -->
+                    <div v-if="gallery.images.length > 0" class="grid grid-cols-3 gap-2">
+                      <div v-for="(image, index) in gallery.images" :key="index" class="relative group">
+                        <img :src="image" :alt="`${gallery.title} - Image ${index + 1}`" class="w-full h-20 object-cover rounded">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
+                          <button @click="removeImageFromGallery(gallery.id, index)" class="text-white hover:text-red-300">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div v-else class="text-center py-4 text-gray-500 text-sm">
+                      No images in this gallery yet
+                    </div>
+                  </div>
                 </div>
+              </div>
+
+              <!-- No Galleries Message -->
+              <div v-else class="text-center py-8 text-gray-500">
+                <p>No galleries created yet.</p>
+                <p class="text-sm">Create your first gallery above to get started!</p>
               </div>
             </div>
           </div>
@@ -276,6 +331,7 @@ const showAddRecurringForm = ref(false)
 const showAddSpecialForm = ref(false)
 const showPhotoUpload = ref(false)
 const showAddGalleryForm = ref(false)
+const showPhotoUploadFor = ref<string | null>(null)
 
 // Tabs configuration
 const tabs = [
@@ -607,6 +663,87 @@ const deleteGallery = async (id: string) => {
   } catch (error) {
     saveStatus.value = 'Error deleting gallery'
     console.error('Error deleting gallery:', error)
+  }
+}
+
+// Edit gallery
+const editGallery = (id: string) => {
+  // TODO: Implement gallery editing
+  console.log('Edit gallery:', id)
+}
+
+// Show photo upload for specific gallery
+const showPhotoUploadForGallery = (galleryId: string) => {
+  if (showPhotoUploadFor.value === galleryId) {
+    showPhotoUploadFor.value = null
+  } else {
+    showPhotoUploadFor.value = galleryId
+  }
+}
+
+// Upload photos to specific gallery
+const uploadPhotosToGallery = async (galleryId: string) => {
+  if (!selectedFiles.value.length) return
+  
+  try {
+    loading.value = true
+    saveStatus.value = 'Uploading images to gallery...'
+    
+    const uploadedImages = []
+    
+    for (const file of selectedFiles.value) {
+      try {
+        const result = await dataService.uploadImage(file)
+        uploadedImages.push(result.url)
+      } catch (error) {
+        console.error('Failed to upload:', file.name, error)
+      }
+    }
+    
+    if (uploadedImages.length > 0) {
+      // Add images to the specific gallery
+      const gallery = galleries.value.find(g => g.id === galleryId)
+      if (gallery) {
+        const updatedImages = [...gallery.images, ...uploadedImages]
+        const success = await dataService.updateGallery(galleryId, { images: updatedImages })
+        
+        if (success) {
+          gallery.images = updatedImages
+          saveStatus.value = `Successfully uploaded ${uploadedImages.length} images to gallery!`
+          showPhotoUploadFor.value = null
+          selectedFiles.value = []
+        } else {
+          saveStatus.value = 'Error saving gallery updates'
+        }
+      }
+    } else {
+      saveStatus.value = 'No images were uploaded successfully'
+    }
+  } catch (error) {
+    saveStatus.value = 'Error uploading images to gallery'
+    console.error('Upload error:', error)
+  } finally {
+    loading.value = false
+    setTimeout(() => saveStatus.value = '', 3000)
+  }
+}
+
+// Remove image from gallery
+const removeImageFromGallery = async (galleryId: string, imageIndex: number) => {
+  const gallery = galleries.value.find(g => g.id === galleryId)
+  if (gallery && gallery.images[imageIndex]) {
+    const updatedImages = [...gallery.images]
+    updatedImages.splice(imageIndex, 1)
+    
+    const success = await dataService.updateGallery(galleryId, { images: updatedImages })
+    
+    if (success) {
+      gallery.images = updatedImages
+      saveStatus.value = 'Image removed from gallery'
+    } else {
+      saveStatus.value = 'Error removing image from gallery'
+    }
+    setTimeout(() => saveStatus.value = '', 3000)
   }
 }
 
