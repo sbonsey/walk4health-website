@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import AdminPanel from './components/AdminPanel.vue'
 import { dataService, type EventsData, type ClubContent } from './services/dataService'
 
@@ -42,6 +42,18 @@ const clubContent = ref<ClubContent>({
 
 // Template refs
 const eventsContainer = ref<HTMLElement>()
+
+// Computed properties for scroll buttons
+const canScrollLeft = computed(() => {
+  if (!eventsContainer.value) return false
+  return eventsContainer.value.scrollLeft > 0
+})
+
+const canScrollRight = computed(() => {
+  if (!eventsContainer.value) return false
+  const maxScroll = eventsContainer.value.scrollWidth - eventsContainer.value.clientWidth
+  return eventsContainer.value.scrollLeft < maxScroll
+})
 
 // Load data on mount
 onMounted(async () => {
@@ -210,13 +222,7 @@ const scrollEvents = (direction: 'left' | 'right') => {
   }
 }
 
-const debugAdminState = () => {
-  console.log('🔍 Admin State Debug:', {
-    isAdmin: isAdmin.value,
-    adminPanelOpen: adminPanelOpen.value,
-    showLoginModal: showLoginModal.value
-  })
-}
+
 
 const formatEventDate = (dateString: string) => {
   const date = new Date(dateString)
@@ -435,14 +441,22 @@ const formatEventDate = (dateString: string) => {
           <!-- Events Container with Horizontal Scroll -->
           <div class="relative">
             <!-- Scroll Buttons for Desktop -->
-            <button @click="scrollEvents('left')" class="hidden lg:block absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-900 p-2 rounded-full shadow-lg border border-gray-200 transition-all duration-200">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button 
+              v-if="canScrollLeft" 
+              @click="scrollEvents('left')" 
+              class="hidden lg:block absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm hover:bg-white text-gray-700 hover:text-gray-900 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
               </svg>
             </button>
             
-            <button @click="scrollEvents('right')" class="hidden lg:block absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-900 p-2 rounded-full shadow-lg border border-gray-200 transition-all duration-200">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button 
+              v-if="canScrollRight" 
+              @click="scrollEvents('right')" 
+              class="hidden lg:block absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm hover:bg-white text-gray-700 hover:text-gray-900 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
               </svg>
             </button>
@@ -465,7 +479,7 @@ const formatEventDate = (dateString: string) => {
                     </svg>
                     <span>{{ event.time }}</span>
                   </div>
-                  <button class="bg-white hover:bg-gray-50 text-primary-600 font-medium px-4 py-2 rounded-lg border border-primary-200 transition-all duration-200 hover:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 text-sm">
+                  <button class="bg-white hover:bg-gray-50 text-primary-600 font-medium px-4 py-2 rounded-lg transition-all duration-200 hover:bg-primary-50 focus:outline-none text-sm">
                     Join Walk
                   </button>
                 </div>
@@ -490,7 +504,7 @@ const formatEventDate = (dateString: string) => {
                     </svg>
                     <span>{{ event.time }}</span>
                   </div>
-                  <button class="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-200 text-sm">
+                  <button class="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none text-sm">
                     More Info
                   </button>
                 </div>
@@ -696,10 +710,10 @@ const formatEventDate = (dateString: string) => {
     <button 
       v-if="isAdmin"
       @click="toggleAdminPanel" 
-      class="fixed right-4 top-4 z-[9999] bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+      class="fixed right-4 top-4 z-[9999] bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
       title="Toggle Admin Panel"
     >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
       </svg>
@@ -709,92 +723,16 @@ const formatEventDate = (dateString: string) => {
     <button 
       v-else
       @click="showLoginModal = true" 
-      class="fixed right-4 top-4 z-[9999] bg-gray-600 text-white p-3 rounded-full shadow-lg hover:bg-gray-700 transition-colors"
+      class="fixed right-4 top-4 z-[9999] bg-gray-500 hover:bg-gray-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
       title="Admin Login"
     >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
       </svg>
     </button>
 
-    <!-- Debug Button - Temporary, remove after testing -->
-    <button 
-      @click="debugAdminState"
-      class="fixed left-4 top-20 z-[9999] bg-red-600 text-white p-3 rounded-full shadow-lg hover:bg-red-700 transition-colors"
-      title="Debug Admin State"
-    >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-      </svg>
-    </button>
+
   </div>
 </template>
 
-<style scoped>
-/* Elegant Desktop Navigation Items */
-.nav-item-elegant {
-  @apply text-gray-700 hover:text-gray-900 font-light tracking-wide text-sm uppercase transition-colors duration-200;
-}
 
-/* Elegant Mobile Navigation Items */
-.mobile-nav-item-elegant {
-  @apply text-gray-700 hover:text-gray-900 font-light tracking-wide text-lg uppercase transition-colors duration-200;
-}
-
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #f97316;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #ea580c;
-}
-
-/* Hide scrollbar for events container */
-.scrollbar-hide {
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  scrollbar-width: none;  /* Firefox */
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;  /* Safari and Chrome */
-}
-
-/* Button styles */
-.btn-primary {
-  @apply bg-primary-600 hover:bg-primary-700 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-200;
-}
-
-.btn-secondary {
-  @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-200;
-}
-
-/* Events container styling */
-#events .container {
-  max-width: 1200px;
-}
-
-#events .card {
-  flex: 0 0 calc(33.333% - 1rem);
-  max-width: calc(33.333% - 1rem);
-}
-
-/* Ensure smooth scrolling */
-#events .flex {
-  scroll-behavior: smooth;
-}
-</style>
