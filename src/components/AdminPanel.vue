@@ -245,9 +245,41 @@
                       </div>
                       
                       <div v-if="showPhotoUploadFor === gallery.id" class="space-y-3">
-                        <input type="file" @change="handlePhotoUpload" multiple accept="image/*" class="w-full">
+                        <div class="space-y-2">
+                          <input 
+                            type="file" 
+                            @change="handlePhotoUpload" 
+                            multiple 
+                            accept="image/*" 
+                            class="w-full"
+                            :disabled="loading"
+                          >
+                          <div class="text-xs text-gray-500">
+                            <p>• Maximum file size: 10MB per image</p>
+                            <p>• Supported formats: JPG, PNG, GIF, WebP</p>
+                            <p>• Images will be automatically compressed and optimized</p>
+                          </div>
+                        </div>
+                        
+                        <!-- File Selection Info -->
+                        <div v-if="selectedFiles.length > 0" class="bg-gray-50 p-3 rounded-lg">
+                          <p class="text-sm font-medium text-gray-700 mb-2">Selected Files:</p>
+                          <div class="space-y-1">
+                            <div v-for="file in selectedFiles" :key="file.name" class="flex items-center justify-between text-xs">
+                              <span class="text-gray-600">{{ file.name }}</span>
+                              <span class="text-gray-500">{{ (file.size / 1024 / 1024).toFixed(2) }}MB</span>
+                            </div>
+                          </div>
+                        </div>
+                        
                         <div class="flex space-x-2">
-                          <button @click="uploadPhotosToGallery(gallery.id)" class="btn-primary text-sm flex-1">Upload to Gallery</button>
+                          <button 
+                            @click="uploadPhotosToGallery(gallery.id)" 
+                            :disabled="loading || selectedFiles.length === 0"
+                            class="btn-primary text-sm flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {{ loading ? 'Uploading...' : `Upload ${selectedFiles.length} Photo${selectedFiles.length !== 1 ? 's' : ''}` }}
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -706,12 +738,18 @@ const uploadPhotosToGallery = async (galleryId: string) => {
     
     for (const file of selectedFiles.value) {
       try {
-        console.log('📤 Uploading file:', file.name)
-        const result = await dataService.uploadImage(file)
+        console.log('📤 Processing file:', file.name, 'Size:', (file.size / 1024 / 1024).toFixed(2) + 'MB')
+        
+        // Compress and optimize image before upload
+        const optimizedFile = await compressImage(file)
+        console.log('📦 Compressed file:', optimizedFile.name, 'Size:', (optimizedFile.size / 1024 / 1024).toFixed(2) + 'MB')
+        
+        const result = await dataService.uploadImage(optimizedFile)
         console.log('✅ Upload result:', result)
         uploadedImages.push(result.url)
       } catch (error) {
         console.error('❌ Failed to upload:', file.name, error)
+        saveStatus.value = `Failed to upload ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`
       }
     }
     
@@ -752,6 +790,109 @@ const uploadPhotosToGallery = async (galleryId: string) => {
     loading.value = false
     setTimeout(() => saveStatus.value = '', 3000)
   }
+}
+
+// Image compression and optimization
+const compressImage = async (file: File): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    // Check file size first
+    const maxSize = 10 * 1024 * 1024 // 10MB limit
+    if (file.size > maxSize) {
+      reject(new Error(`File size ${(file.size / 1024 / 1024).toFixed(1)}MB exceeds 10MB limit`))
+      return
+    }
+    
+    // Check if it's an image file
+    if (!file.type.startsWith('image/')) {
+      reject(new Error('File must be an image'))
+      return
+    }
+    
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    const img = new Image()
+    
+    img.onload = () => {
+      try {
+        // Calculate new dimensions (max 1920x1080)
+        const maxWidth = 1920
+        const maxHeight = 1080
+        let { width, height } = img
+        
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height)
+          width *= ratio
+          height *= ratio
+        }
+        
+        canvas.width = width
+        canvas.height = height
+        
+        // Draw and compress image
+        ctx?.drawImage(img, 0, 0, width, height)
+        
+        // Try WebP first, fallback to JPEG if not supported
+        const tryWebP = () => {
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.webp'), {
+                  type: 'image/webp',
+                  lastModified: Date.now()
+                })
+                
+                console.log('📦 Image compressed to WebP:', {
+                  original: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
+                  compressed: `${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`,
+                  reduction: `${((file.size - compressedFile.size) / file.size * 100).toFixed(1)}%`
+                })
+                
+                resolve(compressedFile)
+              } else {
+                // WebP failed, try JPEG
+                tryJPEG()
+              }
+            },
+            'image/webp',
+            0.8
+          )
+        }
+        
+        const tryJPEG = () => {
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.jpg'), {
+                  type: 'image/jpeg',
+                  lastModified: Date.now()
+                })
+                
+                console.log('📦 Image compressed to JPEG:', {
+                  original: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
+                  compressed: `${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`,
+                  reduction: `${((file.size - compressedFile.size) / file.size * 100).toFixed(1)}%`
+                })
+                
+                resolve(compressedFile)
+              } else {
+                reject(new Error('Failed to compress image to any format'))
+              }
+            },
+            'image/jpeg',
+            0.8
+          )
+        }
+        
+        // Start with WebP, fallback to JPEG
+        tryWebP()
+      } catch (error) {
+        reject(error)
+      }
+    }
+    
+    img.onerror = () => reject(new Error('Failed to load image'))
+    img.src = URL.createObjectURL(file)
+  })
 }
 
 // Remove image from gallery
@@ -805,9 +946,53 @@ const formatDate = (dateString: string) => {
 const handlePhotoUpload = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files) {
-    // Store selected files for upload
-    selectedFiles.value = Array.from(target.files)
-    console.log('Files selected:', selectedFiles.value)
+    const files = Array.from(target.files)
+    const validFiles: File[] = []
+    const errors: string[] = []
+    
+    // Validate each file
+    for (const file of files) {
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        errors.push(`${file.name} is not an image file`)
+        continue
+      }
+      
+      // Check file size (10MB limit)
+      const maxSize = 10 * 1024 * 1024
+      if (file.size > maxSize) {
+        errors.push(`${file.name} is too large (${(file.size / 1024 / 1024).toFixed(1)}MB > 10MB)`)
+        continue
+      }
+      
+      validFiles.push(file)
+    }
+    
+    // Store valid files
+    selectedFiles.value = validFiles
+    
+    // Show validation results
+    if (validFiles.length > 0) {
+      console.log('✅ Valid files selected:', validFiles)
+      if (errors.length > 0) {
+        saveStatus.value = `Selected ${validFiles.length} valid files. ${errors.length} files were rejected.`
+      } else {
+        saveStatus.value = `Selected ${validFiles.length} file${validFiles.length !== 1 ? 's' : ''} for upload`
+      }
+    } else {
+      saveStatus.value = 'No valid files selected'
+      console.log('❌ No valid files selected')
+    }
+    
+    if (errors.length > 0) {
+      console.log('❌ Validation errors:', errors)
+      setTimeout(() => saveStatus.value = '', 5000)
+    } else {
+      setTimeout(() => saveStatus.value = '', 3000)
+    }
+    
+    // Clear the input to allow selecting the same file again
+    target.value = ''
   }
 }
 
