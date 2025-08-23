@@ -287,28 +287,45 @@ class DataService {
   async updateGallery(galleryId: string, updates: Partial<GalleryMeta>): Promise<boolean> {
     try {
       if (this.isProduction()) {
-        const response = await fetch(`/api/galleries/${galleryId}`, {
+        console.log('🔄 Updating gallery via API:', galleryId, updates)
+        
+        const response = await fetch(`/api/galleries?galleryId=${galleryId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(updates)
         })
-        return response.ok
+        
+        console.log('📡 API response status:', response.status)
+        console.log('📡 API response headers:', Object.fromEntries(response.headers.entries()))
+        
+        if (response.ok) {
+          const result = await response.json()
+          console.log('✅ API update success:', result)
+          return true
+        } else {
+          const errorText = await response.text()
+          console.error('❌ API update failed:', response.status, errorText)
+          return false
+        }
       } else {
         // Development fallback
+        console.log('🔄 Updating gallery locally:', galleryId, updates)
         const existing = this.getGalleries()
         const galleries = await existing
         const index = galleries.findIndex(g => g.id === galleryId)
         if (index !== -1) {
           galleries[index] = { ...galleries[index], ...updates }
           localStorage.setItem('walk4health_galleries', JSON.stringify(galleries))
+          console.log('✅ Local update success')
           return true
         }
+        console.log('❌ Gallery not found locally')
         return false
       }
     } catch (error) {
-      console.error('Error updating gallery:', error)
+      console.error('❌ Error updating gallery:', error)
       return false
     }
   }

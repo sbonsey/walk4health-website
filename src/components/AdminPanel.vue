@@ -172,6 +172,16 @@
             
             <!-- Gallery Management -->
             <div class="space-y-6">
+              <!-- Debug Info -->
+              <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200 mb-4">
+                <h4 class="font-medium text-yellow-900 mb-2">Debug Info</h4>
+                <p class="text-xs text-yellow-700">Galleries loaded: {{ galleries.length }}</p>
+                <p class="text-xs text-yellow-700">Total images: {{ galleries.reduce((sum, g) => sum + g.images.length, 0) }}</p>
+                <button @click="debugGalleries" class="text-xs bg-yellow-200 hover:bg-yellow-300 px-2 py-1 rounded">
+                  Debug Galleries
+                </button>
+              </div>
+
               <!-- Create New Gallery -->
               <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
                 <h4 class="font-medium text-blue-900 mb-3">Create New Gallery</h4>
@@ -689,29 +699,45 @@ const uploadPhotosToGallery = async (galleryId: string) => {
     loading.value = true
     saveStatus.value = 'Uploading images to gallery...'
     
+    console.log('🔄 Starting upload to gallery:', galleryId)
+    console.log('📁 Files to upload:', selectedFiles.value)
+    
     const uploadedImages = []
     
     for (const file of selectedFiles.value) {
       try {
+        console.log('📤 Uploading file:', file.name)
         const result = await dataService.uploadImage(file)
+        console.log('✅ Upload result:', result)
         uploadedImages.push(result.url)
       } catch (error) {
-        console.error('Failed to upload:', file.name, error)
+        console.error('❌ Failed to upload:', file.name, error)
       }
     }
+    
+    console.log('📸 All uploaded images:', uploadedImages)
     
     if (uploadedImages.length > 0) {
       // Add images to the specific gallery
       const gallery = galleries.value.find(g => g.id === galleryId)
+      console.log('🎯 Found gallery:', gallery)
+      
       if (gallery) {
         const updatedImages = [...gallery.images, ...uploadedImages]
+        console.log('🔄 Updating gallery images:', updatedImages)
+        
         const success = await dataService.updateGallery(galleryId, { images: updatedImages })
+        console.log('💾 Gallery update success:', success)
         
         if (success) {
           gallery.images = updatedImages
+          console.log('✅ Gallery updated locally:', gallery.images)
           saveStatus.value = `Successfully uploaded ${uploadedImages.length} images to gallery!`
           showPhotoUploadFor.value = null
           selectedFiles.value = []
+          
+          // Force a refresh of the galleries data
+          await loadData()
         } else {
           saveStatus.value = 'Error saving gallery updates'
         }
@@ -721,7 +747,7 @@ const uploadPhotosToGallery = async (galleryId: string) => {
     }
   } catch (error) {
     saveStatus.value = 'Error uploading images to gallery'
-    console.error('Upload error:', error)
+    console.error('❌ Upload error:', error)
   } finally {
     loading.value = false
     setTimeout(() => saveStatus.value = '', 3000)
@@ -745,6 +771,20 @@ const removeImageFromGallery = async (galleryId: string, imageIndex: number) => 
     }
     setTimeout(() => saveStatus.value = '', 3000)
   }
+}
+
+// Debug galleries
+const debugGalleries = () => {
+  console.log('🔍 Debug Galleries:')
+  console.log('📊 Galleries array:', galleries.value)
+  galleries.value.forEach((gallery, index) => {
+    console.log(`🎯 Gallery ${index}:`, {
+      id: gallery.id,
+      title: gallery.title,
+      images: gallery.images,
+      imageCount: gallery.images.length
+    })
+  })
 }
 
 // Methods

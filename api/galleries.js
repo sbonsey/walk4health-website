@@ -172,8 +172,11 @@ export default async function handler(req, res) {
 
     case 'PUT':
       try {
-        const { galleryId } = req.query
+        // Extract galleryId from URL path or query
+        const galleryId = req.query.galleryId || req.url.split('/').pop()
         const updates = req.body
+        
+        console.log('🔄 PUT Gallery Update:', { galleryId, updates })
         
         if (!galleryId) {
           return res.status(400).json({ error: 'Missing gallery ID' })
