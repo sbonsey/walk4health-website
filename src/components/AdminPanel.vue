@@ -330,6 +330,7 @@ const photos = ref([
   { id: 1, url: 'https://via.placeholder.com/300x200/4F46E5/FFFFFF?text=Walking+Trail', title: 'Walking Trail' },
   { id: 2, url: 'https://via.placeholder.com/300x200/059669/FFFFFF?text=Club+Members', title: 'Club Members' }
 ])
+const selectedFiles = ref<File[]>([])
 
 // Loading states
 const loading = ref(false)
@@ -627,14 +628,54 @@ const formatDate = (dateString: string) => {
 const handlePhotoUpload = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files) {
-    // Handle file upload logic here
-    console.log('Files selected:', target.files)
+    // Store selected files for upload
+    selectedFiles.value = Array.from(target.files)
+    console.log('Files selected:', selectedFiles.value)
   }
 }
 
-const uploadPhotos = () => {
-  // Implement photo upload logic
-  showPhotoUpload.value = false
+const uploadPhotos = async () => {
+  if (!selectedFiles.value.length) return
+  
+  try {
+    loading.value = true
+    saveStatus.value = 'Uploading images...'
+    
+    const uploadedImages = []
+    
+    for (const file of selectedFiles.value) {
+      try {
+        const result = await dataService.uploadImage(file)
+        uploadedImages.push({
+          url: result.url,
+          filename: result.filename,
+          title: file.name.replace(/\.[^/.]+$/, '') // Remove file extension
+        })
+      } catch (error) {
+        console.error('Failed to upload:', file.name, error)
+      }
+    }
+    
+    if (uploadedImages.length > 0) {
+      // Add to photos array
+      photos.value.push(...uploadedImages.map((img, index) => ({
+        id: Date.now() + index,
+        ...img
+      })))
+      
+      saveStatus.value = `Successfully uploaded ${uploadedImages.length} images!`
+      showPhotoUpload.value = false
+      selectedFiles.value = []
+    } else {
+      saveStatus.value = 'No images were uploaded successfully'
+    }
+  } catch (error) {
+    saveStatus.value = 'Error uploading images'
+    console.error('Upload error:', error)
+  } finally {
+    loading.value = false
+    setTimeout(() => saveStatus.value = '', 3000)
+  }
 }
 
 const deletePhoto = (id: number) => {

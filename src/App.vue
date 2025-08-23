@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import AdminPanel from './components/AdminPanel.vue'
-import { dataService, type EventsData, type ClubContent } from './services/dataService'
+import { dataService, type EventsData, type ClubContent, type GalleryMeta } from './services/dataService'
 
 // Reactive data
 const mobileMenuOpen = ref(false)
@@ -40,6 +40,9 @@ const clubContent = ref<ClubContent>({
   lastUpdated: new Date().toISOString()
 })
 
+// Gallery data - loaded from data service
+const galleries = ref<GalleryMeta[]>([])
+
 // Template refs
 const eventsContainer = ref<HTMLElement>()
 
@@ -64,9 +67,10 @@ onMounted(async () => {
 const loadData = async () => {
   isLoading.value = true
   try {
-    const [eventsData, contentData] = await Promise.all([
+    const [eventsData, contentData, galleriesData] = await Promise.all([
       dataService.getEvents(),
-      dataService.getContent()
+      dataService.getContent(),
+      dataService.getGalleries()
     ])
     
     // Ensure events data is properly structured
@@ -125,10 +129,14 @@ const loadData = async () => {
       }
     }
     
+    // Set galleries data
+    galleries.value = galleriesData || []
+    
     console.log('✅ App.vue: Data loaded successfully:', { 
       recurringEvents: recurringEvents.value, 
       specialEvents: specialEvents.value,
-      clubContent: clubContent.value 
+      clubContent: clubContent.value,
+      galleries: galleries.value
     })
   } catch (error) {
     console.error('❌ App.vue: Error loading data:', error)
@@ -189,6 +197,17 @@ const closeLoginModal = () => {
   showLoginModal.value = false
   loginError.value = ''
   loginForm.value = { username: '', password: '' }
+}
+
+// Format date for display
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-NZ', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  })
 }
 
 const handleLogin = () => {
@@ -525,7 +544,33 @@ const formatEventDate = (dateString: string) => {
         <div class="container">
           <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Photo Gallery</h2>
           
-          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Dynamic Galleries -->
+          <div v-if="galleries.length > 0" class="space-y-12">
+            <div v-for="gallery in galleries" :key="gallery.id" class="space-y-6">
+              <div class="text-center">
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ gallery.title }}</h3>
+                <p class="text-gray-600 mb-1">{{ gallery.description }}</p>
+                <p class="text-sm text-gray-500">{{ formatDate(gallery.date) }} • {{ gallery.location }}</p>
+              </div>
+              
+              <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div v-for="(image, index) in gallery.images" :key="index" 
+                     class="group relative overflow-hidden rounded-lg aspect-square cursor-pointer">
+                  <img :src="image" 
+                       :alt="`${gallery.title} - Image ${index + 1}`" 
+                       class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
+                  <div class="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <p class="font-medium">{{ gallery.title }}</p>
+                    <p class="text-sm">{{ gallery.location }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Fallback Gallery (when no galleries exist) -->
+          <div v-else class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Walking Trail -->
             <div class="group relative overflow-hidden rounded-lg aspect-square cursor-pointer">
               <img src="https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
@@ -544,10 +589,10 @@ const formatEventDate = (dateString: string) => {
                    alt="Club members walking" 
                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
               <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
-              <div class="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <p class="font-medium">Club Members</p>
-                <p class="text-sm">Walking together</p>
-              </div>
+                                <div class="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <p class="font-medium">Club Members</p>
+                    <p class="text-sm">Walking together</p>
+                  </div>
             </div>
             
             <!-- Scenic View -->
@@ -657,7 +702,6 @@ const formatEventDate = (dateString: string) => {
     <footer class="bg-gray-800 text-white py-8">
       <div class="container text-center">
         <p>&copy; 2025 Walk4Health | 24 Years of Walking in the Hutt Valley</p>
-        <p class="text-gray-400 mt-2">© 2012 WEBFUSION SOFTWARE</p>
       </div>
     </footer>
 

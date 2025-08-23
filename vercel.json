@@ -9,6 +9,12 @@
     },
     "api/test.js": {
       "maxDuration": 10
+    },
+    "api/upload-image.js": {
+      "maxDuration": 30
+    },
+    "api/galleries.js": {
+      "maxDuration": 10
     }
   },
   "routes": [

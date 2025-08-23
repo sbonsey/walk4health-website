@@ -208,19 +208,19 @@ class DataService {
   // Galleries
   async getGalleries(): Promise<GalleryMeta[]> {
     try {
-      // In a real implementation, this would fetch from an API
-      // For now, return sample data
-      return [
-        {
-          id: 'gallery-1',
-          title: 'Sunday Walk - Hutt Valley Trail',
-          description: 'Beautiful morning walk along the Hutt Valley river trail with club members.',
-          date: '2025-01-05',
-          location: 'Hutt Valley, Lower Hutt',
-          images: ['image1.jpg', 'image2.jpg', 'image3.jpg'],
-          createdAt: '2025-01-01T00:00:00.000Z'
+      if (this.isProduction()) {
+        const response = await fetch('/api/galleries')
+        if (response.ok) {
+          return await response.json()
+        } else {
+          console.error('Failed to fetch galleries from API')
+          return []
         }
-      ]
+      } else {
+        // Development fallback
+        const stored = localStorage.getItem('walk4health_galleries')
+        return stored ? JSON.parse(stored) : []
+      }
     } catch (error) {
       console.error('Error fetching galleries:', error)
       return []
@@ -229,41 +229,103 @@ class DataService {
 
   async createGallery(gallery: Omit<GalleryMeta, 'id' | 'createdAt'>): Promise<string> {
     try {
-      const id = `gallery-${Date.now()}`
-      const newGallery: GalleryMeta = {
-        ...gallery,
-        id,
-        createdAt: new Date().toISOString()
+      if (this.isProduction()) {
+        const response = await fetch('/api/galleries', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(gallery)
+        })
+        
+        if (response.ok) {
+          const result = await response.json()
+          return result.gallery.id
+        } else {
+          throw new Error('Failed to create gallery')
+        }
+      } else {
+        // Development fallback
+        const newGallery: GalleryMeta = {
+          ...gallery,
+          id: `gallery-${Date.now()}`,
+          createdAt: new Date().toISOString()
+        }
+        
+        const existing = this.getGalleries()
+        const updated = [...(await existing), newGallery]
+        localStorage.setItem('walk4health_galleries', JSON.stringify(updated))
+        
+        return newGallery.id
       }
-      
-      console.log('Creating gallery:', newGallery)
-      
-      // Store in localStorage as fallback
-      const galleries = JSON.parse(localStorage.getItem('walk4health-galleries') || '[]')
-      galleries.push(newGallery)
-      localStorage.setItem('walk4health-galleries', JSON.stringify(galleries))
-      
-      return id
     } catch (error) {
       console.error('Error creating gallery:', error)
-      throw error
+      throw new Error('Failed to create gallery')
     }
   }
 
-  async deleteGallery(id: string): Promise<boolean> {
+  async deleteGallery(galleryId: string): Promise<boolean> {
     try {
-      console.log('Deleting gallery:', id)
-      
-      // Remove from localStorage
-      const galleries = JSON.parse(localStorage.getItem('walk4health-galleries') || '[]')
-      const filteredGalleries = galleries.filter((g: GalleryMeta) => g.id !== id)
-      localStorage.setItem('walk4health-galleries', JSON.stringify(filteredGalleries))
-      
-      return true
+      if (this.isProduction()) {
+        const response = await fetch(`/api/galleries?galleryId=${galleryId}`, {
+          method: 'DELETE'
+        })
+        return response.ok
+      } else {
+        // Development fallback
+        const existing = this.getGalleries()
+        const updated = (await existing).filter(g => g.id !== galleryId)
+        localStorage.setItem('walk4health_galleries', JSON.stringify(updated))
+        return true
+      }
     } catch (error) {
       console.error('Error deleting gallery:', error)
       return false
     }
+  }
+
+  // Image upload
+  async uploadImage(file: File): Promise<{ url: string; filename: string }> {
+    try {
+      if (this.isProduction()) {
+        // Convert file to base64 for API
+        const base64 = await this.fileToBase64(file)
+        
+        const response = await fetch('/api/upload-image', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            image: base64,
+            filename: file.name,
+            contentType: file.type
+          })
+        })
+        
+        if (response.ok) {
+          return await response.json()
+        } else {
+          throw new Error('Failed to upload image')
+        }
+      } else {
+        // Development fallback - create local URL
+        const url = URL.createObjectURL(file)
+        return { url, filename: file.name }
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      throw new Error('Failed to upload image')
+    }
+  }
+
+  private async fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = error => reject(error)
+    })
   }
 
   // Fallback to localStorage for offline/development
