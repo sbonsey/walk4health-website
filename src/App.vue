@@ -3,6 +3,15 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import AdminPanel from './components/AdminPanel.vue'
 import { dataService, type EventsData, type ClubContent, type GalleryMeta } from './services/dataService'
 
+// Types
+interface NewsItem {
+  id: string
+  title: string
+  content: string
+  date: string
+  galleryLink?: string
+}
+
 // Reactive data
 const mobileMenuOpen = ref(false)
 const contactForm = ref({
@@ -43,6 +52,32 @@ const clubContent = ref<ClubContent>({
 // Gallery data - loaded from data service
 const galleries = ref<GalleryMeta[]>([])
 
+// News data
+const newsItems = ref<NewsItem[]>([
+  {
+    id: '1',
+    title: 'Welcome to Walk4Health 2025!',
+    content: 'We\'re excited to start another year of walking adventures in the beautiful Hutt Valley. Our club continues to grow with new members joining us every month.',
+    date: '2025-01-15',
+    galleryLink: undefined
+  },
+  {
+    id: '2',
+    title: 'New Walking Routes Added',
+    content: 'We\'ve discovered some fantastic new walking trails in the Upper Hutt area. These routes offer stunning views and are perfect for all fitness levels.',
+    date: '2025-01-10',
+    galleryLink: undefined
+  },
+  {
+    id: '3',
+    title: 'Club Social Event Success',
+    content: 'Our recent club social event was a huge success! Over 30 members attended and we enjoyed sharing stories and planning future walks together.',
+    date: '2025-01-05',
+    galleryLink: undefined
+  }
+])
+const showAllNews = ref(false)
+
 // Template refs
 const eventsContainer = ref<HTMLElement>()
 const galleriesContainer = ref<HTMLElement>()
@@ -69,6 +104,15 @@ const canScrollGalleriesRight = computed(() => {
   if (!galleriesContainer.value) return false
   const maxScroll = galleriesContainer.value.scrollWidth - galleriesContainer.value.clientWidth
   return galleriesContainer.value.scrollLeft < maxScroll
+})
+
+// Computed properties for news
+const displayedNewsItems = computed(() => {
+  return newsItems.value.slice(0, 3)
+})
+
+const additionalNewsItems = computed(() => {
+  return newsItems.value.slice(3)
 })
 
 // Load data on mount
@@ -213,6 +257,27 @@ const handleContentUpdated = (content: ClubContent) => {
 const handleGalleriesUpdated = (updatedGalleries: GalleryMeta[]) => {
   galleries.value = updatedGalleries
   console.log('✅ App.vue: Galleries updated from admin panel:', updatedGalleries)
+}
+
+// News methods
+const formatNewsDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-NZ', { 
+    month: 'long', 
+    day: 'numeric',
+    year: 'numeric'
+  })
+}
+
+const toggleNewsExpansion = () => {
+  showAllNews.value = !showAllNews.value
+}
+
+const openGalleryFromNews = (galleryId: string) => {
+  const gallery = galleries.value.find(g => g.id === galleryId)
+  if (gallery) {
+    selectedGallery.value = gallery
+  }
 }
 
 // Methods
@@ -382,6 +447,7 @@ const formatEventDate = (dateString: string) => {
           <div class="hidden md:flex items-center space-x-12">
             <a href="#home" class="nav-item-elegant">HOME</a>
             <a href="#about" class="nav-item-elegant">ABOUT</a>
+            <a href="#news" class="nav-item-elegant">NEWS</a>
             <a href="#events" class="nav-item-elegant">EVENTS</a>
             <a href="#gallery" class="nav-item-elegant">GALLERY</a>
             <a href="#contact" class="nav-item-elegant">CONTACT</a>
@@ -406,6 +472,7 @@ const formatEventDate = (dateString: string) => {
           <div class="flex flex-col space-y-6">
             <a href="#home" @click="closeMobileMenu" class="mobile-nav-item-elegant">HOME</a>
             <a href="#about" @click="closeMobileMenu" class="mobile-nav-item-elegant">ABOUT</a>
+            <a href="#news" @click="closeMobileMenu" class="mobile-nav-item-elegant">NEWS</a>
             <a href="#events" @click="closeMobileMenu" class="mobile-nav-item-elegant">EVENTS</a>
             <a href="#gallery" @click="closeMobileMenu" class="mobile-nav-item-elegant">GALLERY</a>
             <a href="#contact" @click="closeMobileMenu" class="mobile-nav-item-elegant">CONTACT</a>
@@ -554,6 +621,95 @@ const formatEventDate = (dateString: string) => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- News Section -->
+      <section id="news" class="section bg-gray-50">
+        <div class="container">
+          <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Latest News</h2>
+          
+          <!-- News Items -->
+          <div v-if="newsItems.length > 0" class="space-y-6">
+            <!-- First 3 News Items (Always Visible) -->
+            <div v-for="(item, index) in displayedNewsItems" :key="item.id" 
+                 class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6">
+              <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                  <div class="flex items-center space-x-3 mb-2">
+                    <span class="text-sm font-medium text-primary-600 bg-primary-50 px-3 py-1 rounded-full">
+                      {{ formatNewsDate(item.date) }}
+                    </span>
+                    <span v-if="item.galleryLink" class="text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                      📸 Gallery
+                    </span>
+                  </div>
+                  <h3 class="text-xl font-bold text-gray-900 mb-3">{{ item.title }}</h3>
+                  <p class="text-gray-600 leading-relaxed">{{ item.content }}</p>
+                  
+                  <!-- Gallery Link -->
+                  <div v-if="item.galleryLink" class="mt-4">
+                    <button @click="openGalleryFromNews(item.galleryLink)" 
+                            class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                      View Related Gallery
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Show More Button -->
+            <div v-if="newsItems.length > 3" class="text-center pt-6">
+              <button @click="toggleNewsExpansion" 
+                      class="btn-primary px-8 py-3 text-lg">
+                {{ showAllNews ? 'Show Less' : `Show ${newsItems.length - 3} More News Items` }}
+              </button>
+            </div>
+            
+            <!-- Additional News Items (Hidden by Default) -->
+            <div v-if="showAllNews" class="space-y-6">
+              <div v-for="(item, index) in additionalNewsItems" :key="item.id" 
+                   class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6">
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex-1">
+                    <div class="flex items-center space-x-3 mb-2">
+                      <span class="text-sm font-medium text-primary-600 bg-primary-50 px-3 py-1 rounded-full">
+                        {{ formatNewsDate(item.date) }}
+                      </span>
+                      <span v-if="item.galleryLink" class="text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                        📸 Gallery
+                      </span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">{{ item.title }}</h3>
+                    <p class="text-gray-600 leading-relaxed">{{ item.content }}</p>
+                    
+                    <!-- Gallery Link -->
+                    <div v-if="item.galleryLink" class="mt-4">
+                      <button @click="openGalleryFromNews(item.galleryLink)" 
+                              class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        View Related Gallery
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Empty State -->
+          <div v-else class="text-center py-12">
+            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <p class="text-gray-500 text-lg">No news items yet</p>
+            <p class="text-gray-400 text-sm">Check back soon for updates!</p>
           </div>
         </div>
       </section>

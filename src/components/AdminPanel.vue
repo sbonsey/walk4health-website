@@ -143,6 +143,70 @@
             </div>
           </div>
 
+          <!-- News Tab -->
+          <div v-if="activeTab === 'news'" class="space-y-4">
+            <!-- Status Display -->
+            <div v-if="saveStatus" class="p-3 rounded-lg text-sm" :class="saveStatus.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'">
+              {{ saveStatus }}
+            </div>
+            
+            <div class="flex justify-between items-center">
+              <h3 class="text-lg font-semibold text-gray-900">Manage News</h3>
+              <button @click="showAddNewsForm = true" class="btn-primary text-sm">
+                Add News Item
+              </button>
+            </div>
+            
+            <!-- Add News Form -->
+            <div v-if="showAddNewsForm" class="bg-gray-50 p-4 rounded-lg space-y-3">
+              <h4 class="font-medium text-gray-900">Add News Item</h4>
+              <input v-model="newNewsItem.title" type="text" placeholder="News Title" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              <textarea v-model="newNewsItem.content" placeholder="News content" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+              <input v-model="newNewsItem.date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              <select v-model="newNewsItem.galleryLink" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                <option value="">No Gallery Link (Optional)</option>
+                <option v-for="gallery in galleries" :key="gallery.id" :value="gallery.id">
+                  {{ gallery.title }}
+                </option>
+              </select>
+              <div class="flex space-x-2">
+                <button @click="createNewsItem" class="btn-primary text-sm flex-1">Save News</button>
+                <button @click="showAddNewsForm = false" class="btn-secondary text-sm flex-1">Cancel</button>
+              </div>
+            </div>
+            
+            <!-- News List -->
+            <div class="space-y-3">
+              <div v-if="newsItems.length > 0">
+                <h4 class="font-medium text-gray-700 mb-2 text-sm">News Items</h4>
+                <div class="space-y-2">
+                  <div v-for="item in newsItems" :key="item.id" class="bg-green-50 p-3 rounded-lg border border-green-200">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <h5 class="font-medium text-gray-900">{{ item.title }}</h5>
+                        <p class="text-sm text-gray-600">{{ formatDate(item.date) }}</p>
+                        <p class="text-sm text-gray-600 mt-1">{{ item.content }}</p>
+                        <p v-if="item.galleryLink" class="text-xs text-blue-600 mt-1">
+                          📸 Linked to gallery: {{ galleries.find(g => g.id === item.galleryLink)?.title }}
+                        </p>
+                      </div>
+                      <button @click="deleteNewsItem(item.id)" class="text-red-600 hover:text-red-800">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div v-else class="text-center py-8 text-gray-500">
+                <p>No news items added yet.</p>
+                <p class="text-sm">Add news items to keep members updated.</p>
+              </div>
+            </div>
+          </div>
+
           <!-- Photos Tab -->
           <div v-if="activeTab === 'photos'" class="space-y-4">
             <div class="flex justify-between items-center">
@@ -354,6 +418,15 @@
 import { ref, reactive, onMounted, watch, computed } from 'vue'
 import { dataService, type EventsData, type ClubContent, type GalleryMeta } from '../services/dataService'
 
+// Types
+interface NewsItem {
+  id: string
+  title: string
+  content: string
+  date: string
+  galleryLink?: string
+}
+
 // Props
 const props = defineProps<{
   isAdmin: boolean
@@ -376,10 +449,12 @@ const showAddSpecialForm = ref(false)
 const showPhotoUpload = ref(false)
 const showAddGalleryForm = ref(false)
 const showPhotoUploadFor = ref<string | null>(null)
+const showAddNewsForm = ref(false)
 
 // Tabs configuration
 const tabs = [
   { id: 'events', name: 'Events' },
+  { id: 'news', name: 'News' },
   { id: 'photos', name: 'Photos' },
   { id: 'content', name: 'Content' }
 ]
@@ -409,6 +484,14 @@ const newGallery = reactive({
   images: [] as string[]
 })
 
+// Form data for new news item
+const newNewsItem = reactive({
+  title: '',
+  content: '',
+  date: '',
+  galleryLink: ''
+})
+
 // Data state
 const events = ref<EventsData>({
   recurringEvents: [],
@@ -432,6 +515,9 @@ const galleries = ref<GalleryMeta[]>([])
 watch(() => props.galleries, (newGalleries) => {
   galleries.value = [...newGalleries]
 }, { immediate: true })
+
+// News data
+const newsItems = ref<NewsItem[]>([])
 const photos = ref([
   { id: 1, url: 'https://via.placeholder.com/300x200/4F46E5/FFFFFF?text=Walking+Trail', title: 'Walking Trail' },
   { id: 2, url: 'https://via.placeholder.com/300x200/059669/FFFFFF?text=Club+Members', title: 'Club Members' }
@@ -959,6 +1045,53 @@ const formatDate = (dateString: string) => {
     month: 'long', 
     day: 'numeric' 
   })
+}
+
+// News methods
+const createNewsItem = async () => {
+  if (newNewsItem.title && newNewsItem.content && newNewsItem.date) {
+    try {
+      loading.value = true
+      saveStatus.value = 'Creating news item...'
+      
+      const newsItem: NewsItem = {
+        id: Date.now().toString(),
+        title: newNewsItem.title,
+        content: newNewsItem.content,
+        date: newNewsItem.date,
+        galleryLink: newNewsItem.galleryLink || undefined
+      }
+      
+      // Add to local state
+      newsItems.value.unshift(newsItem)
+      
+      // Reset form
+      newNewsItem.title = ''
+      newNewsItem.content = ''
+      newNewsItem.date = ''
+      newNewsItem.galleryLink = ''
+      showAddNewsForm.value = false
+      
+      saveStatus.value = 'News item created successfully!'
+      setTimeout(() => saveStatus.value = '', 3000)
+    } catch (error) {
+      saveStatus.value = 'Error creating news item'
+      console.error('Error creating news item:', error)
+    } finally {
+      loading.value = false
+    }
+  }
+}
+
+const deleteNewsItem = async (id: string) => {
+  try {
+    newsItems.value = newsItems.value.filter(item => item.id !== id)
+    saveStatus.value = 'News item deleted successfully!'
+    setTimeout(() => saveStatus.value = '', 3000)
+  } catch (error) {
+    saveStatus.value = 'Error deleting news item'
+    console.error('Error deleting news item:', error)
+  }
 }
 
 const handlePhotoUpload = (event: Event) => {

@@ -51,7 +51,7 @@
   }
   
   /* Page anchor spacing - prevent headings from being hidden behind fixed nav */
-  #home, #about, #events, #gallery, #contact {
+  #home, #about, #news, #events, #gallery, #contact {
     scroll-margin-top: 2rem; /* Reduced from 7rem to 2rem */
   }
   
@@ -70,7 +70,7 @@
       @apply py-16;
     }
     
-    #home, #about, #events, #gallery, #contact {
+    #home, #about, #news, #events, #gallery, #contact {
       scroll-margin-top: 1.5rem;
     }
   }
@@ -84,7 +84,7 @@
       @apply py-12;
     }
     
-    #home, #about, #events, #gallery, #contact {
+    #home, #about, #news, #events, #gallery, #contact {
       scroll-margin-top: 1rem;
     }
   }
