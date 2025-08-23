@@ -209,6 +209,12 @@ const handleContentUpdated = (content: ClubContent) => {
   clubContent.value = content
 }
 
+// Handle galleries updates from admin panel
+const handleGalleriesUpdated = (updatedGalleries: GalleryMeta[]) => {
+  galleries.value = updatedGalleries
+  console.log('✅ App.vue: Galleries updated from admin panel:', updatedGalleries)
+}
+
 // Methods
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value
@@ -945,9 +951,11 @@ const formatEventDate = (dateString: string) => {
     <AdminPanel 
       :is-admin="isAdmin" 
       :is-open="adminPanelOpen"
+      :galleries="galleries"
       @close="adminPanelOpen = false"
       @events-updated="handleEventsUpdated"
       @content-updated="handleContentUpdated"
+      @galleries-updated="handleGalleriesUpdated"
     />
 
     <!-- Admin Login Modal -->

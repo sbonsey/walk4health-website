@@ -351,13 +351,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, watch, computed } from 'vue'
 import { dataService, type EventsData, type ClubContent, type GalleryMeta } from '../services/dataService'
 
 // Props
 const props = defineProps<{
   isAdmin: boolean
   isOpen: boolean
+  galleries: GalleryMeta[]
 }>()
 
 // Emits
@@ -365,6 +366,7 @@ const emit = defineEmits<{
   close: []
   eventsUpdated: [EventsData]
   contentUpdated: [ClubContent]
+  galleriesUpdated: [GalleryMeta[]]
 }>()
 
 // Reactive data
@@ -423,7 +425,13 @@ const content = ref<ClubContent>({
   lastUpdated: new Date().toISOString()
 })
 
+// Local galleries state that syncs with props
 const galleries = ref<GalleryMeta[]>([])
+
+// Watch for prop changes and sync local state
+watch(() => props.galleries, (newGalleries) => {
+  galleries.value = [...newGalleries]
+}, { immediate: true })
 const photos = ref([
   { id: 1, url: 'https://via.placeholder.com/300x200/4F46E5/FFFFFF?text=Walking+Trail', title: 'Walking Trail' },
   { id: 2, url: 'https://via.placeholder.com/300x200/059669/FFFFFF?text=Club+Members', title: 'Club Members' }
@@ -683,8 +691,11 @@ const createGallery = async () => {
       newGallery.location = ''
       showAddGalleryForm.value = false
       
-      // Reload galleries
+      // Reload galleries and emit update
       await loadData()
+      
+      // Emit updated galleries to parent
+      emit('galleriesUpdated', galleries.value)
       
       saveStatus.value = `Gallery "${newGallery.title}" created successfully!`
       setTimeout(() => saveStatus.value = '', 3000)
@@ -701,7 +712,10 @@ const deleteGallery = async (id: string) => {
     await dataService.deleteGallery(id)
     saveStatus.value = `Gallery deleted successfully!`
     setTimeout(() => saveStatus.value = '', 3000)
+    
+    // Reload galleries and emit update
     await loadData()
+    emit('galleriesUpdated', galleries.value)
   } catch (error) {
     saveStatus.value = 'Error deleting gallery'
     console.error('Error deleting gallery:', error)
@@ -774,8 +788,9 @@ const uploadPhotosToGallery = async (galleryId: string) => {
           showPhotoUploadFor.value = null
           selectedFiles.value = []
           
-          // Force a refresh of the galleries data
+          // Force a refresh of the galleries data and emit update
           await loadData()
+          emit('galleriesUpdated', galleries.value)
         } else {
           saveStatus.value = 'Error saving gallery updates'
         }
@@ -907,6 +922,9 @@ const removeImageFromGallery = async (galleryId: string, imageIndex: number) => 
     if (success) {
       gallery.images = updatedImages
       saveStatus.value = 'Image removed from gallery'
+      
+      // Emit updated galleries to parent
+      emit('galleriesUpdated', galleries.value)
     } else {
       saveStatus.value = 'Error removing image from gallery'
     }
