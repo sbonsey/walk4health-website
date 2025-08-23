@@ -1,6 +1,6 @@
 <template>
   <!-- Admin Panel - Only show when explicitly opened -->
-  <div v-if="isAdmin && isOpen" class="admin-panel bg-white border-l border-gray-200 fixed right-0 top-24 h-[calc(100vh-6rem)] w-96 shadow-xl z-40 transform transition-transform duration-300">
+  <div v-if="isAdmin && isOpen" class="admin-panel bg-white border-l border-gray-200 fixed right-0 top-24 h-[calc(100vh-6rem)] w-96 shadow-xl z-[70] transform transition-transform duration-300">
     <div class="p-6">
       <!-- Header -->
       <div class="flex items-center justify-between mb-6">

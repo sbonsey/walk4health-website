@@ -1154,7 +1154,7 @@ const formatEventDate = (dateString: string) => {
     <button 
       v-if="isAdmin"
       @click="toggleAdminPanel" 
-      class="fixed right-4 top-4 z-[9999] bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
+      class="fixed right-4 top-4 z-40 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
       title="Toggle Admin Panel"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1167,7 +1167,7 @@ const formatEventDate = (dateString: string) => {
     <button 
       v-else
       @click="showLoginModal = true" 
-      class="fixed right-4 top-4 z-[9999] bg-gray-500 hover:bg-gray-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
+      class="fixed right-4 top-4 z-40 bg-gray-500 hover:bg-gray-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
       title="Admin Login"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
