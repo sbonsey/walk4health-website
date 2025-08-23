@@ -45,6 +45,7 @@ const galleries = ref<GalleryMeta[]>([])
 
 // Template refs
 const eventsContainer = ref<HTMLElement>()
+const galleriesContainer = ref<HTMLElement>()
 
 // Computed properties for scroll buttons
 const canScrollLeft = computed(() => {
@@ -56,6 +57,18 @@ const canScrollRight = computed(() => {
   if (!eventsContainer.value) return false
   const maxScroll = eventsContainer.value.scrollWidth - eventsContainer.value.clientWidth
   return eventsContainer.value.scrollLeft < maxScroll
+})
+
+// Computed properties for gallery scroll buttons
+const canScrollGalleriesLeft = computed(() => {
+  if (!galleriesContainer.value) return false
+  return galleriesContainer.value.scrollLeft > 0
+})
+
+const canScrollGalleriesRight = computed(() => {
+  if (!galleriesContainer.value) return false
+  const maxScroll = galleriesContainer.value.scrollWidth - galleriesContainer.value.clientWidth
+  return galleriesContainer.value.scrollLeft < maxScroll
 })
 
 // Load data on mount
@@ -208,6 +221,33 @@ const formatDate = (dateString: string) => {
     month: 'long', 
     day: 'numeric' 
   })
+}
+
+// Gallery methods
+const openGallery = (gallery: GalleryMeta) => {
+  // TODO: Navigate to individual gallery page
+  console.log('Opening gallery:', gallery)
+  // For now, just log the gallery data
+  alert(`Opening gallery: ${gallery.title}\nThis will navigate to a detailed gallery view in the future.`)
+}
+
+const scrollGalleries = (direction: 'left' | 'right') => {
+  if (!galleriesContainer.value) return
+  
+  const scrollAmount = 400 // Adjust scroll distance as needed
+  const currentScroll = galleriesContainer.value.scrollLeft
+  
+  if (direction === 'left') {
+    galleriesContainer.value.scrollTo({
+      left: currentScroll - scrollAmount,
+      behavior: 'smooth'
+    })
+  } else {
+    galleriesContainer.value.scrollTo({
+      left: currentScroll + scrollAmount,
+      behavior: 'smooth'
+    })
+  }
 }
 
 const handleLogin = () => {
@@ -544,28 +584,63 @@ const formatEventDate = (dateString: string) => {
         <div class="container">
           <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Photo Gallery</h2>
           
-          <!-- Dynamic Galleries -->
-          <div v-if="galleries.length > 0" class="space-y-12">
-            <div v-for="gallery in galleries" :key="gallery.id" class="space-y-6">
-              <div class="text-center">
-                <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ gallery.title }}</h3>
-                <p class="text-gray-600 mb-1">{{ gallery.description }}</p>
-                <p class="text-sm text-gray-500">{{ formatDate(gallery.date) }} • {{ gallery.location }}</p>
-              </div>
-              
-              <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div v-for="(image, index) in gallery.images" :key="index" 
-                     class="group relative overflow-hidden rounded-lg aspect-square cursor-pointer">
-                  <img :src="image" 
-                       :alt="`${gallery.title} - Image ${index + 1}`" 
-                       class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
-                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
-                  <div class="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <p class="font-medium">{{ gallery.title }}</p>
-                    <p class="text-sm">{{ gallery.location }}</p>
+          <!-- Dynamic Galleries with Horizontal Scrolling -->
+          <div v-if="galleries.length > 0" class="relative">
+            <!-- Gallery Cards Container -->
+            <div ref="galleriesContainer" class="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+              <div v-for="gallery in galleries" :key="gallery.id" 
+                   class="flex-none w-[calc(33.333%-1rem)] min-w-0 cursor-pointer"
+                   @click="openGallery(gallery)">
+                <!-- Gallery Card -->
+                <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                  <!-- Featured Image -->
+                  <div class="aspect-[4/3] overflow-hidden">
+                    <img v-if="gallery.images.length > 0" 
+                         :src="gallery.images[0]" 
+                         :alt="gallery.title"
+                         class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+                    <div v-else class="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  
+                  <!-- Gallery Info -->
+                  <div class="p-4">
+                    <h3 class="font-bold text-lg text-gray-900 mb-2 line-clamp-2">{{ gallery.title }}</h3>
+                    <p class="text-gray-600 text-sm mb-2 line-clamp-2">{{ gallery.description }}</p>
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                      <span>{{ formatDate(gallery.date) }}</span>
+                      <span>{{ gallery.images.length }} photos</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">{{ gallery.location }}</p>
                   </div>
                 </div>
               </div>
+            </div>
+            
+            <!-- Scroll Arrows -->
+            <button v-if="canScrollGalleriesLeft" 
+                    @click="scrollGalleries('left')" 
+                    class="absolute left-0 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0 z-10">
+              <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+            
+            <button v-if="canScrollGalleriesRight" 
+                    @click="scrollGalleries('right')" 
+                    class="absolute right-0 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0 z-10">
+              <svg class="w-5 h-12 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+            
+            <!-- Scroll Indicator for Mobile -->
+            <div class="lg:hidden flex justify-center mt-4 space-x-2">
+              <div v-for="(_, index) in Math.ceil(galleries.length / 3)" :key="index" 
+                   class="w-2 h-2 rounded-full bg-gray-300"></div>
             </div>
           </div>
           
