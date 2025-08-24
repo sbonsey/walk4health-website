@@ -516,7 +516,7 @@ const formatEventDate = (dateString: string) => {
             <!-- Logo -->
             <div class="flex items-center gap-3">
               <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Walk for Health</h1>
-              <img src="/src/assets/shoes.jpg" alt="Walking shoes" class="h-8 md:h-10 w-auto object-cover rounded">
+              <img src="/src/assets/blue-shoes.jpg" alt="Walking shoes" class="h-8 md:h-10 w-auto object-cover rounded">
             </div>
           
           <!-- Desktop Navigation -->
