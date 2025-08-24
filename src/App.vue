@@ -40,6 +40,7 @@ const specialEvents = ref<EventsData['specialEvents']>([])
 
 // Initialize content with proper structure
 const clubContent = ref<ClubContent>({
+  clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
   clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
   walkingSchedule: {
     sundaySummer: '09:00',
@@ -170,6 +171,7 @@ const loadData = async () => {
     // Ensure content data is properly structured
     if (contentData && typeof contentData === 'object') {
       clubContent.value = {
+        clubMission: contentData.clubMission || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
         clubDescription: contentData.clubDescription || 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
         walkingSchedule: contentData.walkingSchedule || {
           sundaySummer: '09:00',
@@ -180,6 +182,7 @@ const loadData = async () => {
       }
     } else {
       clubContent.value = {
+        clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
         clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
         walkingSchedule: {
           sundaySummer: '09:00',
@@ -203,6 +206,7 @@ const loadData = async () => {
       const storedContent = dataService.getContentFromStorage()
       if (storedContent) {
         clubContent.value = {
+          clubMission: storedContent.clubMission || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
           clubDescription: storedContent.clubDescription || 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
           walkingSchedule: storedContent.walkingSchedule || {
             sundaySummer: '09:00',
@@ -229,6 +233,7 @@ const loadData = async () => {
     recurringEvents.value = []
     specialEvents.value = []
     clubContent.value = {
+      clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
       clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
       walkingSchedule: {
         sundaySummer: '09:00',

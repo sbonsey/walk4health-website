@@ -178,6 +178,7 @@ class DataService {
         if (stored) return stored
       }
       return {
+        clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
         clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
         walkingSchedule: {
           sundaySummer: '09:00',

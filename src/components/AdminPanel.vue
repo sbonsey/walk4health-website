@@ -643,6 +643,7 @@ const events = ref<EventsData>({
 })
 
 const content = ref<ClubContent>({
+  clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
   clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
   walkingSchedule: {
     sundaySummer: '09:00',
@@ -731,6 +732,7 @@ const loadData = async () => {
     // Ensure content data is properly structured
     if (contentData && typeof contentData === 'object') {
       content.value = {
+        clubMission: contentData.clubMission || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
         clubDescription: contentData.clubDescription || '',
         walkingSchedule: {
           sundaySummer: contentData.walkingSchedule?.sundaySummer || '09:00',
@@ -760,6 +762,7 @@ const loadData = async () => {
       }
     } else {
       content.value = {
+        clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
         clubDescription: '',
         walkingSchedule: {
           sundaySummer: '09:00',
