@@ -53,30 +53,8 @@ const clubContent = ref<ClubContent>({
 // Gallery data - loaded from data service
 const galleries = ref<GalleryMeta[]>([])
 
-// News data
-const newsItems = ref<NewsItem[]>([
-  {
-    id: '1',
-            title: 'Welcome to Walk for Health 2025!',
-    content: 'We\'re excited to start another year of walking adventures in the beautiful Hutt Valley. Our club continues to grow with new members joining us every month.',
-    date: '2025-01-15',
-    galleryLink: undefined
-  },
-  {
-    id: '2',
-    title: 'New Walking Routes Added',
-    content: 'We\'ve discovered some fantastic new walking trails in the Upper Hutt area. These routes offer stunning views and are perfect for all fitness levels.',
-    date: '2025-01-10',
-    galleryLink: undefined
-  },
-  {
-    id: '3',
-    title: 'Club Social Event Success',
-    content: 'Our recent club social event was a huge success! Over 30 members attended and we enjoyed sharing stories and planning future walks together.',
-    date: '2025-01-05',
-    galleryLink: undefined
-  }
-])
+// News data - loaded from data service
+const newsItems = ref<NewsItem[]>([])
 const showAllNews = ref(false)
 
 // Template refs
@@ -156,10 +134,11 @@ onMounted(async () => {
 const loadData = async () => {
   isLoading.value = true
   try {
-    const [eventsData, contentData, galleriesData] = await Promise.all([
+    const [eventsData, contentData, galleriesData, newsData] = await Promise.all([
       dataService.getEvents(),
       dataService.getContent(),
-      dataService.getGalleries()
+      dataService.getGalleries(),
+      dataService.getNews()
     ])
     
     // Ensure events data is properly structured
@@ -235,6 +214,9 @@ const loadData = async () => {
     // Set galleries data
     galleries.value = galleriesData || []
     
+    // Set news data
+    newsItems.value = newsData || []
+    
     console.log('✅ App.vue: Data loaded successfully:', { 
       recurringEvents: recurringEvents.value, 
       specialEvents: specialEvents.value,
@@ -282,6 +264,12 @@ const handleContentUpdated = (content: ClubContent) => {
 const handleGalleriesUpdated = (updatedGalleries: GalleryMeta[]) => {
   galleries.value = updatedGalleries
   console.log('✅ App.vue: Galleries updated from admin panel:', updatedGalleries)
+}
+
+// Handle news updates from admin panel
+const handleNewsUpdated = (updatedNews: NewsItem[]) => {
+  newsItems.value = updatedNews
+  console.log('✅ App.vue: News updated from admin panel:', updatedNews)
 }
 
 // News methods
@@ -1139,6 +1127,7 @@ const formatTime = (time: string): string => {
       @events-updated="handleEventsUpdated"
       @content-updated="handleContentUpdated"
       @galleries-updated="handleGalleriesUpdated"
+      @news-updated="handleNewsUpdated"
     />
 
     <!-- Admin Login Modal -->

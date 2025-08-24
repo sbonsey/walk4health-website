@@ -18,6 +18,9 @@
     },
     "api/test-email.js": {
       "maxDuration": 30
+    },
+    "api/news.js": {
+      "maxDuration": 30
     }
   },
   "routes": [

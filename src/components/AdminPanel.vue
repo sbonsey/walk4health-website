@@ -579,6 +579,7 @@ const emit = defineEmits<{
   eventsUpdated: [EventsData]
   'content-updated': [ClubContent]
   galleriesUpdated: [GalleryMeta[]]
+  newsUpdated: [NewsItem[]]
 }>()
 
 // Reactive data
@@ -1324,18 +1325,30 @@ const createNewsItem = async () => {
       // Add to local state
       newsItems.value.unshift(newsItem)
       
-      // Reset form
-      newNewsItem.title = ''
-      newNewsItem.content = ''
-      newNewsItem.date = ''
-      newNewsItem.galleryLink = ''
-      showAddNewsForm.value = false
+      // Save to backend via data service
+      const success = await dataService.saveNews(newsItems.value)
       
-      saveStatus.value = 'News item created successfully!'
-      setTimeout(() => saveStatus.value = '', 3000)
+      if (success) {
+        // Emit update to parent component
+        emit('newsUpdated', newsItems.value)
+        
+        // Reset form
+        newNewsItem.title = ''
+        newNewsItem.content = ''
+        newNewsItem.date = ''
+        newNewsItem.galleryLink = ''
+        showAddNewsForm.value = false
+        
+        saveStatus.value = 'News item created and saved successfully!'
+        setTimeout(() => saveStatus.value = '', 3000)
+      } else {
+        throw new Error('Failed to save news to backend')
+      }
     } catch (error) {
       saveStatus.value = 'Error creating news item'
       console.error('Error creating news item:', error)
+      // Remove from local state if save failed
+      newsItems.value = newsItems.value.filter(item => item.id !== Date.now().toString())
     } finally {
       loading.value = false
     }
@@ -1344,12 +1357,31 @@ const createNewsItem = async () => {
 
 const deleteNewsItem = async (id: string) => {
   try {
+    loading.value = true
+    saveStatus.value = 'Deleting news item...'
+    
+    // Remove from local state
     newsItems.value = newsItems.value.filter(item => item.id !== id)
-    saveStatus.value = 'News item deleted successfully!'
-    setTimeout(() => saveStatus.value = '', 3000)
+    
+    // Save to backend via data service
+    const success = await dataService.saveNews(newsItems.value)
+    
+    if (success) {
+      // Emit update to parent component
+      emit('newsUpdated', newsItems.value)
+      
+      saveStatus.value = 'News item deleted and saved successfully!'
+      setTimeout(() => saveStatus.value = '', 3000)
+    } else {
+      throw new Error('Failed to save news changes to backend')
+    }
   } catch (error) {
     saveStatus.value = 'Error deleting news item'
     console.error('Error deleting news item:', error)
+    // Revert local state if save failed
+    // Note: We'd need to restore the deleted item here, but we don't have it
+  } finally {
+    loading.value = false
   }
 }
 

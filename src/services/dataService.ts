@@ -66,6 +66,14 @@ export interface ContactFormData {
   message: string
 }
 
+export interface NewsItem {
+  id: string
+  title: string
+  content: string
+  date: string
+  galleryLink?: string
+}
+
 class DataService {
   // Check if we're in production (Vercel)
   private isProduction(): boolean {
@@ -531,6 +539,96 @@ class DataService {
     } catch (error) {
       console.error('Error sending contact form:', error)
       throw error
+    }
+  }
+
+  // News methods
+  async getNews(): Promise<NewsItem[]> {
+    try {
+      console.log('🔄 DataService: getNews() called')
+      console.log('🌐 Current hostname:', window.location.hostname)
+      console.log('🏭 Production mode:', this.isProduction())
+      
+      const response = await fetch('/api/news')
+      console.log('🔄 DataService: getNews API response status:', response.status)
+      
+      if (!response.ok) throw new Error('Failed to fetch news')
+      const data = await response.json()
+      console.log('🔄 DataService: getNews API response data:', data)
+      return data.newsItems || []
+    } catch (error) {
+      console.error('Error fetching news:', error)
+      // Only fallback to localStorage in development
+      if (!this.isProduction()) {
+        const stored = this.getNewsFromStorage()
+        if (stored) return stored
+      }
+      return []
+    }
+  }
+
+  async saveNews(newsItems: NewsItem[]): Promise<boolean> {
+    try {
+      console.log('🔄 DataService: Attempting to save news via API...')
+      console.log('🌐 Current hostname:', window.location.hostname)
+      console.log('🏭 Production mode:', this.isProduction())
+      console.log('🔗 API endpoint:', '/api/news')
+      console.log('📊 News data to save:', newsItems)
+      
+      // Always try API first in production
+      const response = await fetch('/api/news', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ newsItems })
+      })
+      
+      console.log('📡 API Response status:', response.status)
+      console.log('📡 API Response headers:', Object.fromEntries(response.headers.entries()))
+      
+      if (response.ok) {
+        const result = await response.json()
+        console.log('✅ API save successful:', result)
+        // Only store in localStorage as backup in development
+        if (!this.isProduction()) {
+          localStorage.setItem('walk4health-news', JSON.stringify(newsItems))
+        }
+        return true
+      } else {
+        const errorText = await response.text()
+        console.error('❌ API save failed:', response.status, errorText)
+        console.error('❌ Full response:', response)
+        throw new Error(`API save failed: ${response.status} ${errorText}`)
+      }
+    } catch (error) {
+      console.error('❌ Error saving news via API:', error)
+      console.error('❌ Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : 'No stack trace'
+      })
+      
+      // Only fallback to localStorage in development
+      if (!this.isProduction()) {
+        console.log('🔄 Falling back to localStorage (development mode)...')
+        localStorage.setItem('walk4health-news', JSON.stringify(newsItems))
+        return true
+      } else {
+        // In production, fail if API doesn't work
+        throw error
+      }
+    }
+  }
+
+  // Helper methods for localStorage fallback
+  private getNewsFromStorage(): NewsItem[] | null {
+    try {
+      const stored = localStorage.getItem('walk4health-news')
+      return stored ? JSON.parse(stored) : null
+    } catch (error) {
+      console.error('Error reading news from localStorage:', error)
+      return null
     }
   }
 
