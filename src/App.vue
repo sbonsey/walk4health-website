@@ -41,11 +41,25 @@ const specialEvents = ref<EventsData['specialEvents']>([])
 // Club content - loaded from data service
 const clubContent = ref<ClubContent>({
   clubDescription: '',
-  walkingSchedule: {
-    sundaySummer: '09:00',
-    sundayWinter: '09:30',
-    tuesday: '10:00'
+  committee: {
+    title: 'Our Committee 2025/26',
+    members: [
+      { position: 'Chairperson', name: 'Lynn Young' },
+      { position: 'Secretary', name: 'Neil Edwards' },
+      { position: 'Treasurer', name: 'Nina Wortman' },
+      { position: 'Membership', name: 'Andrew Young' },
+      { position: 'Website & Sunday', name: 'Dave Morrell' },
+      { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
+      { position: 'Events', name: 'Kaye Plunket' },
+      { position: 'Financial Reviewer', name: 'Bob Metcalf' }
+    ]
   },
+  walkingStats: {
+    yearsActive: '24',
+    members: '50+',
+    walksPerWeek: '2'
+  },
+  clubImageCaption: 'Walking together since 2001',
   lastUpdated: new Date().toISOString()
 })
 
@@ -171,21 +185,49 @@ const loadData = async () => {
     if (contentData && typeof contentData === 'object') {
       clubContent.value = {
         clubDescription: contentData.clubDescription || '',
-        walkingSchedule: {
-          sundaySummer: contentData.walkingSchedule?.sundaySummer || '09:00',
-          sundayWinter: contentData.walkingSchedule?.sundayWinter || '09:30',
-          tuesday: contentData.walkingSchedule?.tuesday || '10:00'
+        committee: contentData.committee || {
+          title: 'Our Committee 2025/26',
+          members: [
+            { position: 'Chairperson', name: 'Lynn Young' },
+            { position: 'Secretary', name: 'Neil Edwards' },
+            { position: 'Treasurer', name: 'Nina Wortman' },
+            { position: 'Membership', name: 'Andrew Young' },
+            { position: 'Website & Sunday', name: 'Dave Morrell' },
+            { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
+            { position: 'Events', name: 'Kaye Plunket' },
+            { position: 'Financial Reviewer', name: 'Bob Metcalf' }
+          ]
         },
+        walkingStats: contentData.walkingStats || {
+          yearsActive: '24',
+          members: '50+',
+          walksPerWeek: '2'
+        },
+        clubImageCaption: contentData.clubImageCaption || 'Walking together since 2001',
         lastUpdated: contentData.lastUpdated || new Date().toISOString()
       }
     } else {
       clubContent.value = {
         clubDescription: '',
-        walkingSchedule: {
-          sundaySummer: '09:00',
-          sundayWinter: '09:30',
-          tuesday: '10:00'
+        committee: {
+          title: 'Our Committee 2025/26',
+          members: [
+            { position: 'Chairperson', name: 'Lynn Young' },
+            { position: 'Secretary', name: 'Neil Edwards' },
+            { position: 'Treasurer', name: 'Nina Wortman' },
+            { position: 'Membership', name: 'Andrew Young' },
+            { position: 'Website & Sunday', name: 'Dave Morrell' },
+            { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
+            { position: 'Events', name: 'Kaye Plunket' },
+            { position: 'Financial Reviewer', name: 'Bob Metcalf' }
+          ]
         },
+        walkingStats: {
+          yearsActive: '24',
+          members: '50+',
+          walksPerWeek: '2'
+        },
+        clubImageCaption: 'Walking together since 2001',
         lastUpdated: new Date().toISOString()
       }
     }
@@ -204,11 +246,25 @@ const loadData = async () => {
       if (storedContent) {
         clubContent.value = {
           clubDescription: storedContent.clubDescription || '',
-          walkingSchedule: {
-            sundaySummer: storedContent.walkingSchedule?.sundaySummer || '09:00',
-            sundayWinter: storedContent.walkingSchedule?.sundayWinter || '09:30',
-            tuesday: storedContent.walkingSchedule?.tuesday || '10:00'
+          committee: storedContent.committee || {
+            title: 'Our Committee 2025/26',
+            members: [
+              { position: 'Chairperson', name: 'Lynn Young' },
+              { position: 'Secretary', name: 'Neil Edwards' },
+              { position: 'Treasurer', name: 'Nina Wortman' },
+              { position: 'Membership', name: 'Andrew Young' },
+              { position: 'Website & Sunday', name: 'Dave Morrell' },
+              { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
+              { position: 'Events', name: 'Kaye Plunket' },
+              { position: 'Financial Reviewer', name: 'Bob Metcalf' }
+            ]
           },
+          walkingStats: storedContent.walkingStats || {
+            yearsActive: '24',
+            members: '50+',
+            walksPerWeek: '2'
+          },
+          clubImageCaption: storedContent.clubImageCaption || 'Walking together since 2001',
           lastUpdated: storedContent.lastUpdated || new Date().toISOString()
         }
       }
@@ -230,11 +286,25 @@ const loadData = async () => {
     specialEvents.value = []
     clubContent.value = {
       clubDescription: '',
-      walkingSchedule: {
-        sundaySummer: '09:00',
-        sundayWinter: '09:30',
-        tuesday: '10:00'
+      committee: {
+        title: 'Our Committee 2025/26',
+        members: [
+          { position: 'Chairperson', name: 'Lynn Young' },
+          { position: 'Secretary', name: 'Neil Edwards' },
+          { position: 'Treasurer', name: 'Nina Wortman' },
+          { position: 'Membership', name: 'Andrew Young' },
+          { position: 'Website & Sunday', name: 'Dave Morrell' },
+          { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
+          { position: 'Events', name: 'Kaye Plunket' },
+          { position: 'Financial Reviewer', name: 'Bob Metcalf' }
+        ]
       },
+      walkingStats: {
+        yearsActive: '24',
+        members: '50+',
+        walksPerWeek: '2'
+      },
+      clubImageCaption: 'Walking together since 2001',
       lastUpdated: new Date().toISOString()
     }
   } finally {
@@ -510,32 +580,23 @@ const formatEventDate = (dateString: string) => {
             </div>
           </div>
           
-          <!-- Walking Schedule -->
-          <div class="mt-16 grid md:grid-cols-2 gap-8">
-            <div class="card bg-white/90 backdrop-blur-sm">
-              <div class="flex items-center mb-4">
-                <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
-                  <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
+          <!-- Regular Walking Schedule (Recurring Events) -->
+          <div class="mt-16">
+            <h3 class="text-2xl font-bold text-center text-gray-900 mb-8">Regular Walking Schedule</h3>
+            <div class="grid md:grid-cols-2 gap-8">
+              <div v-for="event in recurringEvents" :key="`schedule-${event.id}`" class="card bg-white/90 backdrop-blur-sm">
+                <div class="flex items-center mb-4">
+                  <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
+                    <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="text-2xl font-bold text-gray-900">{{ event.title }}</h3>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900">Sunday Walks</h3>
+                <p class="text-gray-600 mb-2">{{ event.day }} at {{ event.time }}</p>
+                <p v-if="event.message" class="text-gray-600 mb-2">{{ event.message }}</p>
+                <p class="text-gray-600">Various locations around Hutt Valley</p>
               </div>
-              <p class="text-gray-600 mb-2">Summer: {{ clubContent.walkingSchedule.sundaySummer }}</p>
-              <p class="text-gray-600 mb-2">Winter: {{ clubContent.walkingSchedule.sundayWinter }}</p>
-              <p class="text-gray-600">Various locations around Hutt Valley</p>
-            </div>
-            <div class="card bg-white/90 backdrop-blur-sm">
-              <div class="flex items-center mb-4">
-                <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
-                  <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-900">Tuesday Walks</h3>
-              </div>
-              <p class="text-gray-600 mb-2">{{ clubContent.walkingSchedule.tuesday }}</p>
-              <p class="text-gray-600">Lower Hutt, Upper Hutt, Petone, Wellington, Coast</p>
             </div>
           </div>
         </div>
@@ -556,15 +617,15 @@ const formatEventDate = (dateString: string) => {
               <!-- Walking Stats -->
               <div class="grid grid-cols-3 gap-4 mt-8">
                 <div class="text-center">
-                  <div class="text-3xl font-bold text-primary-600">24</div>
+                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats?.yearsActive || '24' }}</div>
                   <div class="text-sm text-gray-600">Years Active</div>
                 </div>
                 <div class="text-center">
-                  <div class="text-3xl font-bold text-primary-600">50+</div>
+                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats?.members || '50+' }}</div>
                   <div class="text-sm text-gray-600">Members</div>
                 </div>
                 <div class="text-center">
-                  <div class="text-3xl font-bold text-primary-600">2</div>
+                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats?.walksPerWeek || '2' }}</div>
                   <div class="text-sm text-gray-600">Walks/Week</div>
                 </div>
               </div>
@@ -578,45 +639,17 @@ const formatEventDate = (dateString: string) => {
                      class="w-full h-64 object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                 <div class="absolute bottom-4 left-4 text-white">
-                  <p class="text-sm font-medium">Walking together since 2001</p>
+                  <p class="text-sm font-medium">{{ clubContent.clubImageCaption || 'Walking together since 2001' }}</p>
                 </div>
               </div>
               
               <!-- Committee Info -->
               <div class="bg-primary-50 p-6 rounded-xl border border-primary-100">
-                <h4 class="text-xl font-bold text-primary-800 mb-4">Our Committee 2025/26</h4>
+                <h4 class="text-xl font-bold text-primary-800 mb-4">{{ clubContent.committee?.title || 'Our Committee 2025/26' }}</h4>
                 <div class="grid grid-cols-1 gap-2 text-primary-700 text-sm">
-                  <div class="flex justify-between">
-                    <span class="font-medium">Chairperson:</span>
-                    <span>Lynn Young</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="font-medium">Secretary:</span>
-                    <span>Neil Edwards</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="font-medium">Treasurer:</span>
-                    <span>Nina Wortman</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="font-medium">Membership:</span>
-                    <span>Andrew Young</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="font-medium">Website & Sunday:</span>
-                    <span>Dave Morrell</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="font-medium">Tuesday walking:</span>
-                    <span>Lyne Morrell, Ian Andrews, Patsie Barltrop</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="font-medium">Events:</span>
-                    <span>Kaye Plunket</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="font-medium">Financial Reviewer:</span>
-                    <span>Bob Metcalf</span>
+                  <div v-for="member in clubContent.committee?.members || []" :key="member.position" class="flex justify-between">
+                    <span class="font-medium">{{ member.position }}:</span>
+                    <span>{{ member.name }}</span>
                   </div>
                 </div>
               </div>
@@ -717,7 +750,7 @@ const formatEventDate = (dateString: string) => {
       <!-- Events Section -->
       <section id="events" class="section bg-gray-50">
         <div class="container">
-          <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Upcoming Events</h2>
+          <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Special Events</h2>
           
           <!-- Events Container with Horizontal Scroll -->
           <div class="relative">
@@ -744,29 +777,7 @@ const formatEventDate = (dateString: string) => {
             
             <!-- Events Grid - Fixed width to show exactly 3 panels -->
             <div ref="eventsContainer" class="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
-              <!-- Recurring Events -->
-              <div v-for="event in recurringEvents" :key="`recurring-${event.id}`" class="card group hover:shadow-xl transition-all duration-300 w-[calc(33.333%-1rem)] min-w-0 flex-shrink-0">
-                <div class="relative mb-4">
-                  <img src="/src/assets/upcoming-image-1.jpg" 
-                       :alt="event.title" 
-                       class="w-full h-48 object-cover rounded-lg">
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">{{ event.title }}</h3>
-                <p class="text-gray-600 mb-4">{{ event.message || `Join us for our regular ${event.day} walk around the beautiful Hutt Valley trails.` }}</p>
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center text-sm text-gray-500">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <span>{{ event.time }}</span>
-                  </div>
-                  <button class="bg-white hover:bg-gray-50 text-primary-600 font-medium px-4 py-2 rounded-lg transition-all duration-200 hover:bg-primary-50 focus:outline-none text-sm">
-                    Join Walk
-                  </button>
-                </div>
-              </div>
-              
-              <!-- Special Events -->
+              <!-- Special Events Only (Non-recurring) -->
               <div v-for="event in specialEvents" :key="`special-${event.id}`" class="card group hover:shadow-xl transition-all duration-300 w-[calc(33.333%-1rem)] min-w-0 flex-shrink-0">
                 <div class="relative mb-4">
                   <img src="/src/assets/upcoming-image-3.jpg" 
@@ -794,7 +805,7 @@ const formatEventDate = (dateString: string) => {
             
             <!-- Scroll Indicator for Mobile -->
             <div class="lg:hidden flex justify-center mt-4 space-x-2">
-              <div v-for="(_, index) in Math.ceil((recurringEvents.length + specialEvents.length) / 3)" :key="index" 
+              <div v-for="(_, index) in Math.ceil(specialEvents.length / 3)" :key="index" 
                    class="w-2 h-2 rounded-full bg-gray-300"></div>
             </div>
           </div>

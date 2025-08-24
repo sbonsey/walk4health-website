@@ -21,11 +21,19 @@ export interface EventsData {
 
 export interface ClubContent {
   clubDescription: string
-  walkingSchedule: {
-    sundaySummer: string
-    sundayWinter: string
-    tuesday: string
+  committee: {
+    title: string
+    members: {
+      position: string
+      name: string
+    }[]
   }
+  walkingStats: {
+    yearsActive: string
+    members: string
+    walksPerWeek: string
+  }
+  clubImageCaption: string
   lastUpdated: string
 }
 
@@ -152,11 +160,25 @@ class DataService {
       }
       return {
         clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
-        walkingSchedule: {
-          sundaySummer: '09:00',
-          sundayWinter: '09:30',
-          tuesday: '10:00'
+        committee: {
+          title: 'Our Committee 2025/26',
+          members: [
+            { position: 'Chairperson', name: 'Lynn Young' },
+            { position: 'Secretary', name: 'Neil Edwards' },
+            { position: 'Treasurer', name: 'Nina Wortman' },
+            { position: 'Membership', name: 'Andrew Young' },
+            { position: 'Website & Sunday', name: 'Dave Morrell' },
+            { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
+            { position: 'Events', name: 'Kaye Plunket' },
+            { position: 'Financial Reviewer', name: 'Bob Metcalf' }
+          ]
         },
+        walkingStats: {
+          yearsActive: '24',
+          members: '50+',
+          walksPerWeek: '2'
+        },
+        clubImageCaption: 'Walking together since 2001',
         lastUpdated: new Date().toISOString()
       }
     }

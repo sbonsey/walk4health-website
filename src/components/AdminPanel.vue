@@ -500,11 +500,25 @@ const events = ref<EventsData>({
 
 const content = ref<ClubContent>({
   clubDescription: '',
-  walkingSchedule: {
-    sundaySummer: '09:00',
-    sundayWinter: '09:30',
-    tuesday: '10:00'
+  committee: {
+    title: 'Our Committee 2025/26',
+    members: [
+      { position: 'Chairperson', name: 'Lynn Young' },
+      { position: 'Secretary', name: 'Neil Edwards' },
+      { position: 'Treasurer', name: 'Nina Wortman' },
+      { position: 'Membership', name: 'Andrew Young' },
+      { position: 'Website & Sunday', name: 'Dave Morrell' },
+      { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
+      { position: 'Events', name: 'Kaye Plunket' },
+      { position: 'Financial Reviewer', name: 'Bob Metcalf' }
+    ]
   },
+  walkingStats: {
+    yearsActive: '24',
+    members: '50+',
+    walksPerWeek: '2'
+  },
+  clubImageCaption: 'Walking together since 2001',
   lastUpdated: new Date().toISOString()
 })
 
@@ -567,21 +581,49 @@ const loadData = async () => {
     if (contentData && typeof contentData === 'object') {
       content.value = {
         clubDescription: contentData.clubDescription || '',
-        walkingSchedule: {
-          sundaySummer: contentData.walkingSchedule?.sundaySummer || '09:00',
-          sundayWinter: contentData.walkingSchedule?.sundayWinter || '09:30',
-          tuesday: contentData.walkingSchedule?.tuesday || '10:00'
+        committee: contentData.committee || {
+          title: 'Our Committee 2025/26',
+          members: [
+            { position: 'Chairperson', name: 'Lynn Young' },
+            { position: 'Secretary', name: 'Neil Edwards' },
+            { position: 'Treasurer', name: 'Nina Wortman' },
+            { position: 'Membership', name: 'Andrew Young' },
+            { position: 'Website & Sunday', name: 'Dave Morrell' },
+            { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
+            { position: 'Events', name: 'Kaye Plunket' },
+            { position: 'Financial Reviewer', name: 'Bob Metcalf' }
+          ]
         },
+        walkingStats: contentData.walkingStats || {
+          yearsActive: '24',
+          members: '50+',
+          walksPerWeek: '2'
+        },
+        clubImageCaption: contentData.clubImageCaption || 'Walking together since 2001',
         lastUpdated: contentData.lastUpdated || new Date().toISOString()
       }
     } else {
       content.value = {
         clubDescription: '',
-        walkingSchedule: {
-          sundaySummer: '09:00',
-          sundayWinter: '09:30',
-          tuesday: '10:00'
+        committee: {
+          title: 'Our Committee 2025/26',
+          members: [
+            { position: 'Chairperson', name: 'Lynn Young' },
+            { position: 'Secretary', name: 'Neil Edwards' },
+            { position: 'Treasurer', name: 'Nina Wortman' },
+            { position: 'Membership', name: 'Andrew Young' },
+            { position: 'Website & Sunday', name: 'Dave Morrell' },
+            { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
+            { position: 'Events', name: 'Kaye Plunket' },
+            { position: 'Financial Reviewer', name: 'Bob Metcalf' }
+          ]
         },
+        walkingStats: {
+          yearsActive: '24',
+          members: '50+',
+          walksPerWeek: '2'
+        },
+        clubImageCaption: 'Walking together since 2001',
         lastUpdated: new Date().toISOString()
       }
     }
@@ -609,11 +651,25 @@ const loadData = async () => {
       if (storedContent) {
         content.value = {
           clubDescription: storedContent.clubDescription || '',
-          walkingSchedule: {
-            sundaySummer: storedContent.walkingSchedule?.sundaySummer || '09:00',
-            sundayWinter: storedContent.walkingSchedule?.sundayWinter || '09:30',
-            tuesday: storedContent.walkingSchedule?.tuesday || '10:00'
+          committee: storedContent.committee || {
+            title: 'Our Committee 2025/26',
+            members: [
+              { position: 'Chairperson', name: 'Lynn Young' },
+              { position: 'Secretary', name: 'Neil Edwards' },
+              { position: 'Treasurer', name: 'Nina Wortman' },
+              { position: 'Membership', name: 'Andrew Young' },
+              { position: 'Website & Sunday', name: 'Dave Morrell' },
+              { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
+              { position: 'Events', name: 'Kaye Plunket' },
+              { position: 'Financial Reviewer', name: 'Bob Metcalf' }
+            ]
           },
+          walkingStats: storedContent.walkingStats || {
+            yearsActive: '24',
+            members: '50+',
+            walksPerWeek: '2'
+          },
+          clubImageCaption: storedContent.clubImageCaption || 'Walking together since 2001',
           lastUpdated: storedContent.lastUpdated || new Date().toISOString()
         }
       }
@@ -626,11 +682,25 @@ const loadData = async () => {
     events.value = { recurringEvents: [], specialEvents: [] }
     content.value = {
       clubDescription: '',
-      walkingSchedule: {
-        sundaySummer: '09:00',
-        sundayWinter: '09:30',
-        tuesday: '10:00'
+      committee: {
+        title: 'Our Committee 2025/26',
+        members: [
+          { position: 'Chairperson', name: 'Lynn Young' },
+          { position: 'Secretary', name: 'Neil Edwards' },
+          { position: 'Treasurer', name: 'Nina Wortman' },
+          { position: 'Membership', name: 'Andrew Young' },
+          { position: 'Website & Sunday', name: 'Dave Morrell' },
+          { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
+          { position: 'Events', name: 'Kaye Plunket' },
+          { position: 'Financial Reviewer', name: 'Bob Metcalf' }
+        ]
       },
+      walkingStats: {
+        yearsActive: '24',
+        members: '50+',
+        walksPerWeek: '2'
+      },
+      clubImageCaption: 'Walking together since 2001',
       lastUpdated: new Date().toISOString()
     }
     galleries.value = []
@@ -1193,6 +1263,18 @@ const uploadPhotos = async () => {
 
 const deletePhoto = (id: number) => {
   photos.value = photos.value.filter(photo => photo.id !== id)
+}
+
+// Committee management functions
+const addCommitteeMember = () => {
+  content.value.committee.members.push({
+    position: '',
+    name: ''
+  })
+}
+
+const removeCommitteeMember = (index: number) => {
+  content.value.committee.members.splice(index, 1)
 }
 
 
