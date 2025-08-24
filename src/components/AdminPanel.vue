@@ -793,12 +793,23 @@ const loadData = async () => {
       const storedContent = dataService.getContentFromStorage()
       if (storedContent) {
         content.value = {
+          clubMission: storedContent.clubMission || content.value.clubMission || '',
           clubDescription: storedContent.clubDescription || 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
           walkingSchedule: {
             sundaySummer: storedContent.walkingSchedule?.sundaySummer || '09:00',
             sundayWinter: storedContent.walkingSchedule?.sundayWinter || '09:30',
             tuesday: storedContent.walkingSchedule?.tuesday || '10:00'
           },
+          committee: storedContent.committee || content.value.committee || {
+            title: 'Our Committee',
+            members: []
+          },
+          walkingStats: storedContent.walkingStats || content.value.walkingStats || {
+            yearsActive: '24',
+            members: '50+',
+            walksPerWeek: '2'
+          },
+          clubImageCaption: storedContent.clubImageCaption || content.value.clubImageCaption || '',
           lastUpdated: storedContent.lastUpdated || new Date().toISOString()
         }
       }
@@ -1449,14 +1460,25 @@ const deletePhoto = (id: number) => {
 
 // Committee management functions
 const addCommitteeMember = () => {
-  content.value.committee!.members.push({
-    position: '',
-    name: ''
-  })
+  if (!content.value.committee) {
+    content.value.committee = {
+      title: 'Our Committee',
+      members: []
+    }
+  }
+  
+  // Create a new array to ensure Vue reactivity
+  content.value.committee.members = [
+    ...content.value.committee.members,
+    { position: '', name: '' }
+  ]
 }
 
 const removeCommitteeMember = (index: number) => {
-  content.value.committee!.members.splice(index, 1)
+  if (content.value.committee && content.value.committee.members) {
+    // Create a new array to ensure Vue reactivity
+    content.value.committee.members = content.value.committee.members.filter((_, i) => i !== index)
+  }
 }
 
 // Email Configuration
