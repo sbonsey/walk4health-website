@@ -7,8 +7,11 @@ export default async function handler(req, res) {
   try {
     const { name, email, subject, message } = req.body
     
+    console.log('📧 Contact form submission received:', { name, email, subject, message: message.substring(0, 100) + '...' })
+    
     // Validate required fields
     if (!name || !email || !subject || !message) {
+      console.error('❌ Missing required fields:', { name: !!name, email: !!email, subject: !!subject, message: !!message })
       return res.status(400).json({ error: 'Missing required fields' })
     }
 
@@ -16,42 +19,68 @@ export default async function handler(req, res) {
     const redisUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
     const redisToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
     
+    console.log('🔍 Redis config check:', { 
+      hasRedisUrl: !!redisUrl, 
+      hasRedisToken: !!redisToken,
+      redisUrl: redisUrl ? '***SET***' : 'NOT SET'
+    })
+    
     if (!redisUrl || !redisToken) {
-      console.error('Redis environment variables not set')
+      console.error('❌ Redis environment variables not set')
       return res.status(500).json({ error: 'Email configuration not available' })
     }
 
     // Get email config from Redis
-    const configResponse = await fetch(`${redisUrl}/get/walk4health:email-config`, {
-      headers: {
-        'Authorization': `Bearer ${redisToken}`
-      }
-    })
-    
     let inquiryEmail = 'admin@walk4health.co.nz'
     let subjectPrefix = '[Walk4Health]'
     
-    if (configResponse.ok) {
-      const configResult = await configResponse.json()
-      if (configResult.result) {
-        const config = JSON.parse(configResult.result)
-        inquiryEmail = config.inquiryEmail || inquiryEmail
-        subjectPrefix = config.subjectPrefix || subjectPrefix
+    try {
+      console.log('🔍 Fetching email config from Redis...')
+      const configResponse = await fetch(`${redisUrl}/get/walk4health:email-config`, {
+        headers: {
+          'Authorization': `Bearer ${redisToken}`
+        }
+      })
+      
+      console.log('🔍 Email config response status:', configResponse.status)
+      
+      if (configResponse.ok) {
+        const configResult = await configResponse.json()
+        console.log('🔍 Email config result:', configResult)
+        
+        if (configResult.result) {
+          const config = JSON.parse(configResult.result)
+          inquiryEmail = config.inquiryEmail || inquiryEmail
+          subjectPrefix = config.subjectPrefix || subjectPrefix
+          console.log('✅ Using configured email settings:', { inquiryEmail, subjectPrefix })
+        } else {
+          console.log('⚠️ No email config found in Redis, using defaults')
+        }
+      } else {
+        console.log('⚠️ Failed to fetch email config, using defaults')
       }
+    } catch (configError) {
+      console.error('⚠️ Error fetching email config, using defaults:', configError)
     }
 
-    // Check if Vercel Send API key is configured
-    const sendApiKey = process.env.SENDGRID_API_KEY
-    if (!sendApiKey) {
-      console.error('Vercel Send API key not configured')
-      return res.status(500).json({ error: 'Email service not configured' })
+    // Check if Resend API key is configured
+    const resendApiKey = process.env.RESEND_API_KEY || process.env.SENDGRID_API_KEY
+    console.log('🔍 Email service check:', { 
+      hasResendKey: !!resendApiKey,
+      keySource: process.env.RESEND_API_KEY ? 'RESEND_API_KEY' : process.env.SENDGRID_API_KEY ? 'SENDGRID_API_KEY' : 'NONE'
+    })
+    
+    if (!resendApiKey) {
+      console.error('❌ Resend API key not configured')
+      return res.status(500).json({ error: 'Email service not configured. Please contact the administrator.' })
     }
 
-    // Send email using Vercel Send
+    // Send email using Resend
+    console.log('📧 Sending email via Resend...')
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${sendApiKey}`,
+        'Authorization': `Bearer ${resendApiKey}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -91,14 +120,26 @@ This message was sent from the Walk4Health website contact form.
       })
     })
 
+    console.log('📧 Resend API response status:', emailResponse.status)
+    
     if (!emailResponse.ok) {
       const errorText = await emailResponse.text()
-      console.error('Vercel Send API error:', emailResponse.status, errorText)
-      throw new Error(`Email service error: ${emailResponse.status}`)
+      console.error('❌ Resend API error:', emailResponse.status, errorText)
+      
+      // Provide more specific error messages
+      if (emailResponse.status === 401) {
+        throw new Error('Invalid API key - please check email service configuration')
+      } else if (emailResponse.status === 403) {
+        throw new Error('Domain not verified - please verify noreply@walk4health.co.nz with Resend')
+      } else if (emailResponse.status === 422) {
+        throw new Error('Invalid email format or domain')
+      } else {
+        throw new Error(`Email service error: ${emailResponse.status} - ${errorText}`)
+      }
     }
 
     const emailResult = await emailResponse.json()
-    console.log('📧 Email sent successfully:', emailResult)
+    console.log('✅ Email sent successfully:', emailResult)
 
     // Return success
     res.status(200).json({ 
@@ -107,7 +148,19 @@ This message was sent from the Walk4Health website contact form.
     })
 
   } catch (error) {
-    console.error('Error processing contact form:', error)
-    res.status(500).json({ error: 'Failed to process contact form. Please try again later.' })
+    console.error('❌ Error processing contact form:', error)
+    
+    // Return more specific error messages
+    let errorMessage = 'Failed to process contact form. Please try again later.'
+    
+    if (error.message.includes('API key')) {
+      errorMessage = 'Email service configuration error. Please contact the administrator.'
+    } else if (error.message.includes('Domain not verified')) {
+      errorMessage = 'Email service setup incomplete. Please contact the administrator.'
+    } else if (error.message.includes('Invalid email format')) {
+      errorMessage = 'Invalid email format. Please check your email address.'
+    }
+    
+    res.status(500).json({ error: errorMessage })
   }
 }

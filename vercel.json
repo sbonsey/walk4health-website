@@ -2,19 +2,22 @@
   "version": 2,
   "functions": {
     "api/content.js": {
-      "maxDuration": 10
+      "maxDuration": 30
     },
     "api/events.js": {
-      "maxDuration": 10
+      "maxDuration": 30
     },
     "api/test.js": {
-      "maxDuration": 10
+      "maxDuration": 30
     },
     "api/email-config.js": {
-      "maxDuration": 10
+      "maxDuration": 30
     },
     "api/contact.js": {
-      "maxDuration": 10
+      "maxDuration": 30
+    },
+    "api/test-email.js": {
+      "maxDuration": 30
     }
   },
   "routes": [
