@@ -98,17 +98,46 @@
                 <h4 class="font-medium text-gray-700 mb-2 text-sm">Recurring Events</h4>
                 <div class="space-y-2">
                   <div v-for="event in events.recurringEvents" :key="event.id" class="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                    <div class="flex justify-between items-start">
+                    <!-- Edit Form (when editing) -->
+                    <div v-if="editingRecurringEvent?.id === event.id" class="space-y-3">
+                      <h5 class="font-medium text-gray-900">Edit Recurring Event</h5>
+                      <input v-model="editingRecurringEvent.title" type="text" placeholder="Event Title" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                      <select v-model="editingRecurringEvent.day" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                        <option value="sunday">Sunday</option>
+                        <option value="monday">Monday</option>
+                        <option value="tuesday">Tuesday</option>
+                        <option value="wednesday">Wednesday</option>
+                        <option value="thursday">Thursday</option>
+                        <option value="friday">Friday</option>
+                        <option value="saturday">Saturday</option>
+                      </select>
+                      <input v-model="editingRecurringEvent.time" type="time" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                      <textarea v-model="editingRecurringEvent.message" placeholder="Optional message" rows="2" class="w-full px-2 py-1 border border-gray-300 rounded text-sm"></textarea>
+                      <div class="flex space-x-2">
+                        <button @click="saveRecurringEventEdit" class="btn-primary text-xs">Save</button>
+                        <button @click="cancelRecurringEventEdit" class="btn-secondary text-xs">Cancel</button>
+                      </div>
+                    </div>
+                    
+                    <!-- Display View (when not editing) -->
+                    <div v-else class="flex justify-between items-start">
                       <div>
                         <h5 class="font-medium text-gray-900">{{ event.title }}</h5>
                         <p class="text-sm text-gray-600">{{ event.day }} at {{ event.time }}</p>
                         <p v-if="event.message" class="text-sm text-gray-600 mt-1">{{ event.message }}</p>
                       </div>
-                      <button @click="deleteRecurringEvent(event.id)" class="text-red-600 hover:text-red-800">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                      </button>
+                      <div class="flex space-x-2">
+                        <button @click="editRecurringEvent(event)" class="text-blue-600 hover:text-blue-800">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                          </svg>
+                        </button>
+                        <button @click="deleteRecurringEvent(event.id)" class="text-red-600 hover:text-red-800">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -119,17 +148,38 @@
                 <h4 class="font-medium text-gray-700 mb-2 text-sm">Special Events</h4>
                 <div class="space-y-2">
                   <div v-for="event in events.specialEvents" :key="event.id" class="bg-orange-50 p-3 rounded-lg border border-orange-200">
-                    <div class="flex justify-between items-start">
+                    <!-- Edit Form (when editing) -->
+                    <div v-if="editingSpecialEvent?.id === event.id" class="space-y-3">
+                      <h5 class="font-medium text-gray-900">Edit Special Event</h5>
+                      <input v-model="editingSpecialEvent.title" type="text" placeholder="Event Title" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                      <input v-model="editingSpecialEvent.date" type="date" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                      <input v-model="editingSpecialEvent.time" type="time" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                      <textarea v-model="editingSpecialEvent.message" placeholder="Event description" rows="2" class="w-full px-2 py-1 border border-gray-300 rounded text-sm"></textarea>
+                      <div class="flex space-x-2">
+                        <button @click="saveSpecialEventEdit" class="btn-primary text-xs">Save</button>
+                        <button @click="cancelSpecialEventEdit" class="btn-secondary text-xs">Cancel</button>
+                      </div>
+                    </div>
+                    
+                    <!-- Display View (when not editing) -->
+                    <div v-else class="flex justify-between items-start">
                       <div>
                         <h5 class="font-medium text-gray-900">{{ event.title }}</h5>
                         <p class="text-sm text-gray-600">{{ formatDate(event.date) }} at {{ event.time }}</p>
                         <p v-if="event.message" class="text-sm text-gray-600 mt-1">{{ event.message }}</p>
                       </div>
-                      <button @click="deleteSpecialEvent(event.id)" class="text-red-600 hover:text-red-800">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                      </button>
+                      <div class="flex space-x-2">
+                        <button @click="editSpecialEvent(event)" class="text-blue-600 hover:text-blue-800">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                          </svg>
+                        </button>
+                        <button @click="deleteSpecialEvent(event.id)" class="text-red-600 hover:text-red-800">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -494,6 +544,10 @@ const showPhotoUpload = ref(false)
 const showAddGalleryForm = ref(false)
 const showPhotoUploadFor = ref<string | null>(null)
 const showAddNewsForm = ref(false)
+
+// Event editing state
+const editingRecurringEvent = ref<any>(null)
+const editingSpecialEvent = ref<any>(null)
 
 // Tabs configuration
 const tabs = [
@@ -881,6 +935,50 @@ const deleteRecurringEvent = (id: number) => {
 const deleteSpecialEvent = (id: number) => {
   events.value.specialEvents = events.value.specialEvents.filter(event => event.id !== id)
   saveEvents()
+}
+
+// Edit recurring event
+const editRecurringEvent = (event: any) => {
+  editingRecurringEvent.value = { ...event }
+}
+
+// Save recurring event edit
+const saveRecurringEventEdit = () => {
+  if (editingRecurringEvent.value) {
+    const index = events.value.recurringEvents.findIndex(e => e.id === editingRecurringEvent.value.id)
+    if (index !== -1) {
+      events.value.recurringEvents[index] = { ...editingRecurringEvent.value }
+      saveEvents()
+      editingRecurringEvent.value = null
+    }
+  }
+}
+
+// Cancel recurring event edit
+const cancelRecurringEventEdit = () => {
+  editingRecurringEvent.value = null
+}
+
+// Edit special event
+const editSpecialEvent = (event: any) => {
+  editingSpecialEvent.value = { ...event }
+}
+
+// Save special event edit
+const saveSpecialEventEdit = () => {
+  if (editingSpecialEvent.value) {
+    const index = events.value.specialEvents.findIndex(e => e.id === editingSpecialEvent.value.id)
+    if (index !== -1) {
+      events.value.specialEvents[index] = { ...editingSpecialEvent.value }
+      saveEvents()
+      editingSpecialEvent.value = null
+    }
+  }
+}
+
+// Cancel special event edit
+const cancelSpecialEventEdit = () => {
+  editingSpecialEvent.value = null
 }
 
 // Create new gallery
