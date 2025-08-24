@@ -513,9 +513,10 @@ const formatEventDate = (dateString: string) => {
     <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
       <div class="max-w-7xl mx-auto px-8">
         <div class="flex justify-between items-center h-24">
-                      <!-- Logo -->
-            <div class="flex items-center">
-              <img src="/src/assets/logo-text.svg" alt="Walk for Health" class="h-8 md:h-10">
+            <!-- Logo -->
+            <div class="flex items-center gap-3">
+              <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Walk for Health</h1>
+              <img src="/src/assets/shoes.jpg" alt="Walking shoes" class="h-8 md:h-10 w-auto object-cover rounded">
             </div>
           
           <!-- Desktop Navigation -->
@@ -574,10 +575,7 @@ const formatEventDate = (dateString: string) => {
             </h1>
             <p class="text-xl text-gray-600 mb-4 max-w-3xl mx-auto">
               {{ clubContent.clubMission || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley' }}
-            </p>
-            <p class="text-lg text-gray-600 mb-8 max-w-3xl mx-auto">
-              {{ clubContent.clubDescription }}
-            </p>
+            </p>      
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
               <a href="#events" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold text-lg px-8 py-4 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-200 shadow-lg">
                 Join Our Walks
@@ -1186,7 +1184,7 @@ const formatEventDate = (dateString: string) => {
     <button 
       v-else
       @click="showLoginModal = true" 
-      class="fixed right-4 top-4 z-50 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
+      class="fixed right-4 top-8 z-50 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
       title="Admin Login"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
