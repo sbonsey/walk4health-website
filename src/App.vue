@@ -364,15 +364,43 @@ const closeMobileMenu = () => {
   mobileMenuOpen.value = false
 }
 
-const submitContactForm = () => {
-  // Handle contact form submission
-  console.log('Contact form submitted:', contactForm.value)
-  // Reset form
-  contactForm.value = {
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
+const submitContactForm = async () => {
+  try {
+    // Show loading state
+    const submitButton = document.querySelector('button[type="submit"]')
+    const originalText = submitButton?.textContent
+    if (submitButton) {
+      submitButton.textContent = 'Sending...'
+      submitButton.disabled = true
+    }
+
+    // Send contact form via API
+    const success = await dataService.sendContactForm(contactForm.value)
+    
+    if (success) {
+      // Show success message
+      alert('Thank you for your message! We will get back to you soon.')
+      
+      // Reset form
+      contactForm.value = {
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+      }
+    } else {
+      alert('Sorry, there was an error sending your message. Please try again.')
+    }
+  } catch (error) {
+    console.error('Error submitting contact form:', error)
+    alert('Sorry, there was an error sending your message. Please try again.')
+  } finally {
+    // Restore button state
+    const submitButton = document.querySelector('button[type="submit"]')
+    if (submitButton) {
+      submitButton.textContent = originalText || 'Send Message'
+      submitButton.disabled = false
+    }
   }
 }
 
@@ -1194,7 +1222,7 @@ const formatTime = (time: string): string => {
     <button 
       v-if="isAdmin"
       @click="toggleAdminPanel" 
-      class="fixed right-4 top-4 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
+      class="fixed right-4 top-8 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
       title="Toggle Admin Panel"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

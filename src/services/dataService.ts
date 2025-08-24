@@ -20,21 +20,26 @@ export interface EventsData {
 }
 
 export interface ClubContent {
-  clubMission: string
+  clubMission?: string
   clubDescription: string
-  committee: {
+  walkingSchedule: {
+    sundaySummer: string
+    sundayWinter: string
+    tuesday: string
+  }
+  committee?: {
     title: string
     members: {
       position: string
       name: string
     }[]
   }
-  walkingStats: {
+  walkingStats?: {
     yearsActive: string
     members: string
     walksPerWeek: string
   }
-  clubImageCaption: string
+  clubImageCaption?: string
   lastUpdated: string
 }
 
@@ -46,6 +51,19 @@ export interface GalleryMeta {
   location: string
   images: string[]
   createdAt: string
+}
+
+export interface EmailConfig {
+  inquiryEmail: string
+  subjectPrefix: string
+  lastUpdated: string
+}
+
+export interface ContactFormData {
+  name: string
+  email: string
+  subject: string
+  message: string
 }
 
 class DataService {
@@ -159,30 +177,15 @@ class DataService {
         const stored = this.getContentFromStorage()
         if (stored) return stored
       }
-          return {
-      clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
-      clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
-      committee: {
-        title: 'Our Committee 2025/26',
-        members: [
-          { position: 'Chairperson', name: 'Lynn Young' },
-          { position: 'Secretary', name: 'Neil Edwards' },
-          { position: 'Treasurer', name: 'Nina Wortman' },
-          { position: 'Membership', name: 'Andrew Young' },
-          { position: 'Website & Sunday', name: 'Dave Morrell' },
-          { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
-          { position: 'Events', name: 'Kaye Plunket' },
-          { position: 'Financial Reviewer', name: 'Bob Metcalf' }
-        ]
-      },
-      walkingStats: {
-        yearsActive: '24',
-        members: '50+',
-        walksPerWeek: '2'
-      },
-      clubImageCaption: 'Walking together since 2001',
-      lastUpdated: new Date().toISOString()
-    }
+      return {
+        clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
+        walkingSchedule: {
+          sundaySummer: '09:00',
+          sundayWinter: '09:30',
+          tuesday: '10:00'
+        },
+        lastUpdated: new Date().toISOString()
+      }
     }
   }
 
@@ -442,6 +445,92 @@ class DataService {
         success: false, 
         error: error instanceof Error ? error.message : String(error)
       }
+    }
+  }
+
+  // Email Configuration
+  async getEmailConfig(): Promise<EmailConfig> {
+    try {
+      const response = await fetch('/api/email-config')
+      if (!response.ok) throw new Error('Failed to fetch email config')
+      return await response.json()
+    } catch (error) {
+      console.error('Error fetching email config:', error)
+      return {
+        inquiryEmail: 'admin@walk4health.co.nz',
+        subjectPrefix: '[Walk4Health]',
+        lastUpdated: new Date().toISOString()
+      }
+    }
+  }
+
+  async saveEmailConfig(config: EmailConfig): Promise<boolean> {
+    try {
+      const response = await fetch('/api/email-config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(config)
+      })
+      
+      if (response.ok) {
+        return true
+      } else {
+        throw new Error('Failed to save email config')
+      }
+    } catch (error) {
+      console.error('Error saving email config:', error)
+      throw error
+    }
+  }
+
+  async sendTestEmail(email: string, subjectPrefix: string): Promise<boolean> {
+    try {
+      const testData: ContactFormData = {
+        name: 'Admin Test',
+        email: 'admin@walk4health.co.nz',
+        subject: 'Test Email',
+        message: 'This is a test email to verify the email configuration is working correctly.'
+      }
+
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(testData)
+      })
+      
+      if (response.ok) {
+        return true
+      } else {
+        throw new Error('Failed to send test email')
+      }
+    } catch (error) {
+      console.error('Error sending test email:', error)
+      throw error
+    }
+  }
+
+  async sendContactForm(formData: ContactFormData): Promise<boolean> {
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      })
+      
+      if (response.ok) {
+        return true
+      } else {
+        throw new Error('Failed to send contact form')
+      }
+    } catch (error) {
+      console.error('Error sending contact form:', error)
+      throw error
     }
   }
 

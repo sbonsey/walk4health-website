@@ -514,6 +514,42 @@
               <button @click="saveContent" class="btn-primary w-full">Save Changes</button>
             </div>
           </div>
+
+          <!-- Email Configuration Tab -->
+          <div v-if="activeTab === 'email'" class="space-y-4">
+            <h3 class="text-lg font-semibold text-gray-900">Email Configuration</h3>
+            
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Inquiry Email Address</label>
+                <input v-model="emailConfig.inquiryEmail" type="email" placeholder="admin@walk4health.co.nz" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                <p class="text-xs text-gray-500 mt-1">This email will receive all contact form inquiries from the website.</p>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email Subject Prefix</label>
+                <input v-model="emailConfig.subjectPrefix" type="text" placeholder="[Walk4Health]" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                <p class="text-xs text-gray-500 mt-1">Optional prefix for inquiry emails (e.g., [Walk4Health] General Inquiry)</p>
+              </div>
+              
+              <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                <h4 class="font-medium text-blue-900 mb-2">Email Test</h4>
+                <p class="text-sm text-blue-700 mb-3">Test if your email configuration is working by sending a test email.</p>
+                <button @click="testEmail" class="btn-secondary text-sm">Send Test Email</button>
+                <div v-if="emailTestResult" class="mt-2 text-xs">
+                  <div class="bg-white p-2 rounded border">
+                    <span class="font-medium">Test Result:</span> 
+                    <span :class="emailTestResult.success ? 'text-green-600' : 'text-red-600'">
+                      {{ emailTestResult.success ? '✅ Email sent successfully' : '❌ Email failed' }}
+                    </span>
+                    <div v-if="emailTestResult.error" class="text-red-600 mt-1">{{ emailTestResult.error }}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <button @click="saveEmailConfig" class="btn-primary w-full">Save Email Configuration</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -566,7 +602,8 @@ const tabs = [
   { id: 'events', name: 'Events' },
   { id: 'news', name: 'News' },
   { id: 'photos', name: 'Photos' },
-  { id: 'content', name: 'Content' }
+  { id: 'content', name: 'Content' },
+  { id: 'email', name: 'Email' }
 ]
 
 // Form data for recurring events
@@ -666,16 +703,18 @@ const loadData = async () => {
     console.log('🔄 AdminPanel: Starting to load data from API...')
     console.log('🔄 AdminPanel: Current hostname:', window.location.hostname)
     
-    const [eventsData, contentData, galleriesData] = await Promise.all([
+    const [eventsData, contentData, galleriesData, emailConfigData] = await Promise.all([
       dataService.getEvents(),
       dataService.getContent(),
-      dataService.getGalleries()
+      dataService.getGalleries(),
+      dataService.getEmailConfig()
     ])
     
     console.log('🔄 AdminPanel: API responses received:', {
       eventsData,
       contentData,
-      galleriesData
+      galleriesData,
+      emailConfigData
     })
     
     // Ensure events data is properly structured
@@ -691,54 +730,30 @@ const loadData = async () => {
     // Ensure content data is properly structured
     if (contentData && typeof contentData === 'object') {
       content.value = {
-        clubMission: contentData.clubMission || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
         clubDescription: contentData.clubDescription || '',
-        committee: contentData.committee || {
-          title: 'Our Committee 2025/26',
-          members: [
-            { position: 'Chairperson', name: 'Lynn Young' },
-            { position: 'Secretary', name: 'Neil Edwards' },
-            { position: 'Treasurer', name: 'Nina Wortman' },
-            { position: 'Membership', name: 'Andrew Young' },
-            { position: 'Website & Sunday', name: 'Dave Morrell' },
-            { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
-            { position: 'Events', name: 'Kaye Plunket' },
-            { position: 'Financial Reviewer', name: 'Bob Metcalf' }
-          ]
+        walkingSchedule: {
+          sundaySummer: contentData.walkingSchedule?.sundaySummer || '09:00',
+          sundayWinter: contentData.walkingSchedule?.sundayWinter || '09:30',
+          tuesday: contentData.walkingSchedule?.tuesday || '10:00'
         },
-        walkingStats: contentData.walkingStats || {
-          yearsActive: '24',
-          members: '50+',
-          walksPerWeek: '2'
-        },
-        clubImageCaption: contentData.clubImageCaption || 'Walking together since 2001',
         lastUpdated: contentData.lastUpdated || new Date().toISOString()
       }
     } else {
       content.value = {
-        clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
         clubDescription: '',
-        committee: {
-          title: 'Our Committee 2025/26',
-          members: [
-            { position: 'Chairperson', name: 'Lynn Young' },
-            { position: 'Secretary', name: 'Neil Edwards' },
-            { position: 'Treasurer', name: 'Nina Wortman' },
-            { position: 'Membership', name: 'Andrew Young' },
-            { position: 'Website & Sunday', name: 'Dave Morrell' },
-            { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
-            { position: 'Events', name: 'Kaye Plunket' },
-            { position: 'Financial Reviewer', name: 'Bob Metcalf' }
-          ]
+        walkingSchedule: {
+          sundaySummer: '09:00',
+          sundayWinter: '09:30',
+          tuesday: '10:00'
         },
-        walkingStats: {
-          yearsActive: '24',
-          members: '50+',
-          walksPerWeek: '2'
-        },
-        clubImageCaption: 'Walking together since 2001',
         lastUpdated: new Date().toISOString()
       }
+    }
+    
+    // Load email configuration
+    if (emailConfigData && typeof emailConfigData === 'object') {
+      emailConfig.inquiryEmail = emailConfigData.inquiryEmail || ''
+      emailConfig.subjectPrefix = emailConfigData.subjectPrefix || ''
     }
     
     // Ensure galleries data is properly structured
@@ -1457,6 +1472,63 @@ const addCommitteeMember = () => {
 
 const removeCommitteeMember = (index: number) => {
   content.value.committee.members.splice(index, 1)
+}
+
+// Email Configuration
+const emailConfig = reactive({
+  inquiryEmail: '',
+  subjectPrefix: ''
+})
+
+const emailTestResult = ref<{ success: boolean; error?: string } | null>(null)
+
+const testEmail = async () => {
+  emailTestResult.value = null
+  try {
+    await dataService.sendTestEmail(emailConfig.inquiryEmail, emailConfig.subjectPrefix)
+    emailTestResult.value = { success: true }
+    saveStatus.value = 'Test email sent successfully!'
+    setTimeout(() => saveStatus.value = '', 3000)
+  } catch (error) {
+    emailTestResult.value = { success: false, error: error instanceof Error ? error.message : String(error) }
+    saveStatus.value = 'Error sending test email'
+    console.error('Error sending test email:', error)
+  }
+}
+
+const saveEmailConfig = async () => {
+  try {
+    console.log('🔄 AdminPanel: Starting to save email config...')
+    console.log('🔄 AdminPanel: Email config to save:', emailConfig)
+    console.log('🔄 AdminPanel: Current hostname:', window.location.hostname)
+    console.log('🔄 AdminPanel: Is production:', window.location.hostname !== 'localhost' && !window.location.hostname.includes('localhost'))
+    
+    const configToSave = {
+      ...emailConfig,
+      lastUpdated: new Date().toISOString()
+    }
+    
+    const success = await dataService.saveEmailConfig(configToSave)
+    
+    console.log('🔄 AdminPanel: DataService.saveEmailConfig result:', success)
+    
+    if (success) {
+      saveStatus.value = 'Email configuration saved successfully!'
+      console.log('✅ AdminPanel: Email configuration saved successfully')
+      setTimeout(() => saveStatus.value = '', 3000)
+    } else {
+      saveStatus.value = 'Failed to save email configuration'
+      console.error('❌ AdminPanel: Email config save returned false')
+    }
+  } catch (error) {
+    saveStatus.value = 'Error saving email configuration'
+    console.error('❌ AdminPanel: Error saving email configuration:', error)
+    console.error('❌ AdminPanel: Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : 'No stack trace'
+    })
+  }
 }
 
 
