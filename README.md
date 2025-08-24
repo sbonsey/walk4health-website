@@ -1,6 +1,6 @@
-# Walk4Health Website
+# Walk for Health Website
 
-A Vue.js website for the Walk4Health walking club.
+A Vue.js website for the Walk for Health walking club.
 
 <!-- Last updated: 2025-01-22 - Redis integration complete -->
 
@@ -109,7 +109,7 @@ Update club information, committee details, and walking schedules in `App.vue`.
 
 ## License
 
-This project is for the Walk4Health walking club. All rights reserved.
+This project is for the Walk for Health walking club. All rights reserved.
 
 ## Support
 
@@ -117,4 +117,4 @@ For technical support or questions about the website, contact the development te
 
 ---
 
-**Walk4Health** - 24 Years of Walking in the Hutt Valley
+**Walk for Health** - 24 Years of Walking in the Hutt Valley

@@ -56,7 +56,7 @@ const galleries = ref<GalleryMeta[]>([])
 const newsItems = ref<NewsItem[]>([
   {
     id: '1',
-    title: 'Welcome to Walk4Health 2025!',
+            title: 'Welcome to Walk for Health 2025!',
     content: 'We\'re excited to start another year of walking adventures in the beautiful Hutt Valley. Our club continues to grow with new members joining us every month.',
     date: '2025-01-15',
     galleryLink: undefined
@@ -428,7 +428,7 @@ const formatEventDate = (dateString: string) => {
   <div v-if="isLoading" class="min-h-screen flex items-center justify-center bg-gray-50">
     <div class="text-center">
       <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
-      <p class="text-xl text-gray-600">Loading Walk4Health...</p>
+              <p class="text-xl text-gray-600">Loading Walk for Health...</p>
     </div>
   </div>
 
@@ -440,7 +440,7 @@ const formatEventDate = (dateString: string) => {
         <div class="flex justify-between items-center h-24">
           <!-- Logo -->
           <div class="flex items-center">
-            <h1 class="text-3xl font-light tracking-wide text-gray-800">WALK4HEALTH</h1>
+            <h1 class="text-3xl font-light tracking-wide text-gray-800">WALK FOR HEALTH</h1>
           </div>
           
           <!-- Desktop Navigation -->
@@ -495,7 +495,7 @@ const formatEventDate = (dateString: string) => {
         <div class="container relative z-10">
           <div class="text-center">
             <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              Walk4Health
+              Walk for Health
             </h1>
             <p class="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
               {{ clubContent.clubDescription }}
@@ -1099,7 +1099,7 @@ const formatEventDate = (dateString: string) => {
     <!-- Footer -->
     <footer class="bg-gray-800 text-white py-8">
       <div class="container text-center">
-        <p>&copy; 2025 Walk4Health | 24 Years of Walking in the Hutt Valley</p>
+        <p>&copy; 2025 Walk for Health | 24 Years of Walking in the Hutt Valley</p>
       </div>
     </footer>
 
