@@ -118,6 +118,9 @@ const additionalNewsItems = computed(() => {
 
 // Load data on mount
 onMounted(async () => {
+  console.log('🚀 App.vue: Component mounted, loading data...')
+  console.log('🌐 Current hostname:', window.location.hostname)
+  console.log('🏭 Production mode:', window.location.hostname !== 'localhost' && !window.location.hostname.includes('localhost'))
   await loadData()
   
   // Add keyboard navigation for lightbox
@@ -178,6 +181,9 @@ const loadData = async () => {
           sundayWinter: '',
           tuesday: ''
         },
+        committee: contentData.committee || undefined,
+        walkingStats: contentData.walkingStats || undefined,
+        clubImageCaption: contentData.clubImageCaption || '',
         lastUpdated: contentData.lastUpdated || new Date().toISOString()
       }
     } else {
@@ -189,31 +195,39 @@ const loadData = async () => {
           sundayWinter: '',
           tuesday: ''
         },
+        committee: undefined,
+        walkingStats: undefined,
+        clubImageCaption: '',
         lastUpdated: new Date().toISOString()
       }
     }
     
-    // Fallback to localStorage if needed
-    if (!recurringEvents.value.length && !specialEvents.value.length) {
-      const storedEvents = dataService.getEventsFromStorage()
-      if (storedEvents) {
-        recurringEvents.value = storedEvents.recurringEvents || []
-        specialEvents.value = storedEvents.specialEvents || []
+    // Only fallback to localStorage in development mode
+    if (window.location.hostname === 'localhost' || window.location.hostname.includes('localhost')) {
+      if (!recurringEvents.value.length && !specialEvents.value.length) {
+        const storedEvents = dataService.getEventsFromStorage()
+        if (storedEvents) {
+          recurringEvents.value = storedEvents.recurringEvents || []
+          specialEvents.value = storedEvents.specialEvents || []
+        }
       }
-    }
-    
-    if (!clubContent.value.clubDescription) {
-      const storedContent = dataService.getContentFromStorage()
-      if (storedContent) {
-        clubContent.value = {
-          clubMission: storedContent.clubMission || '',
-          clubDescription: storedContent.clubDescription || '',
-          walkingSchedule: storedContent.walkingSchedule || {
-            sundaySummer: '',
-            sundayWinter: '',
-            tuesday: ''
-          },
-          lastUpdated: storedContent.lastUpdated || new Date().toISOString()
+      
+      if (!clubContent.value.clubDescription) {
+        const storedContent = dataService.getContentFromStorage()
+        if (storedContent) {
+          clubContent.value = {
+            clubMission: storedContent.clubMission || '',
+            clubDescription: storedContent.clubDescription || '',
+            walkingSchedule: storedContent.walkingSchedule || {
+              sundaySummer: '',
+              sundayWinter: '',
+              tuesday: ''
+            },
+            committee: storedContent.committee || undefined,
+            walkingStats: storedContent.walkingStats || undefined,
+            clubImageCaption: storedContent.clubImageCaption || '',
+            lastUpdated: storedContent.lastUpdated || new Date().toISOString()
+          }
         }
       }
     }
@@ -227,6 +241,12 @@ const loadData = async () => {
       clubContent: clubContent.value,
       galleries: galleries.value
     })
+    
+    // Debug: Log the specific values we're interested in
+    console.log('🔍 App.vue: Walking stats from API:', contentData?.walkingStats)
+    console.log('🔍 App.vue: Committee from API:', contentData?.committee)
+    console.log('🔍 App.vue: Final clubContent.walkingStats:', clubContent.value.walkingStats)
+    console.log('🔍 App.vue: Final clubContent.committee:', clubContent.value.committee)
   } catch (error) {
     console.error('❌ App.vue: Error loading data:', error)
     // Ensure we have fallback data even on error
@@ -610,15 +630,15 @@ const formatTime = (time: string): string => {
               <!-- Walking Stats -->
               <div class="grid grid-cols-3 gap-4 mt-8">
                 <div class="text-center">
-                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats?.yearsActive || '24' }}</div>
+                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats?.yearsActive || '—' }}</div>
                   <div class="text-sm text-gray-600">Years Active</div>
                 </div>
                 <div class="text-center">
-                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats?.members || '50+' }}</div>
+                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats?.members || '—' }}</div>
                   <div class="text-sm text-gray-600">Members</div>
                 </div>
                 <div class="text-center">
-                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats?.walksPerWeek || '2' }}</div>
+                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats?.walksPerWeek || '—' }}</div>
                   <div class="text-sm text-gray-600">Walks/Week</div>
                 </div>
               </div>
@@ -632,7 +652,7 @@ const formatTime = (time: string): string => {
                      class="w-full h-64 object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                 <div class="absolute bottom-4 left-4 text-white">
-                  <p class="text-sm font-medium">Walking together since 2001</p>
+                  <p class="text-sm font-medium">{{ clubContent.clubImageCaption || 'Club image caption will appear here once configured' }}</p>
                 </div>
               </div>
               
@@ -943,7 +963,7 @@ const formatTime = (time: string): string => {
                   </div>
                   <div>
                     <p class="font-bold text-gray-900 mb-1">Phone</p>
-                    <p class="text-gray-700 text-lg">Lynn Young (Chairperson): 021 0482790</p>
+                    <p class="text-gray-700 text-lg">Contact information will appear here once configured</p>
                   </div>
                 </div>
                 

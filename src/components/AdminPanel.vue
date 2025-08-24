@@ -489,7 +489,7 @@
                 <div class="grid grid-cols-3 gap-3">
                   <div>
                     <label class="block text-xs text-gray-600 mb-1">Years Active</label>
-                    <input v-model="content.walkingStats!.yearsActive" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" placeholder="24">
+                    <input v-model="content.walkingStats!.yearsActive" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" placeholder="e.g., 24">
                   </div>
                   <div>
                     <label class="block text-xs text-gray-600 mb-1">Members</label>
@@ -804,11 +804,7 @@ const loadData = async () => {
             title: 'Our Committee',
             members: []
           },
-          walkingStats: storedContent.walkingStats || content.value.walkingStats || {
-            yearsActive: '24',
-            members: '50+',
-            walksPerWeek: '2'
-          },
+          walkingStats: storedContent.walkingStats || content.value.walkingStats || undefined,
           clubImageCaption: storedContent.clubImageCaption || content.value.clubImageCaption || '',
           lastUpdated: storedContent.lastUpdated || new Date().toISOString()
         }
@@ -821,11 +817,11 @@ const loadData = async () => {
     // Ensure we have fallback data even on error
     events.value = { recurringEvents: [], specialEvents: [] }
     content.value = {
-      clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
+      clubDescription: '',
       walkingSchedule: {
-        sundaySummer: '09:00',
-        sundayWinter: '09:30',
-        tuesday: '10:00'
+        sundaySummer: '',
+        sundayWinter: '',
+        tuesday: ''
       },
       lastUpdated: new Date().toISOString()
     }
