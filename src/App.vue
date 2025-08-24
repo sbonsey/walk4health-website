@@ -40,6 +40,7 @@ const specialEvents = ref<EventsData['specialEvents']>([])
 
 // Club content - loaded from data service
 const clubContent = ref<ClubContent>({
+  clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
   clubDescription: '',
   committee: {
     title: 'Our Committee 2025/26',
@@ -184,6 +185,7 @@ const loadData = async () => {
     // Ensure content data is properly structured
     if (contentData && typeof contentData === 'object') {
       clubContent.value = {
+        clubMission: contentData.clubMission || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
         clubDescription: contentData.clubDescription || '',
         committee: contentData.committee || {
           title: 'Our Committee 2025/26',
@@ -208,6 +210,7 @@ const loadData = async () => {
       }
     } else {
       clubContent.value = {
+        clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
         clubDescription: '',
         committee: {
           title: 'Our Committee 2025/26',
@@ -245,6 +248,7 @@ const loadData = async () => {
       const storedContent = dataService.getContentFromStorage()
       if (storedContent) {
         clubContent.value = {
+          clubMission: storedContent.clubMission || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
           clubDescription: storedContent.clubDescription || '',
           committee: storedContent.committee || {
             title: 'Our Committee 2025/26',
@@ -567,7 +571,10 @@ const formatEventDate = (dateString: string) => {
             <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
               Walk for Health
             </h1>
-            <p class="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            <p class="text-xl text-gray-600 mb-4 max-w-3xl mx-auto">
+              {{ clubContent.clubMission || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley' }}
+            </p>
+            <p class="text-lg text-gray-600 mb-8 max-w-3xl mx-auto">
               {{ clubContent.clubDescription }}
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">

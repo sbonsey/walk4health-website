@@ -387,9 +387,15 @@
             </div>
             
             <div class="space-y-6">
+              <!-- Club Mission -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Club Mission</label>
+                <textarea v-model="content.clubMission" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="What is your club's mission?"></textarea>
+              </div>
+              
               <!-- Club Description -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Club Description</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Club Description (About Our Club)</label>
                 <textarea v-model="content.clubDescription" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Describe your walking club..."></textarea>
               </div>
               
@@ -537,6 +543,7 @@ const events = ref<EventsData>({
 })
 
 const content = ref<ClubContent>({
+  clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
   clubDescription: '',
   committee: {
     title: 'Our Committee 2025/26',
@@ -618,6 +625,7 @@ const loadData = async () => {
     // Ensure content data is properly structured
     if (contentData && typeof contentData === 'object') {
       content.value = {
+        clubMission: contentData.clubMission || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
         clubDescription: contentData.clubDescription || '',
         committee: contentData.committee || {
           title: 'Our Committee 2025/26',
@@ -642,6 +650,7 @@ const loadData = async () => {
       }
     } else {
       content.value = {
+        clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
         clubDescription: '',
         committee: {
           title: 'Our Committee 2025/26',
@@ -688,6 +697,7 @@ const loadData = async () => {
       const storedContent = dataService.getContentFromStorage()
       if (storedContent) {
         content.value = {
+          clubMission: storedContent.clubMission || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
           clubDescription: storedContent.clubDescription || '',
           committee: storedContent.committee || {
             title: 'Our Committee 2025/26',
