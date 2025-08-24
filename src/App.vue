@@ -289,6 +289,7 @@ const loadData = async () => {
     recurringEvents.value = []
     specialEvents.value = []
     clubContent.value = {
+      clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
       clubDescription: '',
       committee: {
         title: 'Our Committee 2025/26',

@@ -729,6 +729,7 @@ const loadData = async () => {
     // Ensure we have fallback data even on error
     events.value = { recurringEvents: [], specialEvents: [] }
     content.value = {
+      clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
       clubDescription: '',
       committee: {
         title: 'Our Committee 2025/26',
