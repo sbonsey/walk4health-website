@@ -603,23 +603,22 @@ const formatTime = (time: string): string => {
           
           <div class="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h3 class="text-2xl font-bold text-gray-900 mb-4">About Our Club</h3>
               <p class="text-gray-600 mb-6">
                 {{ clubContent.clubDescription }}
               </p>
               
               <!-- Walking Stats -->
-              <div v-if="clubContent.walkingStats" class="grid grid-cols-3 gap-4 mt-8">
+              <div class="grid grid-cols-3 gap-4 mt-8">
                 <div class="text-center">
-                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats.yearsActive || '24' }}</div>
+                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats?.yearsActive || '24' }}</div>
                   <div class="text-sm text-gray-600">Years Active</div>
                 </div>
                 <div class="text-center">
-                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats.members || '50+' }}</div>
+                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats?.members || '50+' }}</div>
                   <div class="text-sm text-gray-600">Members</div>
                 </div>
                 <div class="text-center">
-                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats.walksPerWeek || '2' }}</div>
+                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats?.walksPerWeek || '2' }}</div>
                   <div class="text-sm text-gray-600">Walks/Week</div>
                 </div>
               </div>
@@ -638,12 +637,15 @@ const formatTime = (time: string): string => {
               </div>
               
               <!-- Committee Info -->
-              <div v-if="clubContent.committee && clubContent.committee.members && clubContent.committee.members.length > 0" class="bg-primary-50 p-6 rounded-xl border border-primary-100">
-                <h4 class="text-xl font-bold text-primary-800 mb-4">{{ clubContent.committee.title || 'Our Committee' }}</h4>
+              <div class="bg-primary-50 p-6 rounded-xl border border-primary-100">
+                <h4 class="text-xl font-bold text-primary-800 mb-4">{{ clubContent.committee?.title || 'Our Committee' }}</h4>
                 <div class="grid grid-cols-1 gap-2 text-primary-700 text-sm">
-                  <div v-for="member in clubContent.committee.members" :key="member.position" class="flex justify-between">
+                  <div v-if="clubContent.committee?.members && clubContent.committee.members.length > 0" v-for="member in clubContent.committee.members" :key="member.position" class="flex justify-between">
                     <span class="font-medium">{{ member.position }}:</span>
                     <span>{{ member.name }}</span>
+                  </div>
+                  <div v-if="!clubContent.committee?.members || clubContent.committee.members.length === 0" class="text-center text-primary-600 py-4">
+                    <p>Committee information will appear here once configured</p>
                   </div>
                 </div>
               </div>
