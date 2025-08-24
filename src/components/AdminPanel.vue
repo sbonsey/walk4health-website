@@ -379,30 +379,63 @@
 
           <!-- Content Tab -->
           <div v-if="activeTab === 'content'" class="space-y-4">
-            <h3 class="text-lg font-semibold text-gray-900">Manage Content</h3>
+            <h3 class="text-lg font-semibold text-gray-900">Manage Club Content</h3>
             
-            <div class="space-y-3">
+            <div class="space-y-6">
+              <!-- Club Description -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Club Description</label>
-                <textarea v-model="content.clubDescription" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                <textarea v-model="content.clubDescription" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Describe your walking club..."></textarea>
               </div>
               
+              <!-- Committee Management -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Walking Schedule</label>
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-xs text-gray-600 mb-1">Sunday Summer</label>
-                    <input v-model="content.walkingSchedule.sundaySummer" type="time" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Committee Title</label>
+                <input v-model="content.committee.title" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., Our Committee 2025/26">
+                
+                <div class="mt-4">
+                  <div class="flex justify-between items-center mb-2">
+                    <label class="block text-sm font-medium text-gray-700">Committee Members</label>
+                    <button @click="addCommitteeMember" class="btn-primary text-sm px-3 py-1">Add Member</button>
                   </div>
-                  <div>
-                    <label class="block text-xs text-gray-600 mb-1">Sunday Winter</label>
-                    <input v-model="content.walkingSchedule.sundayWinter" type="time" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
-                  </div>
-                  <div>
-                    <label class="block text-xs text-gray-600 mb-1">Tuesday</label>
-                    <input v-model="content.walkingSchedule.tuesday" type="time" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                  
+                  <div class="space-y-3">
+                    <div v-for="(member, index) in content.committee.members" :key="index" class="flex gap-2 items-center">
+                      <input v-model="member.position" type="text" placeholder="Position" class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm">
+                      <input v-model="member.name" type="text" placeholder="Name" class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm">
+                      <button @click="removeCommitteeMember(index)" class="text-red-600 hover:text-red-800 p-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
+              </div>
+              
+              <!-- Walking Stats -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Walking Statistics</label>
+                <div class="grid grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-xs text-gray-600 mb-1">Years Active</label>
+                    <input v-model="content.walkingStats.yearsActive" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" placeholder="24">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-600 mb-1">Members</label>
+                    <input v-model="content.walkingStats.members" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" placeholder="50+">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-600 mb-1">Walks/Week</label>
+                    <input v-model="content.walkingStats.walksPerWeek" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" placeholder="2">
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Club Image Caption -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Club Image Caption</label>
+                <input v-model="content.clubImageCaption" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., Walking together since 2001">
               </div>
               
               <button @click="saveContent" class="btn-primary w-full">Save Changes</button>
