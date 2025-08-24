@@ -496,6 +496,29 @@ const formatEventDate = (dateString: string) => {
     day: 'numeric' 
   })
 }
+
+// Helper functions
+const capitalizeDay = (day: string): string => {
+  return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase()
+}
+
+const formatTime = (time: string): string => {
+  if (!time) return ''
+  
+  try {
+    // Convert 24-hour format to 12-hour format with AM/PM
+    const [hours, minutes] = time.split(':')
+    const hour = parseInt(hours)
+    const ampm = hour >= 12 ? 'PM' : 'AM'
+    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
+    
+    return `${displayHour}:${minutes} ${ampm}`
+  } catch (error) {
+    // Fallback to original time if parsing fails
+    console.warn('Time formatting failed for:', time, error)
+    return time
+  }
+}
 </script>
 
 <template>
@@ -516,7 +539,7 @@ const formatEventDate = (dateString: string) => {
             <!-- Logo -->
             <div class="flex items-center gap-3">
               <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Walk for Health</h1>
-              <img src="/src/assets/blue-shoes.jpg" alt="Walking shoes" class="h-8 md:h-10 w-auto object-cover rounded">
+              <img src="/src/assets/blue-shoes.jpg" alt="Walking shoes" class="h-12 md:h-10 w-auto object-cover rounded">
             </div>
           
           <!-- Desktop Navigation -->
@@ -599,7 +622,7 @@ const formatEventDate = (dateString: string) => {
                   </div>
                   <h3 class="text-2xl font-bold text-gray-900">{{ event.title }}</h3>
                 </div>
-                <p class="text-gray-600 mb-2">{{ event.day }} at {{ event.time }}</p>
+                <p class="text-gray-600 mb-2">{{ capitalizeDay(event.day) }} at {{ formatTime(event.time) }}</p>
                 <p v-if="event.message" class="text-gray-600 mb-2">{{ event.message }}</p>
                 <p class="text-gray-600">Various locations around Hutt Valley</p>
               </div>

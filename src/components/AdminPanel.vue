@@ -71,6 +71,9 @@
                 <option value="saturday">Saturday</option>
               </select>
               <input v-model="newRecurringEvent.time" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              <div v-if="newRecurringEvent.time" class="text-xs text-gray-500">
+                Will display as: {{ formatTime(newRecurringEvent.time) }}
+              </div>
               <textarea v-model="newRecurringEvent.message" placeholder="Optional message or description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
               <div class="flex space-x-2">
                 <button @click="addRecurringEvent" class="btn-primary text-sm flex-1">Save Event</button>
@@ -84,6 +87,9 @@
               <input v-model="newSpecialEvent.title" type="text" placeholder="Event Title" class="w-full px-3 py-2 border border-gray-300 rounded-md">
               <input v-model="newSpecialEvent.date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md">
               <input v-model="newSpecialEvent.time" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              <div v-if="newSpecialEvent.time" class="text-xs text-gray-500">
+                Will display as: {{ formatTime(newSpecialEvent.time) }}
+              </div>
               <textarea v-model="newSpecialEvent.message" placeholder="Event description or message" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
               <div class="flex space-x-2">
                 <button @click="addSpecialEvent" class="btn-primary text-sm flex-1">Save Event</button>
@@ -112,6 +118,9 @@
                         <option value="saturday">Saturday</option>
                       </select>
                       <input v-model="editingRecurringEvent.time" type="time" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                      <div v-if="editingRecurringEvent.time" class="text-xs text-gray-500">
+                        Will display as: {{ formatTime(editingRecurringEvent.time) }}
+                      </div>
                       <textarea v-model="editingRecurringEvent.message" placeholder="Optional message" rows="2" class="w-full px-2 py-1 border border-gray-300 rounded text-sm"></textarea>
                       <div class="flex space-x-2">
                         <button @click="saveRecurringEventEdit" class="btn-primary text-xs">Save</button>
@@ -123,7 +132,7 @@
                     <div v-else class="flex justify-between items-start">
                       <div>
                         <h5 class="font-medium text-gray-900">{{ event.title }}</h5>
-                        <p class="text-sm text-gray-600">{{ event.day }} at {{ event.time }}</p>
+                        <p class="text-sm text-gray-600">{{ capitalizeDay(event.day) }} at {{ formatTime(event.time) }}</p>
                         <p v-if="event.message" class="text-sm text-gray-600 mt-1">{{ event.message }}</p>
                       </div>
                       <div class="flex space-x-2">
@@ -154,6 +163,9 @@
                       <input v-model="editingSpecialEvent.title" type="text" placeholder="Event Title" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
                       <input v-model="editingSpecialEvent.date" type="date" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
                       <input v-model="editingSpecialEvent.time" type="time" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                      <div v-if="editingSpecialEvent.time" class="text-xs text-gray-500">
+                        Will display as: {{ formatTime(editingSpecialEvent.time) }}
+                      </div>
                       <textarea v-model="editingSpecialEvent.message" placeholder="Event description" rows="2" class="w-full px-2 py-1 border border-gray-300 rounded text-sm"></textarea>
                       <div class="flex space-x-2">
                         <button @click="saveSpecialEventEdit" class="btn-primary text-xs">Save</button>
@@ -165,7 +177,7 @@
                     <div v-else class="flex justify-between items-start">
                       <div>
                         <h5 class="font-medium text-gray-900">{{ event.title }}</h5>
-                        <p class="text-sm text-gray-600">{{ formatDate(event.date) }} at {{ event.time }}</p>
+                        <p class="text-sm text-gray-600">{{ formatDate(event.date) }} at {{ formatTime(event.time) }}</p>
                         <p v-if="event.message" class="text-sm text-gray-600 mt-1">{{ event.message }}</p>
                       </div>
                       <div class="flex space-x-2">
@@ -1247,6 +1259,29 @@ const debugGalleries = () => {
       imageCount: gallery.images.length
     })
   })
+}
+
+// Helper functions
+const capitalizeDay = (day: string): string => {
+  return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase()
+}
+
+const formatTime = (time: string): string => {
+  if (!time) return ''
+  
+  try {
+    // Convert 24-hour format to 12-hour format with AM/PM
+    const [hours, minutes] = time.split(':')
+    const hour = parseInt(hours)
+    const ampm = hour >= 12 ? 'PM' : 'AM'
+    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
+    
+    return `${displayHour}:${minutes} ${ampm}`
+  } catch (error) {
+    // Fallback to original time if parsing fails
+    console.warn('Time formatting failed for:', time, error)
+    return time
+  }
 }
 
 // Methods
