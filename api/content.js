@@ -76,17 +76,18 @@ export default async function handler(req, res) {
 
     case 'POST':
       try {
-        const { clubDescription, committee, walkingStats, clubImageCaption } = req.body
+        const { clubMission, clubDescription, committee, walkingStats, clubImageCaption } = req.body
         
-        console.log('💾 POST Content - Received data:', { clubDescription, committee, walkingStats, clubImageCaption })
+        console.log('💾 POST Content - Received data:', { clubMission, clubDescription, committee, walkingStats, clubImageCaption })
         
         // Validate data
-        if (!clubDescription) {
+        if (!clubMission || !clubDescription) {
           console.error('💾 POST Content - Missing required fields')
-          return res.status(400).json({ error: 'Missing required fields' })
+          return res.status(400).json({ error: 'Missing required fields: clubMission and clubDescription are required' })
         }
 
         const contentData = {
+          clubMission,
           clubDescription,
           committee: committee || {
             title: 'Our Committee 2025/26',
