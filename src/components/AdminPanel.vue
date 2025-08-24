@@ -467,28 +467,25 @@
                 <input v-model="content.committee.title" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., Our Committee 2025/26">
                 
                 <div class="mt-4">
-                  <div class="flex justify-between items-center mb-2">
-                    <label class="block text-sm font-medium text-gray-700">Committee Members</label>
-                    <button @click="addCommitteeMember" class="btn-primary text-sm px-3 py-1">Add Member</button>
-                  </div>
-                  
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Committee Members</label>
                   <div class="space-y-3">
                     <div v-for="(member, index) in content.committee.members" :key="index" class="flex gap-2 items-center">
                       <input v-model="member.position" type="text" placeholder="Position" class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm">
                       <input v-model="member.name" type="text" placeholder="Name" class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm">
-                      <button @click="removeCommitteeMember(index)" class="text-red-600 hover:text-red-800 p-1">
+                      <button @click="removeCommitteeMember(index)" class="text-red-600 hover:text-red-800">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
                       </button>
                     </div>
+                    <button @click="addCommitteeMember" class="btn-secondary text-sm">Add Member</button>
                   </div>
                 </div>
               </div>
               
               <!-- Walking Stats -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Walking Statistics</label>
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h4 class="font-medium text-gray-900 mb-3">Walking Statistics</h4>
                 <div class="grid grid-cols-3 gap-3">
                   <div>
                     <label class="block text-xs text-gray-600 mb-1">Years Active</label>
@@ -646,8 +643,12 @@ const events = ref<EventsData>({
 })
 
 const content = ref<ClubContent>({
-  clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
-  clubDescription: '',
+  clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
+  walkingSchedule: {
+    sundaySummer: '09:00',
+    sundayWinter: '09:30',
+    tuesday: '10:00'
+  },
   committee: {
     title: 'Our Committee 2025/26',
     members: [
@@ -736,6 +737,25 @@ const loadData = async () => {
           sundayWinter: contentData.walkingSchedule?.sundayWinter || '09:30',
           tuesday: contentData.walkingSchedule?.tuesday || '10:00'
         },
+        committee: contentData.committee || {
+          title: 'Our Committee 2025/26',
+          members: [
+            { position: 'Chairperson', name: 'Lynn Young' },
+            { position: 'Secretary', name: 'Neil Edwards' },
+            { position: 'Treasurer', name: 'Nina Wortman' },
+            { position: 'Membership', name: 'Andrew Young' },
+            { position: 'Website & Sunday', name: 'Dave Morrell' },
+            { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
+            { position: 'Events', name: 'Kaye Plunket' },
+            { position: 'Financial Reviewer', name: 'Bob Metcalf' }
+          ]
+        },
+        walkingStats: contentData.walkingStats || {
+          yearsActive: '24',
+          members: '50+',
+          walksPerWeek: '2'
+        },
+        clubImageCaption: contentData.clubImageCaption || 'Walking together since 2001',
         lastUpdated: contentData.lastUpdated || new Date().toISOString()
       }
     } else {
@@ -746,6 +766,25 @@ const loadData = async () => {
           sundayWinter: '09:30',
           tuesday: '10:00'
         },
+        committee: {
+          title: 'Our Committee 2025/26',
+          members: [
+            { position: 'Chairperson', name: 'Lynn Young' },
+            { position: 'Secretary', name: 'Neil Edwards' },
+            { position: 'Treasurer', name: 'Nina Wortman' },
+            { position: 'Membership', name: 'Andrew Young' },
+            { position: 'Website & Sunday', name: 'Dave Morrell' },
+            { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
+            { position: 'Events', name: 'Kaye Plunket' },
+            { position: 'Financial Reviewer', name: 'Bob Metcalf' }
+          ]
+        },
+        walkingStats: {
+          yearsActive: '24',
+          members: '50+',
+          walksPerWeek: '2'
+        },
+        clubImageCaption: 'Walking together since 2001',
         lastUpdated: new Date().toISOString()
       }
     }
@@ -778,27 +817,12 @@ const loadData = async () => {
       const storedContent = dataService.getContentFromStorage()
       if (storedContent) {
         content.value = {
-          clubMission: storedContent.clubMission || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
-          clubDescription: storedContent.clubDescription || '',
-          committee: storedContent.committee || {
-            title: 'Our Committee 2025/26',
-            members: [
-              { position: 'Chairperson', name: 'Lynn Young' },
-              { position: 'Secretary', name: 'Neil Edwards' },
-              { position: 'Treasurer', name: 'Nina Wortman' },
-              { position: 'Membership', name: 'Andrew Young' },
-              { position: 'Website & Sunday', name: 'Dave Morrell' },
-              { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
-              { position: 'Events', name: 'Kaye Plunket' },
-              { position: 'Financial Reviewer', name: 'Bob Metcalf' }
-            ]
+          clubDescription: storedContent.clubDescription || 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
+          walkingSchedule: {
+            sundaySummer: storedContent.walkingSchedule?.sundaySummer || '09:00',
+            sundayWinter: storedContent.walkingSchedule?.sundayWinter || '09:30',
+            tuesday: storedContent.walkingSchedule?.tuesday || '10:00'
           },
-          walkingStats: storedContent.walkingStats || {
-            yearsActive: '24',
-            members: '50+',
-            walksPerWeek: '2'
-          },
-          clubImageCaption: storedContent.clubImageCaption || 'Walking together since 2001',
           lastUpdated: storedContent.lastUpdated || new Date().toISOString()
         }
       }
@@ -810,27 +834,12 @@ const loadData = async () => {
     // Ensure we have fallback data even on error
     events.value = { recurringEvents: [], specialEvents: [] }
     content.value = {
-      clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
-      clubDescription: '',
-      committee: {
-        title: 'Our Committee 2025/26',
-        members: [
-          { position: 'Chairperson', name: 'Lynn Young' },
-          { position: 'Secretary', name: 'Neil Edwards' },
-          { position: 'Treasurer', name: 'Nina Wortman' },
-          { position: 'Membership', name: 'Andrew Young' },
-          { position: 'Website & Sunday', name: 'Dave Morrell' },
-          { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
-          { position: 'Events', name: 'Kaye Plunket' },
-          { position: 'Financial Reviewer', name: 'Bob Metcalf' }
-        ]
+      clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
+      walkingSchedule: {
+        sundaySummer: '09:00',
+        sundayWinter: '09:30',
+        tuesday: '10:00'
       },
-      walkingStats: {
-        yearsActive: '24',
-        members: '50+',
-        walksPerWeek: '2'
-      },
-      clubImageCaption: 'Walking together since 2001',
       lastUpdated: new Date().toISOString()
     }
     galleries.value = []
@@ -1464,6 +1473,12 @@ const deletePhoto = (id: number) => {
 
 // Committee management functions
 const addCommitteeMember = () => {
+  if (!content.value.committee) {
+    content.value.committee = {
+      title: 'Our Committee 2025/26',
+      members: []
+    }
+  }
   content.value.committee.members.push({
     position: '',
     name: ''
@@ -1471,7 +1486,9 @@ const addCommitteeMember = () => {
 }
 
 const removeCommitteeMember = (index: number) => {
-  content.value.committee.members.splice(index, 1)
+  if (content.value.committee) {
+    content.value.committee.members.splice(index, 1)
+  }
 }
 
 // Email Configuration

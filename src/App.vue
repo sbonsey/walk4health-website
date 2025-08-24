@@ -38,29 +38,14 @@ const loginForm = ref({
 const recurringEvents = ref<EventsData['recurringEvents']>([])
 const specialEvents = ref<EventsData['specialEvents']>([])
 
-// Club content - loaded from data service
+// Initialize content with proper structure
 const clubContent = ref<ClubContent>({
-  clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
-  clubDescription: '',
-  committee: {
-    title: 'Our Committee 2025/26',
-    members: [
-      { position: 'Chairperson', name: 'Lynn Young' },
-      { position: 'Secretary', name: 'Neil Edwards' },
-      { position: 'Treasurer', name: 'Nina Wortman' },
-      { position: 'Membership', name: 'Andrew Young' },
-      { position: 'Website & Sunday', name: 'Dave Morrell' },
-      { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
-      { position: 'Events', name: 'Kaye Plunket' },
-      { position: 'Financial Reviewer', name: 'Bob Metcalf' }
-    ]
+  clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
+  walkingSchedule: {
+    sundaySummer: '09:00',
+    sundayWinter: '09:30',
+    tuesday: '10:00'
   },
-  walkingStats: {
-    yearsActive: '24',
-    members: '50+',
-    walksPerWeek: '2'
-  },
-  clubImageCaption: 'Walking together since 2001',
   lastUpdated: new Date().toISOString()
 })
 
@@ -185,52 +170,22 @@ const loadData = async () => {
     // Ensure content data is properly structured
     if (contentData && typeof contentData === 'object') {
       clubContent.value = {
-        clubMission: contentData.clubMission || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
-        clubDescription: contentData.clubDescription || '',
-        committee: contentData.committee || {
-          title: 'Our Committee 2025/26',
-          members: [
-            { position: 'Chairperson', name: 'Lynn Young' },
-            { position: 'Secretary', name: 'Neil Edwards' },
-            { position: 'Treasurer', name: 'Nina Wortman' },
-            { position: 'Membership', name: 'Andrew Young' },
-            { position: 'Website & Sunday', name: 'Dave Morrell' },
-            { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
-            { position: 'Events', name: 'Kaye Plunket' },
-            { position: 'Financial Reviewer', name: 'Bob Metcalf' }
-          ]
+        clubDescription: contentData.clubDescription || 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
+        walkingSchedule: contentData.walkingSchedule || {
+          sundaySummer: '09:00',
+          sundayWinter: '09:30',
+          tuesday: '10:00'
         },
-        walkingStats: contentData.walkingStats || {
-          yearsActive: '24',
-          members: '50+',
-          walksPerWeek: '2'
-        },
-        clubImageCaption: contentData.clubImageCaption || 'Walking together since 2001',
         lastUpdated: contentData.lastUpdated || new Date().toISOString()
       }
     } else {
       clubContent.value = {
-        clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
-        clubDescription: '',
-        committee: {
-          title: 'Our Committee 2025/26',
-          members: [
-            { position: 'Chairperson', name: 'Lynn Young' },
-            { position: 'Secretary', name: 'Neil Edwards' },
-            { position: 'Treasurer', name: 'Nina Wortman' },
-            { position: 'Membership', name: 'Andrew Young' },
-            { position: 'Website & Sunday', name: 'Dave Morrell' },
-            { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
-            { position: 'Events', name: 'Kaye Plunket' },
-            { position: 'Financial Reviewer', name: 'Bob Metcalf' }
-          ]
+        clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
+        walkingSchedule: {
+          sundaySummer: '09:00',
+          sundayWinter: '09:30',
+          tuesday: '10:00'
         },
-        walkingStats: {
-          yearsActive: '24',
-          members: '50+',
-          walksPerWeek: '2'
-        },
-        clubImageCaption: 'Walking together since 2001',
         lastUpdated: new Date().toISOString()
       }
     }
@@ -248,27 +203,12 @@ const loadData = async () => {
       const storedContent = dataService.getContentFromStorage()
       if (storedContent) {
         clubContent.value = {
-          clubMission: storedContent.clubMission || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
-          clubDescription: storedContent.clubDescription || '',
-          committee: storedContent.committee || {
-            title: 'Our Committee 2025/26',
-            members: [
-              { position: 'Chairperson', name: 'Lynn Young' },
-              { position: 'Secretary', name: 'Neil Edwards' },
-              { position: 'Treasurer', name: 'Nina Wortman' },
-              { position: 'Membership', name: 'Andrew Young' },
-              { position: 'Website & Sunday', name: 'Dave Morrell' },
-              { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
-              { position: 'Events', name: 'Kaye Plunket' },
-              { position: 'Financial Reviewer', name: 'Bob Metcalf' }
-            ]
+          clubDescription: storedContent.clubDescription || 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
+          walkingSchedule: storedContent.walkingSchedule || {
+            sundaySummer: '09:00',
+            sundayWinter: '09:30',
+            tuesday: '10:00'
           },
-          walkingStats: storedContent.walkingStats || {
-            yearsActive: '24',
-            members: '50+',
-            walksPerWeek: '2'
-          },
-          clubImageCaption: storedContent.clubImageCaption || 'Walking together since 2001',
           lastUpdated: storedContent.lastUpdated || new Date().toISOString()
         }
       }
@@ -289,27 +229,12 @@ const loadData = async () => {
     recurringEvents.value = []
     specialEvents.value = []
     clubContent.value = {
-      clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
-      clubDescription: '',
-      committee: {
-        title: 'Our Committee 2025/26',
-        members: [
-          { position: 'Chairperson', name: 'Lynn Young' },
-          { position: 'Secretary', name: 'Neil Edwards' },
-          { position: 'Treasurer', name: 'Nina Wortman' },
-          { position: 'Membership', name: 'Andrew Young' },
-          { position: 'Website & Sunday', name: 'Dave Morrell' },
-          { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
-          { position: 'Events', name: 'Kaye Plunket' },
-          { position: 'Financial Reviewer', name: 'Bob Metcalf' }
-        ]
+      clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
+      walkingSchedule: {
+        sundaySummer: '09:00',
+        sundayWinter: '09:30',
+        tuesday: '10:00'
       },
-      walkingStats: {
-        yearsActive: '24',
-        members: '50+',
-        walksPerWeek: '2'
-      },
-      clubImageCaption: 'Walking together since 2001',
       lastUpdated: new Date().toISOString()
     }
   } finally {
@@ -365,10 +290,12 @@ const closeMobileMenu = () => {
 }
 
 const submitContactForm = async () => {
+  let originalText: string | null = null
+  
   try {
     // Show loading state
-    const submitButton = document.querySelector('button[type="submit"]')
-    const originalText = submitButton?.textContent
+    const submitButton = document.querySelector('button[type="submit"]') as HTMLButtonElement
+    originalText = submitButton?.textContent || null
     if (submitButton) {
       submitButton.textContent = 'Sending...'
       submitButton.disabled = true
@@ -396,7 +323,7 @@ const submitContactForm = async () => {
     alert('Sorry, there was an error sending your message. Please try again.')
   } finally {
     // Restore button state
-    const submitButton = document.querySelector('button[type="submit"]')
+    const submitButton = document.querySelector('button[type="submit"]') as HTMLButtonElement
     if (submitButton) {
       submitButton.textContent = originalText || 'Send Message'
       submitButton.disabled = false
@@ -625,7 +552,7 @@ const formatTime = (time: string): string => {
               Walk for Health
             </h1>
             <p class="text-xl text-gray-600 mb-4 max-w-3xl mx-auto">
-              {{ clubContent.clubMission || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley' }}
+              {{ clubContent.clubDescription || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley' }}
             </p>      
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
               <a href="#events" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold text-lg px-8 py-4 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-200 shadow-lg">
@@ -674,16 +601,16 @@ const formatTime = (time: string): string => {
               <!-- Walking Stats -->
               <div class="grid grid-cols-3 gap-4 mt-8">
                 <div class="text-center">
-                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats?.yearsActive || '24' }}</div>
-                  <div class="text-sm text-gray-600">Years Active</div>
+                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingSchedule?.sundaySummer || '09:00' }}</div>
+                  <div class="text-sm text-gray-600">Sunday Summer</div>
                 </div>
                 <div class="text-center">
-                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats?.members || '50+' }}</div>
-                  <div class="text-sm text-gray-600">Members</div>
+                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingSchedule?.sundayWinter || '09:30' }}</div>
+                  <div class="text-sm text-gray-600">Sunday Winter</div>
                 </div>
                 <div class="text-center">
-                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats?.walksPerWeek || '2' }}</div>
-                  <div class="text-sm text-gray-600">Walks/Week</div>
+                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingSchedule?.tuesday || '10:00' }}</div>
+                  <div class="text-sm text-gray-600">Tuesday</div>
                 </div>
               </div>
             </div>
@@ -696,13 +623,13 @@ const formatTime = (time: string): string => {
                      class="w-full h-64 object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                 <div class="absolute bottom-4 left-4 text-white">
-                  <p class="text-sm font-medium">{{ clubContent.clubImageCaption || 'Walking together since 2001' }}</p>
+                  <p class="text-sm font-medium">Walking together since 2001</p>
                 </div>
               </div>
               
               <!-- Committee Info -->
               <div class="bg-primary-50 p-6 rounded-xl border border-primary-100">
-                <h4 class="text-xl font-bold text-primary-800 mb-4">{{ clubContent.committee?.title || 'Our Committee 2025/26' }}</h4>
+                <h4 class="text-xl font-bold text-primary-800 mb-4">Our Committee 2025/26</h4>
                 <div class="grid grid-cols-1 gap-2 text-primary-700 text-sm">
                   <div v-for="member in clubContent.committee?.members || []" :key="member.position" class="flex justify-between">
                     <span class="font-medium">{{ member.position }}:</span>
