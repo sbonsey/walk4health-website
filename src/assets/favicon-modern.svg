@@ -1,0 +1,18 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Modern Walking Shoe Favicon -->
+  
+  <!-- Shoe Base -->
+  <path d="M6 20 Q8 22 10 23 Q12 24 14 23 Q16 22 18 21 Q20 20 22 19 Q24 18 26 17 L27 16 Q26 15 24 14 Q22 13 20 12 Q18 11 16 10 Q14 9 12 8 Q10 7 8 6 Q6 5 4 4 Q2 3 1 2 Q0 1 0 0 Q0 0 1 0 Q2 0 3 1 Q4 2 6 3 Q7 4 8 5 Q9 6 10 7 Q11 8 12 9 Q13 10 14 11 Q15 12 16 13 Q17 14 18 15 Q19 16 20 17 Q21 18 22 19 Q23 20 24 21 Q25 22 26 23 Q27 24 28 25 Q29 26 30 27" 
+        stroke="#3B82F6" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  
+  <!-- Shoe Sole -->
+  <path d="M1 2 Q2 3 4 4 Q6 5 8 6 Q10 7 12 8 Q14 9 16 10 Q18 11 20 12 Q22 13 24 14 Q26 15 28 16 Q30 17 31 18" 
+        stroke="#1E40AF" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Walking Motion Line -->
+  <path d="M2 28 Q3 27 4 26 Q5 25 6 24" 
+        stroke="#10B981" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.8"/>
+  
+  <!-- Health Dot -->
+  <circle cx="8" cy="6" r="1" fill="#EF4444" opacity="0.9"/>
+</svg>

@@ -1,0 +1,27 @@
+<svg width="300" height="40" viewBox="0 0 300 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Modern Text Logo: WALK FOR HEALTH -->
+  
+  <!-- WALK -->
+  <text x="0" y="25" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#1F2937" letter-spacing="1">
+    WALK
+  </text>
+  
+  <!-- FOR -->
+  <text x="70" y="25" font-family="Arial, sans-serif" font-size="16" font-weight="400" fill="#6B7280" letter-spacing="0.5">
+    FOR
+  </text>
+  
+  <!-- HEALTH -->
+  <text x="100" y="25" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#3B82F6" letter-spacing="1">
+    HEALTH
+  </text>
+  
+  <!-- Subtle Underline -->
+  <path d="M0 30 Q37.5 32 75 30 Q112.5 28 150 30 Q187.5 32 225 30 Q262.5 28 300 30" 
+        stroke="#E5E7EB" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.6"/>
+  
+  <!-- Walking Motion Dots -->
+  <circle cx="260" cy="15" r="1.5" fill="#10B981" opacity="0.7"/>
+  <circle cx="265" cy="12" r="1" fill="#F59E0B" opacity="0.7"/>
+  <circle cx="270" cy="9" r="0.8" fill="#EF4444" opacity="0.7"/>
+</svg>

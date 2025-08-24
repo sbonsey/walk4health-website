@@ -1,0 +1,48 @@
+<svg width="400" height="120" viewBox="0 0 400 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Modern Walk for Health Logo -->
+  
+  <!-- Background Circle -->
+  <circle cx="60" cy="60" r="50" fill="#F3F4F6" stroke="#E5E7EB" stroke-width="2"/>
+  
+  <!-- Walking Shoe Icon in Circle -->
+  <g transform="translate(35, 40) scale(0.6)">
+    <!-- Simplified Shoe -->
+    <path d="M20 60 Q30 65 40 67 Q50 68 60 67 Q70 66 80 65 Q90 64 100 62 Q110 60 115 58 L117 55 Q115 52 110 50 Q105 48 100 47 Q95 46 90 45 Q85 44 80 43 Q75 42 70 41 Q65 40 60 39 Q55 38 50 37 Q45 36 40 35 Q35 34 30 33 Q25 32 23 30 Q21 28 20 25 Q19 22 20 20 Q21 18 23 17 Q25 16 27 15 Q30 14 33 13 Q35 12 40 11 Q45 10 50 9 Q55 8 60 7 Q65 6 70 5 Q75 4 80 3 Q85 2 90 1 Q95 0 100 0 Q105 0 110 1 Q115 2 120 3 Q123 4 125 6" 
+          stroke="#3B82F6" stroke-width="2" fill="none" stroke-linecap="round"/>
+    
+    <!-- Shoe Sole -->
+    <path d="M20 25 Q30 27 40 29 Q50 31 60 33 Q70 35 80 37 Q90 39 100 41 Q110 43 115 45" 
+          stroke="#1E40AF" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Text: WALK -->
+  <text x="130" y="45" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#1F2937" letter-spacing="2">
+    WALK
+  </text>
+  
+  <!-- Text: FOR -->
+  <text x="130" y="65" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#6B7280" letter-spacing="1">
+    FOR
+  </text>
+  
+  <!-- Text: HEALTH -->
+  <text x="130" y="85" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#3B82F6" letter-spacing="2">
+    HEALTH
+  </text>
+  
+  <!-- Subtle Walking Motion Lines -->
+  <path d="M350 80 Q355 78 360 76 Q365 74 370 72" 
+        stroke="#10B981" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.4"/>
+  <path d="M355 85 Q360 83 365 81 Q370 79 375 77" 
+        stroke="#10B981" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.4"/>
+  
+  <!-- Health Indicator Dots -->
+  <circle cx="320" cy="30" r="3" fill="#EF4444" opacity="0.8"/>
+  <circle cx="325" cy="25" r="2" fill="#F59E0B" opacity="0.8"/>
+  <circle cx="330" cy="20" r="1.5" fill="#10B981" opacity="0.8"/>
+  
+  <!-- Tagline -->
+  <text x="130" y="105" font-family="Arial, sans-serif" font-size="12" font-weight="400" fill="#9CA3AF" letter-spacing="1">
+    24 YEARS OF WALKING IN THE HUTT VALLEY
+  </text>
+</svg>

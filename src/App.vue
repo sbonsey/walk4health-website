@@ -508,10 +508,10 @@ const formatEventDate = (dateString: string) => {
     <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
       <div class="max-w-7xl mx-auto px-8">
         <div class="flex justify-between items-center h-24">
-          <!-- Logo -->
-          <div class="flex items-center">
-            <h1 class="text-3xl font-light tracking-wide text-gray-800">WALK FOR HEALTH</h1>
-          </div>
+                      <!-- Logo -->
+            <div class="flex items-center">
+              <img src="/src/assets/logo-text.svg" alt="Walk for Health" class="h-8 md:h-10">
+            </div>
           
           <!-- Desktop Navigation -->
           <div class="hidden md:flex items-center space-x-12">

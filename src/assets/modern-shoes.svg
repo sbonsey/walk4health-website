@@ -1,0 +1,30 @@
+<svg width="120" height="80" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Modern Walking Shoe Icon -->
+  
+  <!-- Shoe Base -->
+  <path d="M20 60 Q25 65 35 67 Q45 68 55 67 Q65 66 75 65 Q85 64 95 62 Q105 60 110 58 L112 55 Q110 52 105 50 Q100 48 95 47 Q90 46 85 45 Q80 44 75 43 Q70 42 65 41 Q60 40 55 39 Q50 38 45 37 Q40 36 35 35 Q30 34 25 33 Q20 32 18 30 Q16 28 15 25 Q14 22 15 20 Q16 18 18 17 Q20 16 22 15 Q25 14 28 13 Q30 12 35 11 Q40 10 45 9 Q50 8 55 7 Q60 6 65 5 Q70 4 75 3 Q80 2 85 1 Q90 0 95 0 Q100 0 105 1 Q110 2 115 3 Q118 4 120 6" 
+        stroke="#3B82F6" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Shoe Upper -->
+  <path d="M20 60 Q25 58 30 56 Q35 54 40 52 Q45 50 50 48 Q55 46 60 44 Q65 42 70 40 Q75 38 80 36 Q85 34 90 32 Q95 30 100 28 Q105 26 110 24 Q115 22 118 20" 
+        stroke="#3B82F6" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Shoe Laces -->
+  <path d="M25 55 Q30 53 35 51 Q40 49 45 47 Q50 45 55 43 Q60 41 65 39 Q70 37 75 35 Q80 33 85 31 Q90 29 95 27" 
+        stroke="#1E40AF" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.7"/>
+  
+  <!-- Shoe Sole -->
+  <path d="M15 25 Q20 27 25 29 Q30 31 35 33 Q40 35 45 37 Q50 39 55 41 Q60 43 65 45 Q70 47 75 49 Q80 51 85 53 Q90 55 95 57 Q100 59 105 61 Q110 63 115 65" 
+        stroke="#1E40AF" stroke-width="3" fill="none" stroke-linecap="round"/>
+  
+  <!-- Walking Motion Lines -->
+  <path d="M5 70 Q8 68 10 66 Q12 64 15 62" 
+        stroke="#10B981" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+  <path d="M8 75 Q10 73 12 71 Q14 69 16 67" 
+        stroke="#10B981" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+  
+  <!-- Health/Energy Dots -->
+  <circle cx="25" cy="15" r="2" fill="#EF4444" opacity="0.8"/>
+  <circle cx="35" cy="12" r="1.5" fill="#F59E0B" opacity="0.8"/>
+  <circle cx="45" cy="10" r="1" fill="#10B981" opacity="0.8"/>
+</svg>
