@@ -84,7 +84,9 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'noreply@walk4health.co.nz',
+        // Using Resend's default verified domain. Change to 'noreply@walk4health.co.nz' 
+        // once you verify your domain with Resend
+        from: 'onboarding@resend.dev',
         to: inquiryEmail,
         subject: `${subjectPrefix} ${subject}`,
         html: `
