@@ -36,32 +36,13 @@ export default async function handler(req, res) {
             console.log('🔍 GET Content - Parsed data:', parsedData)
             res.status(200).json(parsedData)
           } else {
-            console.log('🔍 GET Content - No data found, returning default')
-                    // Return default structure if no data exists
-        const defaultData = {
-          clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
-          committee: {
-            title: 'Our Committee 2025/26',
-            members: [
-              { position: 'Chairperson', name: 'Lynn Young' },
-              { position: 'Secretary', name: 'Neil Edwards' },
-              { position: 'Treasurer', name: 'Nina Wortman' },
-              { position: 'Membership', name: 'Andrew Young' },
-              { position: 'Website & Sunday', name: 'Dave Morrell' },
-              { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
-              { position: 'Events', name: 'Kaye Plunket' },
-              { position: 'Financial Reviewer', name: 'Bob Metcalf' }
-            ]
-          },
-          walkingStats: {
-            yearsActive: '24',
-            members: '50+',
-            walksPerWeek: '2'
-          },
-          clubImageCaption: 'Walking together since 2001',
-          lastUpdated: new Date().toISOString()
-        }
-            res.status(200).json(defaultData)
+            console.log('🔍 GET Content - No data found, returning empty structure')
+            // Return empty structure if no data exists - no defaults
+            const emptyData = {
+              clubDescription: '',
+              lastUpdated: new Date().toISOString()
+            }
+            res.status(200).json(emptyData)
           }
         } else {
           const errorText = await response.text()
@@ -89,25 +70,9 @@ export default async function handler(req, res) {
         const contentData = {
           clubMission,
           clubDescription,
-          committee: committee || {
-            title: 'Our Committee 2025/26',
-            members: [
-              { position: 'Chairperson', name: 'Lynn Young' },
-              { position: 'Secretary', name: 'Neil Edwards' },
-              { position: 'Treasurer', name: 'Nina Wortman' },
-              { position: 'Membership', name: 'Andrew Young' },
-              { position: 'Website & Sunday', name: 'Dave Morrell' },
-              { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
-              { position: 'Events', name: 'Kaye Plunket' },
-              { position: 'Financial Reviewer', name: 'Bob Metcalf' }
-            ]
-          },
-          walkingStats: walkingStats || {
-            yearsActive: '24',
-            members: '50+',
-            walksPerWeek: '2'
-          },
-          clubImageCaption: clubImageCaption || 'Walking together since 2001',
+          committee: committee || null,
+          walkingStats: walkingStats || null,
+          clubImageCaption: clubImageCaption || null,
           lastUpdated: new Date().toISOString()
         }
 
