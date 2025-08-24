@@ -542,50 +542,26 @@ const formatTime = (time: string): string => {
 
     <!-- Main Content -->
     <main class="pt-24">
-      <!-- Home Section -->
-      <section id="home" class="section bg-gradient-to-br from-primary-50 to-secondary-50 relative overflow-hidden">
-        <!-- Background Image -->
-        <div class="absolute inset-0 z-0">
-          <img src="/src/assets/kitera-dent-jWv1ILisuSc-unsplash.jpg" 
-               alt="Group of people walking together" 
-               class="w-full h-full object-cover opacity-20">
-        </div>
-        
+      <!-- Hero Section -->
+      <section class="hero-section relative bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white">
+        <div class="absolute inset-0 bg-black/20"></div>
         <div class="container relative z-10">
-          <div class="text-center">
-            <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              Walk for Health
-            </h1>
-            <p class="text-xl text-gray-600 mb-4 max-w-3xl mx-auto">
-              {{ clubContent.clubDescription || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley' }}
-            </p>      
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="#events" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold text-lg px-8 py-4 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-200 shadow-lg">
-                Join Our Walks
-              </a>
-              <a href="#contact" class="bg-white hover:bg-gray-50 text-gray-800 font-semibold text-lg px-8 py-4 rounded-lg border-2 border-gray-200 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-gray-200 shadow-lg">
-                Get in Touch
-              </a>
+          <div class="text-center py-24">
+            <h1 class="text-6xl font-bold mb-6">Walk for Health</h1>
+            <p class="text-xl mb-8 max-w-3xl mx-auto">
+              Join our walking club in the beautiful Hutt Valley for fitness, friendship, and adventure
+            </p>
+            
+            <!-- Mission Statement -->
+            <div v-if="clubContent.clubMission" class="mb-8">
+              <p class="text-lg italic max-w-2xl mx-auto">
+                "{{ clubContent.clubMission }}"
+              </p>
             </div>
-          </div>
-          
-          <!-- Regular Walking Schedule (Recurring Events) -->
-          <div class="mt-16">
-            <h3 class="text-2xl font-bold text-center text-gray-900 mb-8">Regular Walking Schedule</h3>
-            <div class="grid md:grid-cols-2 gap-8">
-              <div v-for="event in recurringEvents" :key="`schedule-${event.id}`" class="card bg-white/90 backdrop-blur-sm">
-                <div class="flex items-center mb-4">
-                  <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
-                    <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                  </div>
-                  <h3 class="text-2xl font-bold text-gray-900">{{ event.title }}</h3>
-                </div>
-                <p class="text-gray-600 mb-2">{{ capitalizeDay(event.day) }} at {{ formatTime(event.time) }}</p>
-                <p v-if="event.message" class="text-gray-600 mb-2">{{ event.message }}</p>
-                <p class="text-gray-600">Various locations around Hutt Valley</p>
-              </div>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <a href="#events" class="btn-primary text-lg px-8 py-4">Join a Walk</a>
+              <a href="#about" class="btn-secondary text-lg px-8 py-4">Learn More</a>
             </div>
           </div>
         </div>
@@ -598,14 +574,6 @@ const formatTime = (time: string): string => {
           
           <div class="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <!-- Mission Statement -->
-              <div v-if="clubContent.clubMission" class="mb-6">
-                <h3 class="text-2xl font-bold text-gray-900 mb-4">Our Mission</h3>
-                <p class="text-gray-600 mb-6 italic">
-                  "{{ clubContent.clubMission }}"
-                </p>
-              </div>
-              
               <h3 class="text-2xl font-bold text-gray-900 mb-4">About Our Club</h3>
               <p class="text-gray-600 mb-6">
                 {{ clubContent.clubDescription }}
@@ -649,35 +617,6 @@ const formatTime = (time: string): string => {
                     <span>{{ member.name }}</span>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Walking Schedule Section -->
-      <section v-if="clubContent.walkingSchedule" class="section bg-gray-50">
-        <div class="container">
-          <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Walking Schedule</h2>
-          
-          <div class="max-w-2xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div class="text-center bg-white p-6 rounded-xl shadow-sm">
-                <div class="text-4xl font-bold text-primary-600 mb-2">{{ formatTime(clubContent.walkingSchedule.sundaySummer) }}</div>
-                <div class="text-lg font-semibold text-gray-800 mb-1">Sunday Summer</div>
-                <div class="text-sm text-gray-600">September - April</div>
-              </div>
-              
-              <div class="text-center bg-white p-6 rounded-xl shadow-sm">
-                <div class="text-4xl font-bold text-primary-600 mb-2">{{ formatTime(clubContent.walkingSchedule.sundayWinter) }}</div>
-                <div class="text-lg font-semibold text-gray-800 mb-1">Sunday Winter</div>
-                <div class="text-sm text-gray-600">May - August</div>
-              </div>
-              
-              <div class="text-center bg-white p-6 rounded-xl shadow-sm">
-                <div class="text-4xl font-bold text-primary-600 mb-2">{{ formatTime(clubContent.walkingSchedule.tuesday) }}</div>
-                <div class="text-lg font-semibold text-gray-800 mb-1">Tuesday</div>
-                <div class="text-sm text-gray-600">All Year Round</div>
               </div>
             </div>
           </div>
