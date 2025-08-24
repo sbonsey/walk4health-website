@@ -464,17 +464,17 @@
               <!-- Committee Management -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Committee Title</label>
-                <input v-model="content.committee.title" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., Our Committee 2025/26">
+                <input v-model="content.committee!.title" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., Our Committee 2025/26">
                 
                 <div class="mt-4">
                   <label class="block text-sm font-medium text-gray-700 mb-1">Committee Members</label>
                   <div class="space-y-3">
-                    <div v-for="(member, index) in content.committee.members" :key="index" class="flex gap-2 items-center">
+                    <div v-for="(member, index) in content.committee!.members" :key="index" class="flex gap-2 items-center">
                       <input v-model="member.position" type="text" placeholder="Position" class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm">
                       <input v-model="member.name" type="text" placeholder="Name" class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm">
                       <button @click="removeCommitteeMember(index)" class="text-red-600 hover:text-red-800">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
                       </button>
                     </div>
@@ -489,15 +489,15 @@
                 <div class="grid grid-cols-3 gap-3">
                   <div>
                     <label class="block text-xs text-gray-600 mb-1">Years Active</label>
-                    <input v-model="content.walkingStats.yearsActive" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" placeholder="24">
+                    <input v-model="content.walkingStats!.yearsActive" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" placeholder="24">
                   </div>
                   <div>
                     <label class="block text-xs text-gray-600 mb-1">Members</label>
-                    <input v-model="content.walkingStats.members" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" placeholder="50+">
+                    <input v-model="content.walkingStats!.members" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" placeholder="50+">
                   </div>
                   <div>
                     <label class="block text-xs text-gray-600 mb-1">Walks/Week</label>
-                    <input v-model="content.walkingStats.walksPerWeek" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" placeholder="2">
+                    <input v-model="content.walkingStats!.walksPerWeek" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" placeholder="2">
                   </div>
                 </div>
               </div>
@@ -1473,22 +1473,14 @@ const deletePhoto = (id: number) => {
 
 // Committee management functions
 const addCommitteeMember = () => {
-  if (!content.value.committee) {
-    content.value.committee = {
-      title: 'Our Committee 2025/26',
-      members: []
-    }
-  }
-  content.value.committee.members.push({
+  content.value.committee!.members.push({
     position: '',
     name: ''
   })
 }
 
 const removeCommitteeMember = (index: number) => {
-  if (content.value.committee) {
-    content.value.committee.members.splice(index, 1)
-  }
+  content.value.committee!.members.splice(index, 1)
 }
 
 // Email Configuration
