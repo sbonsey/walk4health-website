@@ -1,6 +1,6 @@
 <template>
   <!-- Admin Panel - Only show when explicitly opened -->
-  <div v-if="isAdmin && isOpen" class="admin-panel bg-white border-l border-gray-200 fixed right-0 top-24 h-[calc(100vh-6rem)] w-96 shadow-xl z-[70] transform transition-transform duration-300">
+  <div v-if="isAdmin && isOpen" class="admin-panel bg-white border-l border-gray-200 fixed right-0 top-24 h-[calc(100vh-6rem)] w-[32rem] shadow-xl z-[70] transform transition-transform duration-300">
     <div class="p-6">
       <!-- Header -->
       <div class="flex items-center justify-between mb-6">
@@ -380,6 +380,11 @@
           <!-- Content Tab -->
           <div v-if="activeTab === 'content'" class="space-y-4">
             <h3 class="text-lg font-semibold text-gray-900">Manage Club Content</h3>
+            
+            <!-- Status Display -->
+            <div v-if="saveStatus" class="p-3 rounded-lg text-sm" :class="saveStatus.includes('Error') || saveStatus.includes('Failed') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'">
+              {{ saveStatus }}
+            </div>
             
             <div class="space-y-6">
               <!-- Club Description -->

@@ -37,16 +37,30 @@ export default async function handler(req, res) {
             res.status(200).json(parsedData)
           } else {
             console.log('🔍 GET Content - No data found, returning default')
-            // Return default structure if no data exists
-            const defaultData = {
-              clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
-              walkingSchedule: {
-                sundaySummer: '09:00',
-                sundayWinter: '09:30',
-                tuesday: '10:00'
-              },
-              lastUpdated: new Date().toISOString()
-            }
+                    // Return default structure if no data exists
+        const defaultData = {
+          clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
+          committee: {
+            title: 'Our Committee 2025/26',
+            members: [
+              { position: 'Chairperson', name: 'Lynn Young' },
+              { position: 'Secretary', name: 'Neil Edwards' },
+              { position: 'Treasurer', name: 'Nina Wortman' },
+              { position: 'Membership', name: 'Andrew Young' },
+              { position: 'Website & Sunday', name: 'Dave Morrell' },
+              { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
+              { position: 'Events', name: 'Kaye Plunket' },
+              { position: 'Financial Reviewer', name: 'Bob Metcalf' }
+            ]
+          },
+          walkingStats: {
+            yearsActive: '24',
+            members: '50+',
+            walksPerWeek: '2'
+          },
+          clubImageCaption: 'Walking together since 2001',
+          lastUpdated: new Date().toISOString()
+        }
             res.status(200).json(defaultData)
           }
         } else {
@@ -62,19 +76,37 @@ export default async function handler(req, res) {
 
     case 'POST':
       try {
-        const { clubDescription, walkingSchedule } = req.body
+        const { clubDescription, committee, walkingStats, clubImageCaption } = req.body
         
-        console.log('💾 POST Content - Received data:', { clubDescription, walkingSchedule })
+        console.log('💾 POST Content - Received data:', { clubDescription, committee, walkingStats, clubImageCaption })
         
         // Validate data
-        if (!clubDescription || !walkingSchedule) {
+        if (!clubDescription) {
           console.error('💾 POST Content - Missing required fields')
           return res.status(400).json({ error: 'Missing required fields' })
         }
 
         const contentData = {
           clubDescription,
-          walkingSchedule,
+          committee: committee || {
+            title: 'Our Committee 2025/26',
+            members: [
+              { position: 'Chairperson', name: 'Lynn Young' },
+              { position: 'Secretary', name: 'Neil Edwards' },
+              { position: 'Treasurer', name: 'Nina Wortman' },
+              { position: 'Membership', name: 'Andrew Young' },
+              { position: 'Website & Sunday', name: 'Dave Morrell' },
+              { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
+              { position: 'Events', name: 'Kaye Plunket' },
+              { position: 'Financial Reviewer', name: 'Bob Metcalf' }
+            ]
+          },
+          walkingStats: walkingStats || {
+            yearsActive: '24',
+            members: '50+',
+            walksPerWeek: '2'
+          },
+          clubImageCaption: clubImageCaption || 'Walking together since 2001',
           lastUpdated: new Date().toISOString()
         }
 
