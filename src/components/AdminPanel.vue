@@ -577,7 +577,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   close: []
   eventsUpdated: [EventsData]
-  contentUpdated: [ClubContent]
+  'content-updated': [ClubContent]
   galleriesUpdated: [GalleryMeta[]]
 }>()
 
@@ -882,7 +882,7 @@ const saveContent = async () => {
     
     if (success) {
       saveStatus.value = 'Content saved successfully!'
-      emit('contentUpdated', content.value)
+      emit('content-updated', content.value)
       console.log('✅ AdminPanel: Content saved successfully')
       setTimeout(() => saveStatus.value = '', 3000)
     } else {
