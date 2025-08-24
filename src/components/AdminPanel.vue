@@ -643,32 +643,23 @@ const events = ref<EventsData>({
 })
 
 const content = ref<ClubContent>({
-  clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
-  clubDescription: 'In the Hutt Valley we are blessed with some of the best walking areas in New Zealand with the beautiful river trail, etc.',
+  clubMission: '',
+  clubDescription: '',
   walkingSchedule: {
-    sundaySummer: '09:00',
-    sundayWinter: '09:30',
-    tuesday: '10:00'
+    sundaySummer: '',
+    sundayWinter: '',
+    tuesday: ''
   },
   committee: {
-    title: 'Our Committee 2025/26',
-    members: [
-      { position: 'Chairperson', name: 'Lynn Young' },
-      { position: 'Secretary', name: 'Neil Edwards' },
-      { position: 'Treasurer', name: 'Nina Wortman' },
-      { position: 'Membership', name: 'Andrew Young' },
-      { position: 'Website & Sunday', name: 'Dave Morrell' },
-      { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
-      { position: 'Events', name: 'Kaye Plunket' },
-      { position: 'Financial Reviewer', name: 'Bob Metcalf' }
-    ]
+    title: '',
+    members: []
   },
   walkingStats: {
-    yearsActive: '24',
-    members: '50+',
-    walksPerWeek: '2'
+    yearsActive: '',
+    members: '',
+    walksPerWeek: ''
   },
-  clubImageCaption: 'Walking together since 2001',
+  clubImageCaption: '',
   lastUpdated: new Date().toISOString()
 })
 
@@ -732,62 +723,44 @@ const loadData = async () => {
     // Ensure content data is properly structured
     if (contentData && typeof contentData === 'object') {
       content.value = {
-        clubMission: contentData.clubMission || 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
+        clubMission: contentData.clubMission || '',
         clubDescription: contentData.clubDescription || '',
         walkingSchedule: {
-          sundaySummer: contentData.walkingSchedule?.sundaySummer || '09:00',
-          sundayWinter: contentData.walkingSchedule?.sundayWinter || '09:30',
-          tuesday: contentData.walkingSchedule?.tuesday || '10:00'
+          sundaySummer: contentData.walkingSchedule?.sundaySummer || '',
+          sundayWinter: contentData.walkingSchedule?.sundayWinter || '',
+          tuesday: contentData.walkingSchedule?.tuesday || ''
         },
         committee: contentData.committee || {
-          title: 'Our Committee 2025/26',
-          members: [
-            { position: 'Chairperson', name: 'Lynn Young' },
-            { position: 'Secretary', name: 'Neil Edwards' },
-            { position: 'Treasurer', name: 'Nina Wortman' },
-            { position: 'Membership', name: 'Andrew Young' },
-            { position: 'Website & Sunday', name: 'Dave Morrell' },
-            { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
-            { position: 'Events', name: 'Kaye Plunket' },
-            { position: 'Financial Reviewer', name: 'Bob Metcalf' }
-          ]
+          title: '',
+          members: []
         },
         walkingStats: contentData.walkingStats || {
-          yearsActive: '24',
-          members: '50+',
-          walksPerWeek: '2'
+          yearsActive: '',
+          members: '',
+          walksPerWeek: ''
         },
-        clubImageCaption: contentData.clubImageCaption || 'Walking together since 2001',
+        clubImageCaption: contentData.clubImageCaption || '',
         lastUpdated: contentData.lastUpdated || new Date().toISOString()
       }
     } else {
       content.value = {
-        clubMission: 'Promoting health and fitness through regular walking in the beautiful Hutt Valley',
+        clubMission: '',
         clubDescription: '',
         walkingSchedule: {
-          sundaySummer: '09:00',
-          sundayWinter: '09:30',
-          tuesday: '10:00'
+          sundaySummer: '',
+          sundayWinter: '',
+          tuesday: ''
         },
         committee: {
-          title: 'Our Committee 2025/26',
-          members: [
-            { position: 'Chairperson', name: 'Lynn Young' },
-            { position: 'Secretary', name: 'Neil Edwards' },
-            { position: 'Treasurer', name: 'Nina Wortman' },
-            { position: 'Membership', name: 'Andrew Young' },
-            { position: 'Website & Sunday', name: 'Dave Morrell' },
-            { position: 'Tuesday walking', name: 'Lyne Morrell, Ian Andrews, Patsie Barltrop' },
-            { position: 'Events', name: 'Kaye Plunket' },
-            { position: 'Financial Reviewer', name: 'Bob Metcalf' }
-          ]
+          title: '',
+          members: []
         },
         walkingStats: {
-          yearsActive: '24',
-          members: '50+',
-          walksPerWeek: '2'
+          yearsActive: '',
+          members: '',
+          walksPerWeek: ''
         },
-        clubImageCaption: 'Walking together since 2001',
+        clubImageCaption: '',
         lastUpdated: new Date().toISOString()
       }
     }
