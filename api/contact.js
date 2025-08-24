@@ -84,29 +84,28 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        // Using Resend's default verified domain. Change to 'noreply@walk4health.co.nz' 
-        // once you verify your domain with Resend
-        from: 'onboarding@resend.dev',
-        to: inquiryEmail,
-        subject: `${subjectPrefix} ${subject}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #2563eb;">New Contact Form Submission</h2>
-            <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <p><strong>Name:</strong> ${name}</p>
-              <p><strong>Email:</strong> ${email}</p>
-              <p><strong>Subject:</strong> ${subject}</p>
-              <p><strong>Message:</strong></p>
-              <div style="background-color: white; padding: 15px; border-radius: 4px; border-left: 4px solid #2563eb;">
-                ${message.replace(/\n/g, '<br>')}
+          // Using your verified domain walk4health.org.nz
+          from: 'noreply@walk4health.org.nz',
+          to: inquiryEmail,
+          subject: `${subjectPrefix} ${subject}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #2563eb;">New Contact Form Submission</h2>
+              <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>Name:</strong> ${name}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Subject:</strong> ${subject}</p>
+                <p><strong>Message:</strong></p>
+                <div style="background-color: white; padding: 15px; border-radius: 4px; border-left: 4px solid #2563eb;">
+                  ${message.replace(/\n/g, '<br>')}
+                </div>
               </div>
+              <p style="color: #64748b; font-size: 14px;">
+                This message was sent from the Walk4Health website contact form.
+              </p>
             </div>
-            <p style="color: #64748b; font-size: 14px;">
-              This message was sent from the Walk4Health website contact form.
-            </p>
-          </div>
-        `,
-        text: `
+          `,
+          text: `
 New Contact Form Submission
 
 Name: ${name}
@@ -118,7 +117,7 @@ ${message}
 
 ---
 This message was sent from the Walk4Health website contact form.
-        `
+          `
       })
     })
 
