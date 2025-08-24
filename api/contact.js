@@ -40,36 +40,74 @@ export default async function handler(req, res) {
       }
     }
 
-    // For now, we'll just log the email details since we don't have an email service configured
-    // In production, you would integrate with a service like SendGrid, Mailgun, or Resend
-    console.log('📧 Contact Form Submission:')
-    console.log('📧 To:', inquiryEmail)
-    console.log('📧 Subject:', `${subjectPrefix} ${subject}`)
-    console.log('📧 From:', `${name} <${email}>`)
-    console.log('📧 Message:', message)
-    console.log('📧 Timestamp:', new Date().toISOString())
+    // Check if Vercel Send API key is configured
+    const sendApiKey = process.env.SENDGRID_API_KEY
+    if (!sendApiKey) {
+      console.error('Vercel Send API key not configured')
+      return res.status(500).json({ error: 'Email service not configured' })
+    }
 
-    // TODO: Integrate with email service
-    // Example with SendGrid:
-    // const sgMail = require('@sendgrid/mail')
-    // sgMail.setApiKey(process.env.SENDGRID_API_KEY)
-    // await sgMail.send({
-    //   to: inquiryEmail,
-    //   from: 'noreply@walk4health.co.nz',
-    //   subject: `${subjectPrefix} ${subject}`,
-    //   text: `Name: ${name}\nEmail: ${email}\nSubject: ${subject}\n\nMessage:\n${message}`,
-    //   html: `<h3>New Contact Form Submission</h3><p><strong>Name:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p><strong>Subject:</strong> ${subject}</p><p><strong>Message:</strong></p><p>${message.replace(/\n/g, '<br>')}</p>`
-    // })
+    // Send email using Vercel Send
+    const emailResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${sendApiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'noreply@walk4health.co.nz',
+        to: inquiryEmail,
+        subject: `${subjectPrefix} ${subject}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #2563eb;">New Contact Form Submission</h2>
+            <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <p><strong>Name:</strong> ${name}</p>
+              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>Subject:</strong> ${subject}</p>
+              <p><strong>Message:</strong></p>
+              <div style="background-color: white; padding: 15px; border-radius: 4px; border-left: 4px solid #2563eb;">
+                ${message.replace(/\n/g, '<br>')}
+              </div>
+            </div>
+            <p style="color: #64748b; font-size: 14px;">
+              This message was sent from the Walk4Health website contact form.
+            </p>
+          </div>
+        `,
+        text: `
+New Contact Form Submission
 
-    // Return success (even though we're just logging for now)
+Name: ${name}
+Email: ${email}
+Subject: ${subject}
+
+Message:
+${message}
+
+---
+This message was sent from the Walk4Health website contact form.
+        `
+      })
+    })
+
+    if (!emailResponse.ok) {
+      const errorText = await emailResponse.text()
+      console.error('Vercel Send API error:', emailResponse.status, errorText)
+      throw new Error(`Email service error: ${emailResponse.status}`)
+    }
+
+    const emailResult = await emailResponse.json()
+    console.log('📧 Email sent successfully:', emailResult)
+
+    // Return success
     res.status(200).json({ 
       success: true, 
-      message: 'Contact form submitted successfully',
-      note: 'Email functionality is currently in development mode. Your message has been logged.'
+      message: 'Contact form submitted successfully. We will get back to you soon!'
     })
 
   } catch (error) {
     console.error('Error processing contact form:', error)
-    res.status(500).json({ error: 'Failed to process contact form' })
+    res.status(500).json({ error: 'Failed to process contact form. Please try again later.' })
   }
 }

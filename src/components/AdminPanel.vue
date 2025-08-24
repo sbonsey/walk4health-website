@@ -299,14 +299,14 @@
             <!-- Gallery Management -->
             <div class="space-y-6">
               <!-- Debug Info -->
-              <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200 mb-4">
+              <!-- <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200 mb-4">
                 <h4 class="font-medium text-yellow-900 mb-2">Debug Info</h4>
                 <p class="text-xs text-yellow-700">Galleries loaded: {{ galleries.length }}</p>
                 <p class="text-xs text-yellow-700">Total images: {{ galleries.reduce((sum, g) => sum + g.images.length, 0) }}</p>
                 <button @click="debugGalleries" class="text-xs bg-yellow-200 hover:bg-yellow-300 px-2 py-1 rounded">
                   Debug Galleries
                 </button>
-              </div>
+              </div> -->
 
               <!-- Create New Gallery -->
               <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
@@ -1485,12 +1485,39 @@ const emailTestResult = ref<{ success: boolean; error?: string } | null>(null)
 const testEmail = async () => {
   emailTestResult.value = null
   try {
-    await dataService.sendTestEmail(emailConfig.inquiryEmail, emailConfig.subjectPrefix)
-    emailTestResult.value = { success: true }
-    saveStatus.value = 'Test email sent successfully!'
-    setTimeout(() => saveStatus.value = '', 3000)
+    // Send a test email using the contact API
+    const testData = {
+      name: 'Admin Test',
+      email: 'admin@walk4health.co.nz',
+      subject: 'Test Email',
+      message: 'This is a test email to verify the email configuration is working correctly. If you receive this, the email system is properly configured!'
+    }
+
+    const response = await fetch('/api/contact', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(testData)
+    })
+
+    if (response.ok) {
+      emailTestResult.value = { success: true }
+      saveStatus.value = 'Test email sent successfully!'
+      setTimeout(() => saveStatus.value = '', 3000)
+    } else {
+      const errorData = await response.json()
+      emailTestResult.value = { 
+        success: false, 
+        error: errorData.error || `HTTP ${response.status}` 
+      }
+      saveStatus.value = 'Error sending test email'
+    }
   } catch (error) {
-    emailTestResult.value = { success: false, error: error instanceof Error ? error.message : String(error) }
+    emailTestResult.value = { 
+      success: false, 
+      error: error instanceof Error ? error.message : String(error) 
+    }
     saveStatus.value = 'Error sending test email'
     console.error('Error sending test email:', error)
   }
