@@ -598,24 +598,32 @@ const formatTime = (time: string): string => {
           
           <div class="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h3 class="text-2xl font-bold text-gray-900 mb-4">24 Years of Walking</h3>
+              <!-- Mission Statement -->
+              <div v-if="clubContent.clubMission" class="mb-6">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Our Mission</h3>
+                <p class="text-gray-600 mb-6 italic">
+                  "{{ clubContent.clubMission }}"
+                </p>
+              </div>
+              
+              <h3 class="text-2xl font-bold text-gray-900 mb-4">About Our Club</h3>
               <p class="text-gray-600 mb-6">
                 {{ clubContent.clubDescription }}
               </p>
               
               <!-- Walking Stats -->
-              <div class="grid grid-cols-3 gap-4 mt-8">
+              <div v-if="clubContent.walkingStats" class="grid grid-cols-3 gap-4 mt-8">
                 <div class="text-center">
-                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingSchedule?.sundaySummer || '09:00' }}</div>
-                  <div class="text-sm text-gray-600">Sunday Summer</div>
+                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats.yearsActive || '24' }}</div>
+                  <div class="text-sm text-gray-600">Years Active</div>
                 </div>
                 <div class="text-center">
-                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingSchedule?.sundayWinter || '09:30' }}</div>
-                  <div class="text-sm text-gray-600">Sunday Winter</div>
+                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats.members || '50+' }}</div>
+                  <div class="text-sm text-gray-600">Members</div>
                 </div>
                 <div class="text-center">
-                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingSchedule?.tuesday || '10:00' }}</div>
-                  <div class="text-sm text-gray-600">Tuesday</div>
+                  <div class="text-3xl font-bold text-primary-600">{{ clubContent.walkingStats.walksPerWeek || '2' }}</div>
+                  <div class="text-sm text-gray-600">Walks/Week</div>
                 </div>
               </div>
             </div>
@@ -641,6 +649,35 @@ const formatTime = (time: string): string => {
                     <span>{{ member.name }}</span>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Walking Schedule Section -->
+      <section v-if="clubContent.walkingSchedule" class="section bg-gray-50">
+        <div class="container">
+          <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Walking Schedule</h2>
+          
+          <div class="max-w-2xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div class="text-center bg-white p-6 rounded-xl shadow-sm">
+                <div class="text-4xl font-bold text-primary-600 mb-2">{{ formatTime(clubContent.walkingSchedule.sundaySummer) }}</div>
+                <div class="text-lg font-semibold text-gray-800 mb-1">Sunday Summer</div>
+                <div class="text-sm text-gray-600">September - April</div>
+              </div>
+              
+              <div class="text-center bg-white p-6 rounded-xl shadow-sm">
+                <div class="text-4xl font-bold text-primary-600 mb-2">{{ formatTime(clubContent.walkingSchedule.sundayWinter) }}</div>
+                <div class="text-lg font-semibold text-gray-800 mb-1">Sunday Winter</div>
+                <div class="text-sm text-gray-600">May - August</div>
+              </div>
+              
+              <div class="text-center bg-white p-6 rounded-xl shadow-sm">
+                <div class="text-4xl font-bold text-primary-600 mb-2">{{ formatTime(clubContent.walkingSchedule.tuesday) }}</div>
+                <div class="text-lg font-semibold text-gray-800 mb-1">Tuesday</div>
+                <div class="text-sm text-gray-600">All Year Round</div>
               </div>
             </div>
           </div>
