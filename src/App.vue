@@ -348,6 +348,10 @@ const toggleAdminPanel = () => {
   adminPanelOpen.value = !adminPanelOpen.value
 }
 
+const isAdminPanelOpen = () => {
+  return adminPanelOpen.value
+}
+
 const closeLoginModal = () => {
   showLoginModal.value = false
   loginError.value = ''
@@ -547,8 +551,8 @@ const formatTime = (time: string): string => {
             <!-- Mobile Admin Section -->
             <div class="pt-4 border-t border-gray-200">              
               <!-- Admin Toggle Button - Show when admin IS logged in -->
-              <a v-if="isAdmin" href="#" @click="toggleAdminPanel; closeMobileMenu()" class="mobile-nav-item-elegant">ADMIN</a>
-              <a v-else href="#" @click="showLoginModal = true; closeMobileMenu()" class="mobile-nav-item-elegant">CLOSE ADMIN</a>              
+              <a v-if="isAdmin" href="#" @click="toggleAdminPanel; closeMobileMenu()" class="mobile-nav-item-elegant">{{ isAdminPanelOpen() ? 'CLOSE ADMIN' : 'ADMIN' }}</a>
+              <a v-else href="#" @click="showLoginModal = true; closeMobileMenu()" class="mobile-nav-item-elegant">ADMIN LOGIN</a>              
             </div>
           </div>
         </div>

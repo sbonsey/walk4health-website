@@ -1,14 +1,24 @@
 <template>
   <!-- Admin Panel - Only show when explicitly opened -->
-  <div v-if="isAdmin && isOpen" class="admin-panel bg-white border-l border-gray-200 fixed right-0 top-24 h-[calc(100vh-6rem)] w-full md:w-[32rem] shadow-xl z-[70] transform transition-transform duration-300">
+  <div v-if="isAdmin && isOpen" class="admin-panel bg-white border-l border-gray-200 fixed inset-0 md:right-0 md:left-auto md:top-24 md:h-[calc(100vh-6rem)] w-full md:w-[32rem] shadow-xl z-[70] transform transition-transform duration-300">
     <div class="p-4 md:p-6">
       <!-- Header -->
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-bold text-gray-900">Admin Panel</h2>
-        <button @click="closePanel" class="text-gray-500 hover:text-gray-700">
+        <button @click="closePanel" class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
+        </button>
+      </div>
+      
+      <!-- Mobile Close Button (Full Width) -->
+      <div class="md:hidden mb-4">
+        <button @click="closePanel" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          <span>Close Admin Panel</span>
         </button>
       </div>
 
