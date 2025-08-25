@@ -1,7 +1,7 @@
 <template>
   <!-- Admin Panel - Only show when explicitly opened -->
-  <div v-if="isAdmin && isOpen" class="admin-panel bg-white border-l border-gray-200 fixed right-0 top-24 h-[calc(100vh-6rem)] w-[32rem] shadow-xl z-[70] transform transition-transform duration-300">
-    <div class="p-6">
+  <div v-if="isAdmin && isOpen" class="admin-panel bg-white border-l border-gray-200 fixed right-0 top-24 h-[calc(100vh-6rem)] w-full md:w-[32rem] shadow-xl z-[70] transform transition-transform duration-300">
+    <div class="p-4 md:p-6">
       <!-- Header -->
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-bold text-gray-900">Admin Panel</h2>
@@ -21,7 +21,7 @@
       <!-- Content (only show when not loading) -->
       <div v-else class="space-y-6">
         <!-- Navigation Tabs -->
-        <div class="flex space-x-1 mb-6 bg-gray-100 rounded-lg p-1">
+        <div class="flex flex-col md:flex-row md:space-x-1 space-y-1 md:space-y-0 mb-6 bg-gray-100 rounded-lg p-1">
           <button 
             v-for="tab in tabs" 
             :key="tab.id"
@@ -44,9 +44,9 @@
             
 
             
-            <div class="flex justify-between items-center">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center space-y-3 md:space-y-0">
               <h3 class="text-lg font-semibold text-gray-900">Manage Events</h3>
-              <div class="flex space-x-2">
+              <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
                 <button @click="showAddRecurringForm = true" class="btn-primary text-sm">
                   Add Recurring
                 </button>
@@ -75,7 +75,7 @@
                 Will display as: {{ formatTime(newRecurringEvent.time) }}
               </div>
               <textarea v-model="newRecurringEvent.message" placeholder="Optional message or description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
-              <div class="flex space-x-2">
+              <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
                 <button @click="addRecurringEvent" class="btn-primary text-sm flex-1">Save Event</button>
                 <button @click="showAddRecurringForm = false" class="btn-secondary text-sm flex-1">Cancel</button>
               </div>
@@ -91,7 +91,7 @@
                 Will display as: {{ formatTime(newSpecialEvent.time) }}
               </div>
               <textarea v-model="newSpecialEvent.message" placeholder="Event description or message" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
-              <div class="flex space-x-2">
+              <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
                 <button @click="addSpecialEvent" class="btn-primary text-sm flex-1">Save Event</button>
                 <button @click="showAddSpecialForm = false" class="btn-secondary text-sm flex-1">Cancel</button>
               </div>
