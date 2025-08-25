@@ -834,7 +834,7 @@ const formatTime = (time: string): string => {
       </section>
 
       <!-- Events Section -->
-      <section id="events" class="section bg-gray-50 pt-12">
+      <section id="events" class="section bg-gray-50 pt-12 scroll-mt-32">
         <div class="container">
           <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Special Events</h2>
           
