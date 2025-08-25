@@ -679,7 +679,6 @@ const formatTime = (time: string): string => {
                   </div>
                   <p class="text-gray-600 mb-2">{{ capitalizeDay(event.day) }} at {{ formatTime(event.time) }}</p>
                   <p v-if="event.message" class="text-gray-600 mb-2">{{ event.message }}</p>
-                  <p class="text-gray-600">Various locations around Hutt Valley</p>
                 </div>
               </div>
             </div>
