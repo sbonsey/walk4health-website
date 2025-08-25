@@ -788,31 +788,12 @@ const formatTime = (time: string): string => {
           
           <!-- Events Container with Horizontal Scroll -->
           <div class="relative">
-            <!-- Scroll Buttons for Large Screens Only -->
-            <button 
-              v-if="canScrollLeft" 
-              @click="scrollEvents('left')" 
-              class="hidden lg:block absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm hover:bg-white text-gray-700 hover:text-gray-900 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-              </svg>
-            </button>
-            
-            <button 
-              v-if="canScrollRight" 
-              @click="scrollEvents('right')" 
-              class="hidden lg:block absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm hover:bg-white text-gray-700 hover:text-gray-900 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </button>
+
             
             <!-- Events Grid - Responsive layout -->
-            <div ref="eventsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:flex lg:gap-6 lg:overflow-x-auto lg:pb-4 lg:scrollbar-hide">
+            <div ref="eventsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <!-- Special Events Only (Non-recurring) -->
-              <div v-for="event in specialEvents" :key="`special-${event.id}`" class="card group hover:shadow-xl transition-all duration-300 lg:w-[calc(33.333%-1rem)] lg:min-w-0 lg:flex-shrink-0">
+              <div v-for="event in specialEvents" :key="`special-${event.id}`" class="card group hover:shadow-xl transition-all duration-300">
                 <div class="relative mb-4">
                   <img src="/src/assets/upcoming-image-3.jpg" 
                        :alt="event.title" 
@@ -823,25 +804,16 @@ const formatTime = (time: string): string => {
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 mb-2">{{ event.title }}</h3>
                 <p class="text-gray-600 mb-4">{{ event.message || 'Join us for this special walking event and community activity.' }}</p>
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center text-sm text-gray-500">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <span>{{ event.time }}</span>
-                  </div>
-                  <button class="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none text-sm">
-                    More Info
-                  </button>
+                <div class="flex items-center text-sm text-gray-500">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span>{{ event.time }}</span>
                 </div>
               </div>
             </div>
             
-            <!-- Scroll Indicator for Large Screens Only -->
-            <div class="hidden lg:flex justify-center mt-4 space-x-2">
-              <div v-for="(_, index) in Math.ceil(specialEvents.length / 3)" :key="index" 
-                   class="w-2 h-2 rounded-full bg-gray-300"></div>
-            </div>
+
           </div>
         </div>
       </section>
@@ -854,9 +826,9 @@ const formatTime = (time: string): string => {
           <!-- Dynamic Galleries with Horizontal Scrolling -->
           <div v-if="galleries.length > 0" class="relative">
             <!-- Gallery Cards Container -->
-            <div ref="galleriesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:flex lg:gap-6 lg:overflow-x-auto lg:scrollbar-hide lg:pb-4">
+            <div ref="galleriesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div v-for="gallery in galleries" :key="gallery.id" 
-                   class="lg:flex-none lg:w-[calc(33.333%-1rem)] lg:min-w-0 cursor-pointer"
+                   class="cursor-pointer"
                    @click="openGallery(gallery)">
                 <!-- Gallery Card -->
                 <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
@@ -887,28 +859,7 @@ const formatTime = (time: string): string => {
               </div>
             </div>
             
-            <!-- Scroll Arrows for Large Screens Only -->
-            <button v-if="canScrollGalleriesLeft" 
-                    @click="scrollGalleries('left')" 
-                    class="hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0 z-10">
-              <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-              </svg>
-            </button>
-            
-            <button v-if="canScrollGalleriesRight" 
-                    @click="scrollGalleries('right')" 
-                    class="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0 z-10">
-              <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </button>
-            
-            <!-- Scroll Indicator for Large Screens Only -->
-            <div class="hidden lg:flex justify-center mt-4 space-x-2">
-              <div v-for="(_, index) in Math.ceil(galleries.length / 3)" :key="index" 
-                   class="w-2 h-2 rounded-full bg-gray-300"></div>
-            </div>
+
           </div>
           
           <!-- Fallback Gallery (when no galleries exist) -->
