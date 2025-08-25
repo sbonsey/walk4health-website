@@ -582,6 +582,7 @@ const props = defineProps<{
   isOpen: boolean
   galleries: GalleryMeta[]
   events: EventsData
+  news: NewsItem[]
 }>()
 
 // Emits
@@ -690,8 +691,15 @@ watch(() => props.galleries, (newGalleries) => {
   galleries.value = [...newGalleries]
 }, { immediate: true })
 
-// News data
+// News data - local news that syncs with props
 const newsItems = ref<NewsItem[]>([])
+
+// Watch for news prop changes and sync local state
+watch(() => props.news, (newNews) => {
+  if (newNews) {
+    newsItems.value = [...newNews]
+  }
+}, { immediate: true })
 const photos = ref([
   { id: 1, url: 'https://via.placeholder.com/300x200/4F46E5/FFFFFF?text=Walking+Trail', title: 'Walking Trail' },
   { id: 2, url: 'https://via.placeholder.com/300x200/059669/FFFFFF?text=Club+Members', title: 'Club Members' }

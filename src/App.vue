@@ -1086,6 +1086,7 @@ const formatTime = (time: string): string => {
       :is-open="adminPanelOpen"
       :galleries="galleries"
       :events="{ recurringEvents, specialEvents }"
+      :news="newsItems"
       @close="adminPanelOpen = false"
       @events-updated="handleEventsUpdated"
       @content-updated="handleContentUpdated"
