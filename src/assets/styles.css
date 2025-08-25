@@ -49,7 +49,7 @@
   
   /* Events section needs more scroll margin due to reduced top padding */
   #events {
-    scroll-margin-top: 8rem; /* 8rem = 128px for fixed navigation */
+    scroll-margin-top: 2rem; /* Keep consistent with other sections */
   }
   
   /* Smooth scrolling for all anchor links */
