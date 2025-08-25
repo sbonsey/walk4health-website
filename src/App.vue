@@ -510,7 +510,7 @@ const formatTime = (time: string): string => {
         <div class="flex justify-between items-center h-24">
             <!-- Logo -->
             <div class="flex items-center gap-3">
-                              <h1 class="block sm:hidden md:block text-2xl md:text-3xl font-bold text-gray-800">Walk for Health</h1>
+              <h1 class="block md:hidden lg:block text-2xl md:text-3xl font-bold text-gray-800">Walk for Health</h1>
               <img src="/src/assets/blue-shoes.jpg" alt="Walking shoes" class="h-12 md:h-10 w-auto object-cover rounded">
             </div>
           
