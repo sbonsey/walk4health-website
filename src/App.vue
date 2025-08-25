@@ -87,11 +87,17 @@ const canScrollGalleriesRight = computed(() => {
 
 // Computed properties for news
 const displayedNewsItems = computed(() => {
-  return newsItems.value.slice(0, 3)
+  // Sort by date (newest first) and take first 3
+  return [...newsItems.value]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 3)
 })
 
 const additionalNewsItems = computed(() => {
-  return newsItems.value.slice(3)
+  // Sort by date (newest first) and take remaining items after first 3
+  return [...newsItems.value]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(3)
 })
 
 // Load data on mount
