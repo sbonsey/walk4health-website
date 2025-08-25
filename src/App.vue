@@ -88,15 +88,52 @@ const canScrollGalleriesRight = computed(() => {
 // Computed properties for news
 const displayedNewsItems = computed(() => {
   // Sort by date (newest first) and take first 3
-  return [...newsItems.value]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 3)
+  const sorted = [...newsItems.value]
+    .sort((a, b) => {
+      try {
+        const dateA = new Date(a.date)
+        const dateB = new Date(b.date)
+        
+        // Check if dates are valid
+        if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
+          console.warn('⚠️ Invalid date found:', { a: a.date, b: b.date })
+          return 0 // Keep original order if dates are invalid
+        }
+        
+        return dateB.getTime() - dateA.getTime() // Newest first
+      } catch (error) {
+        console.error('❌ Error sorting news by date:', error)
+        return 0 // Keep original order on error
+      }
+    })
+  
+  console.log('📰 News sorting debug:', {
+    original: newsItems.value.map(item => ({ id: item.id, date: item.date, dateObj: new Date(item.date) })),
+    sorted: sorted.map(item => ({ id: item.id, date: item.date, dateObj: new Date(item.date) }))
+  })
+  
+  return sorted.slice(0, 3)
 })
 
 const additionalNewsItems = computed(() => {
   // Sort by date (newest first) and take remaining items after first 3
   return [...newsItems.value]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a, b) => {
+      try {
+        const dateA = new Date(a.date)
+        const dateB = new Date(b.date)
+        
+        // Check if dates are valid
+        if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
+          return 0 // Keep original order if dates are invalid
+        }
+        
+        return dateB.getTime() - dateA.getTime() // Newest first
+      } catch (error) {
+        console.error('❌ Error sorting additional news by date:', error)
+        return 0 // Keep original order on error
+      }
+    })
     .slice(3)
 })
 
