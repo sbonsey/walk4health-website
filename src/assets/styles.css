@@ -43,8 +43,13 @@
   }
   
   /* Page anchor spacing - prevent headings from being hidden behind fixed nav */
-  #home, #about, #news, #events, #gallery, #contact {
+  #home, #about, #news, #gallery, #contact {
     scroll-margin-top: 2rem; /* Reduced from 7rem to 2rem */
+  }
+  
+  /* Events section needs more scroll margin due to reduced top padding */
+  #events {
+    scroll-margin-top: 8rem; /* 8rem = 128px for fixed navigation */
   }
   
   /* Smooth scrolling for all anchor links */
