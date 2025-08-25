@@ -259,6 +259,11 @@ const loadData = async () => {
     
     // Set news data
     newsItems.value = newsData || []
+    console.log('📰 News data loaded:', {
+      newsData,
+      newsItemsCount: newsItems.value.length,
+      newsItems: newsItems.value
+    })
     
     console.log('✅ App.vue: Data loaded successfully:', { 
       recurringEvents: recurringEvents.value, 
