@@ -620,7 +620,7 @@ const formatTime = (time: string): string => {
             <div class="mt-16">
               <h3 class="text-2xl font-bold text-center text-gray-900 mb-8">Regular Walking Schedule</h3>
               <div class="grid md:grid-cols-2 gap-8">
-                <div v-for="event in recurringEvents" :key="`schedule-${event.id}`" class="card bg-white/90 backdrop-blur-sm">
+                <div v-for="event in recurringEvents" :key="`schedule-${event.id}`" class="card bg-white/90 backdrop-blur-sm text-left">
                   <div class="flex items-center mb-4">
                     <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
                       <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
