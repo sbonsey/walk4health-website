@@ -42,14 +42,6 @@
     @apply max-w-7xl;
   }
   
-  #events .card {
-    @apply flex-none w-[calc(33.333%-1rem)] min-w-0 flex-shrink-0;
-  }
-  
-  #events .flex {
-    @apply scroll-smooth;
-  }
-  
   /* Page anchor spacing - prevent headings from being hidden behind fixed nav */
   #home, #about, #news, #events, #gallery, #contact {
     scroll-margin-top: 2rem; /* Reduced from 7rem to 2rem */
