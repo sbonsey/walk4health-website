@@ -581,6 +581,7 @@ const props = defineProps<{
   isAdmin: boolean
   isOpen: boolean
   galleries: GalleryMeta[]
+  events: EventsData
 }>()
 
 // Emits
@@ -647,11 +648,18 @@ const newNewsItem = reactive({
   galleryLink: ''
 })
 
-// Data state
+// Data state - local events that sync with props
 const events = ref<EventsData>({
   recurringEvents: [],
   specialEvents: []
 })
+
+// Watch for prop changes and sync local state
+watch(() => props.events, (newEvents) => {
+  if (newEvents) {
+    events.value = { ...newEvents }
+  }
+}, { immediate: true })
 
 const content = ref<ClubContent>({
   clubMission: '',
