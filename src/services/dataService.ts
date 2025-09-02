@@ -74,6 +74,12 @@ export interface NewsItem {
   galleryLink?: string
 }
 
+export interface LinkItem {
+  id: string
+  url: string
+  description: string
+}
+
 class DataService {
   // Check if we're in production (Vercel)
   private isProduction(): boolean {
@@ -567,6 +573,50 @@ class DataService {
     }
   }
 
+  // Links methods
+  async getLinks(): Promise<LinkItem[]> {
+    try {
+      const response = await fetch('/api/links')
+      if (!response.ok) throw new Error('Failed to fetch links')
+      const data = await response.json()
+      return data.links || []
+    } catch (error) {
+      console.error('Error fetching links:', error)
+      if (!this.isProduction()) {
+        const stored = this.getLinksFromStorage()
+        if (stored) return stored
+      }
+      return []
+    }
+  }
+
+  async saveLinks(links: LinkItem[]): Promise<boolean> {
+    try {
+      const response = await fetch('/api/links', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ links })
+      })
+      if (response.ok) {
+        if (!this.isProduction()) {
+          localStorage.setItem('walk4health-links', JSON.stringify(links))
+        }
+        return true
+      } else {
+        const errorText = await response.text()
+        console.error('Failed to save links:', response.status, errorText)
+        throw new Error(`HTTP ${response.status}`)
+      }
+    } catch (error) {
+      console.error('Error saving links:', error)
+      if (!this.isProduction()) {
+        localStorage.setItem('walk4health-links', JSON.stringify(links))
+        return true
+      }
+      throw error
+    }
+  }
+
   async saveNews(newsItems: NewsItem[]): Promise<boolean> {
     try {
       console.log('🔄 DataService: Attempting to save news via API...')
@@ -628,6 +678,15 @@ class DataService {
       return stored ? JSON.parse(stored) : null
     } catch (error) {
       console.error('Error reading news from localStorage:', error)
+      return null
+    }
+  }
+
+  private getLinksFromStorage(): LinkItem[] | null {
+    try {
+      const stored = localStorage.getItem('walk4health-links')
+      return stored ? JSON.parse(stored) : null
+    } catch (error) {
       return null
     }
   }

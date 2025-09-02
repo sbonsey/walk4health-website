@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import AdminPanel from './components/AdminPanel.vue'
-import { dataService, type EventsData, type ClubContent, type GalleryMeta } from './services/dataService'
+import { dataService, type EventsData, type ClubContent, type GalleryMeta, type LinkItem } from './services/dataService'
 
 // Types
 interface NewsItem {
@@ -60,6 +60,7 @@ const showAllNews = ref(false)
 // Template refs
 const eventsContainer = ref<HTMLElement>()
 const galleriesContainer = ref<HTMLElement>()
+const links = ref<LinkItem[]>([])
 
 // Computed properties for scroll buttons
 const canScrollLeft = computed(() => {
@@ -177,11 +178,12 @@ onMounted(async () => {
 const loadData = async () => {
   isLoading.value = true
   try {
-    const [eventsData, contentData, galleriesData, newsData] = await Promise.all([
+    const [eventsData, contentData, galleriesData, newsData, linksData] = await Promise.all([
       dataService.getEvents(),
       dataService.getContent(),
       dataService.getGalleries(),
-      dataService.getNews()
+      dataService.getNews(),
+      dataService.getLinks()
     ])
     
     // Ensure events data is properly structured
@@ -265,11 +267,15 @@ const loadData = async () => {
       newsItems: newsItems.value
     })
     
+    // Set links data
+    links.value = Array.isArray(linksData) ? linksData : []
+    
     console.log('✅ App.vue: Data loaded successfully:', { 
       recurringEvents: recurringEvents.value, 
       specialEvents: specialEvents.value,
       clubContent: clubContent.value,
-      galleries: galleries.value
+      galleries: galleries.value,
+      links: links.value
     })
     
     // Debug: Log the specific values we're interested in
@@ -297,11 +303,7 @@ const loadData = async () => {
   }
 }
 
-// Handle events updates from admin panel
-const handleEventsUpdated = (events: EventsData) => {
-  recurringEvents.value = events.recurringEvents
-  specialEvents.value = events.specialEvents
-}
+// (Events admin removed)
 
 // Handle content updates from admin panel
 const handleContentUpdated = (content: ClubContent) => {
@@ -488,24 +490,7 @@ const handleLogin = () => {
   }
 }
 
-const scrollEvents = (direction: 'left' | 'right') => {
-  if (eventsContainer.value) {
-    const scrollAmount = 400 // Adjust scroll amount as needed
-    const currentScroll = eventsContainer.value.scrollLeft
-    
-    if (direction === 'left') {
-      eventsContainer.value.scrollTo({
-        left: currentScroll - scrollAmount,
-        behavior: 'smooth'
-      })
-    } else {
-      eventsContainer.value.scrollTo({
-        left: currentScroll + scrollAmount,
-        behavior: 'smooth'
-      })
-    }
-  }
-}
+// (Events section removed)
 
 
 
@@ -559,7 +544,7 @@ const formatTime = (time: string): string => {
             <!-- Logo -->
             <div class="flex items-center gap-3">
               <h1 class="block md:hidden lg:block text-2xl md:text-3xl font-bold text-gray-800">Walk for Health</h1>
-              <img src="/src/assets/blue-shoes.jpg" alt="Walking shoes" class="h-12 md:h-10 w-auto object-cover rounded">
+              <img src="/src/assets/shoes-no-text.png" alt="Walking shoes" class="h-12 md:h-10 w-auto object-cover rounded">
             </div>
           
           <!-- Desktop Navigation -->
@@ -567,7 +552,7 @@ const formatTime = (time: string): string => {
             <a href="#home" class="nav-item-elegant">HOME</a>
             <a href="#about" class="nav-item-elegant">ABOUT</a>
             <a href="#news" class="nav-item-elegant">NEWS</a>
-            <a href="#events" class="nav-item-elegant">EVENTS</a>
+            <a href="#links" class="nav-item-elegant">LINKS</a>
             <a href="#gallery" class="nav-item-elegant">GALLERY</a>
             <a href="#contact" class="nav-item-elegant">CONTACT</a>
               <!-- Admin Toggle Button - Show when admin IS logged in (Desktop Only) -->
@@ -616,7 +601,7 @@ const formatTime = (time: string): string => {
             <a href="#home" @click="closeMobileMenu" class="mobile-nav-item-elegant">HOME</a>
             <a href="#about" @click="closeMobileMenu" class="mobile-nav-item-elegant">ABOUT</a>
             <a href="#news" @click="closeMobileMenu" class="mobile-nav-item-elegant">NEWS</a>
-            <a href="#events" @click="closeMobileMenu" class="mobile-nav-item-elegant">EVENTS</a>
+            <a href="#links" @click="closeMobileMenu" class="mobile-nav-item-elegant">LINKS</a>
             <a href="#gallery" @click="closeMobileMenu" class="mobile-nav-item-elegant">GALLERY</a>
             <a href="#contact" @click="closeMobileMenu" class="mobile-nav-item-elegant">CONTACT</a>
             
@@ -644,9 +629,14 @@ const formatTime = (time: string): string => {
         
         <div class="container relative z-10">
           <div class="text-center">
-            <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              Walk for Health
-            </h1>
+            <div class="mb-8">
+              <img src="/src/assets/logo-modified.png" 
+                   alt="Walk for Health logo"
+                   class="h-24 md:h-32 w-auto mx-auto object-contain">
+            </div>
+            <!-- <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+              Walk For Health
+            </h1> -->
             
             <!-- Mission Statement -->
             <div v-if="clubContent.clubMission" class="mb-6">
@@ -717,7 +707,7 @@ const formatTime = (time: string): string => {
             <div class="space-y-6">
               <!-- Club Image -->
               <div class="relative rounded-xl overflow-hidden shadow-lg">
-                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                <img src="/src/assets/w4h-walkers-cropped.jpg" 
                      alt="Walking group on trail" 
                      class="w-full h-64 object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
@@ -833,39 +823,40 @@ const formatTime = (time: string): string => {
         </div>
       </section>
 
-      <!-- Events Section -->
-      <section id="events" class="section bg-gray-50 pt-24">
+      <!-- Links Section -->
+      <section id="links" class="section bg-gray-50 pt-24">
         <div class="container">
-          <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Special Events</h2>
-          
-          <!-- Events Container with Horizontal Scroll -->
-          <div class="relative">
-
-            
-            <!-- Events Grid - Responsive layout -->
-            <div ref="eventsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <!-- Special Events Only (Non-recurring) -->
-              <div v-for="event in specialEvents" :key="`special-${event.id}`" class="card group hover:shadow-xl transition-all duration-300">
-                <div class="relative mb-4">
-                  <img src="/src/assets/upcoming-image-3.jpg" 
-                       :alt="event.title" 
-                       class="w-full h-48 object-cover rounded-lg">
-                  <div class="absolute top-3 right-3 bg-primary-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                    {{ formatEventDate(event.date) }}
-                  </div>
+          <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Useful Links</h2>
+          <div v-if="links.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <a v-for="link in links" :key="link.id" :href="link.url" target="_blank" rel="noopener" class="card hover:shadow-lg transition-all">
+              <div class="flex items-start justify-between">
+                <div>
+                  <p class="text-blue-700 break-all">{{ link.url }}</p>
+                  <p class="text-gray-600 mt-1">{{ link.description }}</p>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">{{ event.title }}</h3>
-                <p class="text-gray-600 mb-4">{{ event.message || 'Join us for this special walking event and community activity.' }}</p>
-                <div class="flex items-center text-sm text-gray-500">
-                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  <span>{{ formatTime(event.time) }}</span>
-                </div>
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h4m0 0v4m0-4L10 14M7 17h.01"></path>
+                </svg>
               </div>
+            </a>
+          </div>
+          <div v-else>
+            <div class="text-center text-gray-500 mb-6">
+              No links have been added yet. Example preview:
             </div>
-            
-
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <a href="#" class="card hover:shadow-lg transition-all">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <p class="text-blue-700 break-all">https://example.com/walking-trails</p>
+                    <p class="text-gray-600 mt-1">Example: Regional walking trails and maps</p>
+                  </div>
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h4m0 0v4m0-4L10 14M7 17h.01"></path>
+                  </svg>
+                </div>
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -1156,10 +1147,8 @@ const formatTime = (time: string): string => {
       :is-admin="isAdmin" 
       :is-open="adminPanelOpen"
       :galleries="galleries"
-      :events="{ recurringEvents, specialEvents }"
       :news="newsItems"
       @close="adminPanelOpen = false"
-      @events-updated="handleEventsUpdated"
       @content-updated="handleContentUpdated"
       @galleries-updated="handleGalleriesUpdated"
       @news-updated="handleNewsUpdated"

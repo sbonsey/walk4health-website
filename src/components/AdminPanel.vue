@@ -45,173 +45,44 @@
 
         <!-- Content based on active tab -->
         <div class="space-y-6">
-          <!-- Events Tab -->
-          <div v-if="activeTab === 'events'" class="space-y-4">
-            <!-- Status Display -->
+          <!-- Links Tab -->
+          <div v-if="activeTab === 'links'" class="space-y-4">
             <div v-if="saveStatus" class="p-3 rounded-lg text-sm" :class="saveStatus.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'">
               {{ saveStatus }}
             </div>
-            
-
-            
-            <div class="flex flex-col md:flex-row md:justify-between md:items-center space-y-3 md:space-y-0">
-              <h3 class="text-lg font-semibold text-gray-900">Manage Events</h3>
-              <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
-                <button @click="showAddRecurringForm = true" class="btn-primary text-sm">
-                  Add Recurring
-                </button>
-                <button @click="showAddSpecialForm = true" class="btn-primary text-sm">
-                  Add Special
-                </button>
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold text-gray-900">Manage Links</h3>
+              <button @click="showAddLinkForm = true" class="btn-primary text-sm">Add Link</button>
+            </div>
+            <div v-if="showAddLinkForm" class="bg-gray-50 p-4 rounded-lg space-y-3">
+              <h4 class="font-medium text-gray-900">Add Link</h4>
+              <input v-model="newLink.url" type="url" placeholder="https://example.com" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              <input v-model="newLink.description" type="text" placeholder="Description" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              <div class="flex space-x-2">
+                <button @click="addLink" class="btn-primary text-sm flex-1">Save Link</button>
+                <button @click="showAddLinkForm = false" class="btn-secondary text-sm flex-1">Cancel</button>
               </div>
             </div>
-            
-            <!-- Add Recurring Event Form -->
-            <div v-if="showAddRecurringForm" class="bg-gray-50 p-4 rounded-lg space-y-3">
-              <h4 class="font-medium text-gray-900">Add Recurring Event</h4>
-              <input v-model="newRecurringEvent.title" type="text" placeholder="Event Title (e.g., Sunday Walk)" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-              <select v-model="newRecurringEvent.day" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                <option value="">Select Day</option>
-                <option value="sunday">Sunday</option>
-                <option value="monday">Monday</option>
-                <option value="tuesday">Tuesday</option>
-                <option value="wednesday">Wednesday</option>
-                <option value="thursday">Thursday</option>
-                <option value="friday">Friday</option>
-                <option value="saturday">Saturday</option>
-              </select>
-              <input v-model="newRecurringEvent.time" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-              <div v-if="newRecurringEvent.time" class="text-xs text-gray-500">
-                Will display as: {{ formatTime(newRecurringEvent.time) }}
-              </div>
-              <textarea v-model="newRecurringEvent.message" placeholder="Optional message or description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
-              <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
-                <button @click="addRecurringEvent" class="btn-primary text-sm flex-1">Save Event</button>
-                <button @click="showAddRecurringForm = false" class="btn-secondary text-sm flex-1">Cancel</button>
-              </div>
-            </div>
-
-            <!-- Add Special Event Form -->
-            <div v-if="showAddSpecialForm" class="bg-gray-50 p-4 rounded-lg space-y-3">
-              <h4 class="font-medium text-gray-900">Add Special Event</h4>
-              <input v-model="newSpecialEvent.title" type="text" placeholder="Event Title" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-              <input v-model="newSpecialEvent.date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-              <input v-model="newSpecialEvent.time" type="time" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-              <div v-if="newSpecialEvent.time" class="text-xs text-gray-500">
-                Will display as: {{ formatTime(newSpecialEvent.time) }}
-              </div>
-              <textarea v-model="newSpecialEvent.message" placeholder="Event description or message" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
-              <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
-                <button @click="addSpecialEvent" class="btn-primary text-sm flex-1">Save Event</button>
-                <button @click="showAddSpecialForm = false" class="btn-secondary text-sm flex-1">Cancel</button>
-              </div>
-            </div>
-
-            <!-- Events List -->
-            <div class="space-y-3">
-              <!-- Recurring Events -->
-              <div v-if="events.recurringEvents.length > 0">
-                <h4 class="font-medium text-gray-700 mb-2 text-sm">Recurring Events</h4>
-                <div class="space-y-2">
-                  <div v-for="event in events.recurringEvents" :key="event.id" class="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                    <!-- Edit Form (when editing) -->
-                    <div v-if="editingRecurringEvent?.id === event.id" class="space-y-3">
-                      <h5 class="font-medium text-gray-900">Edit Recurring Event</h5>
-                      <input v-model="editingRecurringEvent.title" type="text" placeholder="Event Title" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
-                      <select v-model="editingRecurringEvent.day" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
-                        <option value="sunday">Sunday</option>
-                        <option value="monday">Monday</option>
-                        <option value="tuesday">Tuesday</option>
-                        <option value="wednesday">Wednesday</option>
-                        <option value="thursday">Thursday</option>
-                        <option value="friday">Friday</option>
-                        <option value="saturday">Saturday</option>
-                      </select>
-                      <input v-model="editingRecurringEvent.time" type="time" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
-                      <div v-if="editingRecurringEvent.time" class="text-xs text-gray-500">
-                        Will display as: {{ formatTime(editingRecurringEvent.time) }}
-                      </div>
-                      <textarea v-model="editingRecurringEvent.message" placeholder="Optional message" rows="2" class="w-full px-2 py-1 border border-gray-300 rounded text-sm"></textarea>
-                      <div class="flex space-x-2">
-                        <button @click="saveRecurringEventEdit" class="btn-primary text-xs">Save</button>
-                        <button @click="cancelRecurringEventEdit" class="btn-secondary text-xs">Cancel</button>
-                      </div>
-                    </div>
-                    
-                    <!-- Display View (when not editing) -->
-                    <div v-else class="flex justify-between items-start">
-                      <div>
-                        <h5 class="font-medium text-gray-900">{{ event.title }}</h5>
-                        <p class="text-sm text-gray-600">{{ capitalizeDay(event.day) }} at {{ formatTime(event.time) }}</p>
-                        <p v-if="event.message" class="text-sm text-gray-600 mt-1">{{ event.message }}</p>
-                      </div>
-                      <div class="flex space-x-2">
-                        <button @click="editRecurringEvent(event)" class="text-blue-600 hover:text-blue-800">
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                          </svg>
-                        </button>
-                        <button @click="deleteRecurringEvent(event.id)" class="text-red-600 hover:text-red-800">
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+            <div class="space-y-2">
+              <div v-for="link in links" :key="link.id" class="bg-white p-3 rounded-lg border border-gray-200 flex justify-between items-start">
+                <div class="flex-1">
+                  <p class="text-sm text-gray-800 break-all">{{ link.url }}</p>
+                  <p class="text-xs text-gray-600">{{ link.description }}</p>
+                </div>
+                <div class="flex space-x-2">
+                  <button @click="editLink(link)" class="text-blue-600 hover:text-blue-800">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                  </button>
+                  <button @click="deleteLink(link.id)" class="text-red-600 hover:text-red-800">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                  </button>
                 </div>
               </div>
-
-              <!-- Special Events -->
-              <div v-if="events.specialEvents.length > 0">
-                <h4 class="font-medium text-gray-700 mb-2 text-sm">Special Events</h4>
-                <div class="space-y-2">
-                  <div v-for="event in events.specialEvents" :key="event.id" class="bg-orange-50 p-3 rounded-lg border border-orange-200">
-                    <!-- Edit Form (when editing) -->
-                    <div v-if="editingSpecialEvent?.id === event.id" class="space-y-3">
-                      <h5 class="font-medium text-gray-900">Edit Special Event</h5>
-                      <input v-model="editingSpecialEvent.title" type="text" placeholder="Event Title" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
-                      <input v-model="editingSpecialEvent.date" type="date" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
-                      <input v-model="editingSpecialEvent.time" type="time" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
-                      <div v-if="editingSpecialEvent.time" class="text-xs text-gray-500">
-                        Will display as: {{ formatTime(editingSpecialEvent.time) }}
-                      </div>
-                      <textarea v-model="editingSpecialEvent.message" placeholder="Event description" rows="2" class="w-full px-2 py-1 border border-gray-300 rounded text-sm"></textarea>
-                      <div class="flex space-x-2">
-                        <button @click="saveSpecialEventEdit" class="btn-primary text-xs">Save</button>
-                        <button @click="cancelSpecialEventEdit" class="btn-secondary text-xs">Cancel</button>
-                      </div>
-                    </div>
-                    
-                    <!-- Display View (when not editing) -->
-                    <div v-else class="flex justify-between items-start">
-                      <div>
-                        <h5 class="font-medium text-gray-900">{{ event.title }}</h5>
-                        <p class="text-sm text-gray-600">{{ formatDate(event.date) }} at {{ formatTime(event.time) }}</p>
-                        <p v-if="event.message" class="text-sm text-gray-600 mt-1">{{ event.message }}</p>
-                      </div>
-                      <div class="flex space-x-2">
-                        <button @click="editSpecialEvent(event)" class="text-blue-600 hover:text-blue-800">
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                          </svg>
-                        </button>
-                        <button @click="deleteSpecialEvent(event.id)" class="text-red-600 hover:text-red-800">
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- No Events Message -->
-              <div v-if="events.recurringEvents.length === 0 && events.specialEvents.length === 0" class="text-center text-gray-500 py-8">
-                <p>No events added yet.</p>
-                <p class="text-sm">Add recurring or special events to get started.</p>
-              </div>
+              <div v-if="links.length === 0" class="text-center text-gray-500 py-4 text-sm">No links added yet.</div>
             </div>
           </div>
 
@@ -591,7 +462,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch, computed } from 'vue'
-import { dataService, type EventsData, type ClubContent, type GalleryMeta } from '../services/dataService'
+import { dataService, type ClubContent, type GalleryMeta, type LinkItem } from '../services/dataService'
 
 // Types
 interface NewsItem {
@@ -607,21 +478,19 @@ const props = defineProps<{
   isAdmin: boolean
   isOpen: boolean
   galleries: GalleryMeta[]
-  events: EventsData
   news: NewsItem[]
 }>()
 
 // Emits
 const emit = defineEmits<{
   close: []
-  eventsUpdated: [EventsData]
   'content-updated': [ClubContent]
   galleriesUpdated: [GalleryMeta[]]
   newsUpdated: [NewsItem[]]
 }>()
 
 // Reactive data
-const activeTab = ref('events')
+const activeTab = ref('links')
 const showAddRecurringForm = ref(false)
 const showAddSpecialForm = ref(false)
 const showPhotoUpload = ref(false)
@@ -636,7 +505,7 @@ const editingNewsItem = ref<NewsItem | null>(null)
 
 // Tabs configuration
 const tabs = [
-  { id: 'events', name: 'Events' },
+  { id: 'links', name: 'Links' },
   { id: 'news', name: 'News' },
   { id: 'photos', name: 'Photos' },
   { id: 'content', name: 'Content' },
@@ -676,18 +545,7 @@ const newNewsItem = reactive({
   galleryLink: ''
 })
 
-// Data state - local events that sync with props
-const events = ref<EventsData>({
-  recurringEvents: [],
-  specialEvents: []
-})
-
-// Watch for prop changes and sync local state
-watch(() => props.events, (newEvents) => {
-  if (newEvents) {
-    events.value = { ...newEvents }
-  }
-}, { immediate: true })
+// (Events removed)
 
 const content = ref<ClubContent>({
   clubMission: '',
@@ -750,29 +608,22 @@ const loadData = async () => {
     console.log('🔄 AdminPanel: Starting to load data from API...')
     console.log('🔄 AdminPanel: Current hostname:', window.location.hostname)
     
-    const [eventsData, contentData, galleriesData, emailConfigData] = await Promise.all([
-      dataService.getEvents(),
+    const [linksData, contentData, galleriesData, emailConfigData] = await Promise.all([
+      dataService.getLinks(),
       dataService.getContent(),
       dataService.getGalleries(),
       dataService.getEmailConfig()
     ])
     
     console.log('🔄 AdminPanel: API responses received:', {
-      eventsData,
+      linksData,
       contentData,
       galleriesData,
       emailConfigData
     })
     
-    // Ensure events data is properly structured
-    if (eventsData && typeof eventsData === 'object') {
-      events.value = {
-        recurringEvents: eventsData.recurringEvents || [],
-        specialEvents: eventsData.specialEvents || []
-      }
-    } else {
-      events.value = { recurringEvents: [], specialEvents: [] }
-    }
+    // Load links
+    links.value = Array.isArray(linksData) ? linksData : []
     
     // Ensure content data is properly structured
     if (contentData && typeof contentData === 'object') {
@@ -833,15 +684,7 @@ const loadData = async () => {
     }
     
     // Fallback to localStorage if needed
-    if (!events.value.recurringEvents.length && !events.value.specialEvents.length) {
-      const storedEvents = dataService.getEventsFromStorage()
-      if (storedEvents) {
-        events.value = {
-          recurringEvents: storedEvents.recurringEvents || [],
-          specialEvents: storedEvents.specialEvents || []
-        }
-      }
-    }
+    // No local fallback needed for links here; handled in dataService
     
     if (!content.value.clubDescription) {
       const storedContent = dataService.getContentFromStorage()
@@ -865,11 +708,10 @@ const loadData = async () => {
       }
     }
     
-    console.log('✅ Data loaded successfully:', { events: events.value, content: content.value })
+    console.log('✅ Data loaded successfully:', { links: links.value, content: content.value })
   } catch (error) {
     console.error('❌ Error loading data:', error)
-    // Ensure we have fallback data even on error
-    events.value = { recurringEvents: [], specialEvents: [] }
+    links.value = []
     content.value = {
       clubDescription: '',
       walkingSchedule: {
@@ -885,37 +727,51 @@ const loadData = async () => {
   }
 }
 
-// Save events
-const saveEvents = async () => {
-  try {
-    console.log('🔄 AdminPanel: Starting to save events...')
-    console.log('🔄 AdminPanel: Events data to save:', events.value)
-    console.log('🔄 AdminPanel: Current hostname:', window.location.hostname)
-    console.log('🔄 AdminPanel: Is production:', window.location.hostname !== 'localhost' && !window.location.hostname.includes('localhost'))
-    
-    const success = await dataService.saveEvents(events.value)
-    
-    console.log('🔄 AdminPanel: DataService.saveEvents result:', success)
-    
-    if (success) {
-      saveStatus.value = 'Events saved successfully!'
-      emit('eventsUpdated', events.value)
-      console.log('✅ AdminPanel: Events saved successfully')
-      setTimeout(() => saveStatus.value = '', 3000)
-    } else {
-      saveStatus.value = 'Failed to save events'
-      console.error('❌ AdminPanel: Events save returned false')
-    }
-  } catch (error) {
-    saveStatus.value = 'Error saving events'
-    console.error('❌ AdminPanel: Error saving events:', error)
-    console.error('❌ AdminPanel: Error details:', {
-      name: error instanceof Error ? error.name : 'Unknown',
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : 'No stack trace'
-    })
+// Links management
+const links = ref<LinkItem[]>([])
+const showAddLinkForm = ref(false)
+const newLink = reactive<{ url: string; description: string }>({ url: '', description: '' })
+const editingLink = ref<LinkItem | null>(null)
+
+const loadLinks = async () => {
+  const data = await dataService.getLinks()
+  links.value = Array.isArray(data) ? data : []
+}
+
+const saveLinks = async () => {
+  const success = await dataService.saveLinks(links.value)
+  if (success) {
+    saveStatus.value = 'Links saved successfully!'
+    setTimeout(() => saveStatus.value = '', 3000)
+  } else {
+    saveStatus.value = 'Error saving links'
   }
 }
+
+const addLink = async () => {
+  if (!newLink.url || !newLink.description) return
+  links.value.unshift({ id: Date.now().toString(), url: newLink.url, description: newLink.description })
+  newLink.url = ''
+  newLink.description = ''
+  showAddLinkForm.value = false
+  await saveLinks()
+}
+
+const deleteLink = async (id: string) => {
+  links.value = links.value.filter(l => l.id !== id)
+  await saveLinks()
+}
+
+const editLink = (link: LinkItem) => {
+  editingLink.value = { ...link }
+}
+
+watch(editingLink, async (val, prev) => {
+  // no-op placeholder for potential inline editing UI
+})
+
+// Remove leftover calls references to saveEvents by defining a no-op to satisfy type references if any remain
+const saveEvents = async () => { return }
 
 // Save content
 const saveContent = async () => {
@@ -951,108 +807,34 @@ const saveContent = async () => {
 }
 
 // Add recurring event
-const addRecurringEvent = () => {
-  if (newRecurringEvent.title && newRecurringEvent.day && newRecurringEvent.time) {
-    const event = {
-      id: Date.now(),
-      title: newRecurringEvent.title,
-      day: newRecurringEvent.day,
-      time: newRecurringEvent.time,
-      message: newRecurringEvent.message
-    }
-    events.value.recurringEvents.push(event)
-    
-    // Reset form
-    newRecurringEvent.title = ''
-    newRecurringEvent.day = ''
-    newRecurringEvent.time = ''
-    newRecurringEvent.message = ''
-    showAddRecurringForm.value = false
-    
-    // Auto-save
-    saveEvents()
-  }
-}
+const addRecurringEvent = () => { /* events removed */ }
 
 // Add special event
-const addSpecialEvent = () => {
-  if (newSpecialEvent.title && newSpecialEvent.date && newSpecialEvent.time) {
-    const event = {
-      id: Date.now(),
-      title: newSpecialEvent.title,
-      date: newSpecialEvent.date,
-      time: newSpecialEvent.time,
-      message: newSpecialEvent.message
-    }
-    events.value.specialEvents.push(event)
-    
-    // Reset form
-    newSpecialEvent.title = ''
-    newSpecialEvent.date = ''
-    newSpecialEvent.time = ''
-    newSpecialEvent.message = ''
-    showAddSpecialForm.value = false
-    
-    // Auto-save
-    saveEvents()
-  }
-}
+const addSpecialEvent = () => { /* events removed */ }
 
 // Delete recurring event
-const deleteRecurringEvent = (id: number) => {
-  events.value.recurringEvents = events.value.recurringEvents.filter(event => event.id !== id)
-  saveEvents()
-}
+const deleteRecurringEvent = (id: number) => { /* events removed */ }
 
 // Delete special event
-const deleteSpecialEvent = (id: number) => {
-  events.value.specialEvents = events.value.specialEvents.filter(event => event.id !== id)
-  saveEvents()
-}
+const deleteSpecialEvent = (id: number) => { /* events removed */ }
 
 // Edit recurring event
-const editRecurringEvent = (event: any) => {
-  editingRecurringEvent.value = { ...event }
-}
+const editRecurringEvent = (event: any) => { editingRecurringEvent.value = null }
 
 // Save recurring event edit
-const saveRecurringEventEdit = () => {
-  if (editingRecurringEvent.value) {
-    const index = events.value.recurringEvents.findIndex(e => e.id === editingRecurringEvent.value.id)
-    if (index !== -1) {
-      events.value.recurringEvents[index] = { ...editingRecurringEvent.value }
-      saveEvents()
-      editingRecurringEvent.value = null
-    }
-  }
-}
+const saveRecurringEventEdit = () => { editingRecurringEvent.value = null }
 
 // Cancel recurring event edit
-const cancelRecurringEventEdit = () => {
-  editingRecurringEvent.value = null
-}
+const cancelRecurringEventEdit = () => { editingRecurringEvent.value = null }
 
 // Edit special event
-const editSpecialEvent = (event: any) => {
-  editingSpecialEvent.value = { ...event }
-}
+const editSpecialEvent = (event: any) => { editingSpecialEvent.value = null }
 
 // Save special event edit
-const saveSpecialEventEdit = () => {
-  if (editingSpecialEvent.value) {
-    const index = events.value.specialEvents.findIndex(e => e.id === editingSpecialEvent.value.id)
-    if (index !== -1) {
-      events.value.specialEvents[index] = { ...editingSpecialEvent.value }
-      saveEvents()
-      editingSpecialEvent.value = null
-    }
-  }
-}
+const saveSpecialEventEdit = () => { editingSpecialEvent.value = null }
 
 // Cancel special event edit
-const cancelSpecialEventEdit = () => {
-  editingSpecialEvent.value = null
-}
+const cancelSpecialEventEdit = () => { editingSpecialEvent.value = null }
 
 // Create new gallery
 const createGallery = async () => {
