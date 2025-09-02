@@ -836,7 +836,7 @@ const formatTime = (time: string): string => {
       <!-- Links Section -->
       <section id="links" class="section bg-gray-50">
         <div class="container">
-          <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Useful Links</h2>
+          <h2 class="text-4xl font-bold text-center text-gray-900 mb-8">Useful Links</h2>
           <div v-if="links.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <a v-for="link in links" :key="link.id" :href="link.url" target="_blank" rel="noopener" class="card hover:shadow-lg transition-all">
               <div class="flex items-start justify-between">
