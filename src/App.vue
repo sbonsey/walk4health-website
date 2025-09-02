@@ -834,7 +834,7 @@ const formatTime = (time: string): string => {
       </section>
 
       <!-- Links Section -->
-      <section id="links" class="section bg-gray-50 pt-24">
+      <section id="links" class="section bg-gray-50">
         <div class="container">
           <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Useful Links</h2>
           <div v-if="links.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

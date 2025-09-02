@@ -64,22 +64,32 @@
               </div>
             </div>
             <div class="space-y-2">
-              <div v-for="link in links" :key="link.id" class="bg-white p-3 rounded-lg border border-gray-200 flex justify-between items-start">
-                <div class="flex-1">
-                  <p class="text-sm text-gray-800 break-all">{{ link.url }}</p>
-                  <p class="text-xs text-gray-600">{{ link.description }}</p>
+              <div v-for="link in links" :key="link.id" class="bg-white p-3 rounded-lg border border-gray-200">
+                <div v-if="editingLink && editingLink.id === link.id" class="space-y-2">
+                  <input v-model="editingLink.url" type="url" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="https://example.com">
+                  <input v-model="editingLink.description" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Description">
+                  <div class="flex space-x-2">
+                    <button @click="saveEditedLink" class="btn-primary text-sm flex-1">Save</button>
+                    <button @click="cancelEditLink" class="btn-secondary text-sm flex-1">Cancel</button>
+                  </div>
                 </div>
-                <div class="flex space-x-2">
-                  <button @click="editLink(link)" class="text-blue-600 hover:text-blue-800">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                    </svg>
-                  </button>
-                  <button @click="deleteLink(link.id)" class="text-red-600 hover:text-red-800">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                  </button>
+                <div v-else class="flex justify-between items-start">
+                  <div class="flex-1">
+                    <p class="text-sm text-gray-800 break-all">{{ link.url }}</p>
+                    <p class="text-xs text-gray-600">{{ link.description }}</p>
+                  </div>
+                  <div class="flex space-x-2">
+                    <button @click="editLink(link)" class="text-blue-600 hover:text-blue-800">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                    </button>
+                    <button @click="deleteLink(link.id)" class="text-red-600 hover:text-red-800">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
               <div v-if="links.length === 0" class="text-center text-gray-500 py-4 text-sm">No links added yet.</div>
@@ -771,6 +781,20 @@ const editLink = (link: LinkItem) => {
 watch(editingLink, async (val, prev) => {
   // no-op placeholder for potential inline editing UI
 })
+
+const cancelEditLink = () => {
+  editingLink.value = null
+}
+
+const saveEditedLink = async () => {
+  if (!editingLink.value) return
+  const index = links.value.findIndex(l => l.id === editingLink.value!.id)
+  if (index !== -1) {
+    links.value[index] = { ...editingLink.value }
+    editingLink.value = null
+    await saveLinks()
+  }
+}
 
 // Remove leftover calls references to saveEvents by defining a no-op to satisfy type references if any remain
 const saveEvents = async () => { return }
