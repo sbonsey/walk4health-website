@@ -366,6 +366,32 @@
             </div>
             
             <div class="space-y-6">
+              <!-- Recurring Events (Regular Walking Schedule) -->
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h4 class="font-medium text-gray-900 mb-3">Regular Walking Schedule</h4>
+                <div class="space-y-3">
+                  <div v-for="(ev, idx) in events.recurringEvents" :key="ev.id" class="grid grid-cols-1 md:grid-cols-4 gap-2 items-center bg-white p-3 rounded border">
+                    <input v-model="ev.title" type="text" placeholder="Title" class="px-2 py-1 border rounded text-sm">
+                    <select v-model="ev.day" class="px-2 py-1 border rounded text-sm">
+                      <option value="sunday">Sunday</option>
+                      <option value="monday">Monday</option>
+                      <option value="tuesday">Tuesday</option>
+                      <option value="wednesday">Wednesday</option>
+                      <option value="thursday">Thursday</option>
+                      <option value="friday">Friday</option>
+                      <option value="saturday">Saturday</option>
+                    </select>
+                    <input v-model="ev.time" type="time" class="px-2 py-1 border rounded text-sm">
+                    <div class="flex items-center justify-end gap-2">
+                      <button @click="removeRecurring(idx)" class="text-red-600 hover:text-red-800">Remove</button>
+                    </div>
+                    <textarea v-model="ev.message" placeholder="Optional message" rows="2" class="md:col-span-4 px-2 py-1 border rounded text-sm"></textarea>
+                  </div>
+                  <div>
+                    <button @click="addRecurring()" class="btn-secondary text-sm">Add Recurring</button>
+                  </div>
+                </div>
+              </div>
               <!-- Club Mission -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Club Mission</label>
@@ -472,7 +498,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch, computed } from 'vue'
-import { dataService, type ClubContent, type GalleryMeta, type LinkItem } from '../services/dataService'
+import { dataService, type ClubContent, type GalleryMeta, type LinkItem, type EventsData } from '../services/dataService'
 
 // Types
 interface NewsItem {
@@ -494,6 +520,7 @@ const props = defineProps<{
 // Emits
 const emit = defineEmits<{
   close: []
+  eventsUpdated: [EventsData]
   'content-updated': [ClubContent]
   galleriesUpdated: [GalleryMeta[]]
   newsUpdated: [NewsItem[]]
@@ -556,6 +583,7 @@ const newNewsItem = reactive({
 })
 
 // (Events removed)
+const events = ref<EventsData>({ recurringEvents: [], specialEvents: [] })
 
 const content = ref<ClubContent>({
   clubMission: '',
@@ -618,22 +646,24 @@ const loadData = async () => {
     console.log('🔄 AdminPanel: Starting to load data from API...')
     console.log('🔄 AdminPanel: Current hostname:', window.location.hostname)
     
-    const [linksData, contentData, galleriesData, emailConfigData] = await Promise.all([
+    const [linksData, eventsData, contentData, galleriesData, emailConfigData] = await Promise.all([
       dataService.getLinks(),
+      dataService.getEvents(),
       dataService.getContent(),
       dataService.getGalleries(),
       dataService.getEmailConfig()
     ])
     
-    console.log('🔄 AdminPanel: API responses received:', {
-      linksData,
-      contentData,
-      galleriesData,
-      emailConfigData
-    })
+    console.log('🔄 AdminPanel: API responses received:', { linksData, contentData, galleriesData, emailConfigData })
     
     // Load links
     links.value = Array.isArray(linksData) ? linksData : []
+
+    // Load events
+    events.value = {
+      recurringEvents: eventsData?.recurringEvents || [],
+      specialEvents: eventsData?.specialEvents || []
+    }
     
     // Ensure content data is properly structured
     if (contentData && typeof contentData === 'object') {
@@ -682,8 +712,8 @@ const loadData = async () => {
     
     // Load email configuration
     if (emailConfigData && typeof emailConfigData === 'object') {
-      emailConfig.inquiryEmail = emailConfigData.inquiryEmail || ''
-      emailConfig.subjectPrefix = emailConfigData.subjectPrefix || ''
+      emailConfig.inquiryEmail = (emailConfigData as any).inquiryEmail || ''
+      emailConfig.subjectPrefix = (emailConfigData as any).subjectPrefix || ''
     }
     
     // Ensure galleries data is properly structured
@@ -735,6 +765,18 @@ const loadData = async () => {
   } finally {
     loading.value = false
   }
+}
+
+// Recurring events helpers
+const addRecurring = () => {
+  events.value.recurringEvents = [
+    ...events.value.recurringEvents,
+    { id: Date.now(), title: 'New Walk', day: 'sunday', time: '09:00', message: '' }
+  ]
+}
+
+const removeRecurring = (index: number) => {
+  events.value.recurringEvents = events.value.recurringEvents.filter((_, i) => i !== index)
 }
 
 // Links management
@@ -808,13 +850,17 @@ const saveContent = async () => {
     console.log('🔄 AdminPanel: Is production:', window.location.hostname !== 'localhost' && !window.location.hostname.includes('localhost'))
     
     content.value.lastUpdated = new Date().toISOString()
-    const success = await dataService.saveContent(content.value)
+    const [contentSaved, eventsSaved] = await Promise.all([
+      dataService.saveContent(content.value),
+      dataService.saveEvents(events.value)
+    ])
     
-    console.log('🔄 AdminPanel: DataService.saveContent result:', success)
+    console.log('🔄 AdminPanel: save results:', { contentSaved, eventsSaved })
     
-    if (success) {
+    if (contentSaved && eventsSaved) {
       saveStatus.value = 'Content saved successfully!'
       emit('content-updated', content.value)
+      emit('eventsUpdated', events.value)
       console.log('✅ AdminPanel: Content saved successfully')
       setTimeout(() => saveStatus.value = '', 3000)
     } else {
