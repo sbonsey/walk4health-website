@@ -656,9 +656,9 @@ const formatTime = (time: string): string => {
             </div>
             
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="#events" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold text-lg px-8 py-4 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-200 shadow-lg">
+              <!-- <a href="#events" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold text-lg px-8 py-4 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-200 shadow-lg">
                 Join Our Walks
-              </a>
+              </a> -->
               <a href="#contact" class="bg-white hover:bg-gray-50 text-gray-800 font-semibold text-lg px-8 py-4 rounded-lg border-2 border-gray-200 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-gray-200 shadow-lg">
                 Get in Touch
               </a>
@@ -666,7 +666,8 @@ const formatTime = (time: string): string => {
             
             <!-- Regular Walking Schedule (Recurring Events) -->
             <div class="mt-16">
-              <h3 class="text-2xl font-bold text-center text-gray-900 mb-8">Regular Walking Schedule</h3>
+              <h3 class="text-2xl font-bold text-center text-gray-900 mb-0">Regular Walking Schedule</h3>
+              <h4 class="text-medium font-medium text-center text-gray-600 mb-8">Please come and join our walks</h4>
               <div class="grid md:grid-cols-2 gap-8">
                 <div v-for="event in recurringEvents" :key="`schedule-${event.id}`" class="card bg-white/90 backdrop-blur-sm text-left">
                   <div class="flex items-center mb-4">
