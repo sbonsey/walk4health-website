@@ -743,6 +743,8 @@ const saveLinks = async () => {
   if (success) {
     saveStatus.value = 'Links saved successfully!'
     setTimeout(() => saveStatus.value = '', 3000)
+    // Emit updated links to parent immediately so UI reflects changes
+    emit('content-updated', { ...content.value, lastUpdated: new Date().toISOString() })
   } else {
     saveStatus.value = 'Error saving links'
   }

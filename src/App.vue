@@ -310,6 +310,16 @@ const handleContentUpdated = (content: ClubContent) => {
   clubContent.value = content
 }
 
+// Refresh links from storage/API when admin saves
+const refreshLinks = async () => {
+  try {
+    const latest = await dataService.getLinks()
+    links.value = Array.isArray(latest) ? latest : []
+  } catch (e) {
+    console.error('Failed to refresh links', e)
+  }
+}
+
 // Handle galleries updates from admin panel
 const handleGalleriesUpdated = (updatedGalleries: GalleryMeta[]) => {
   galleries.value = updatedGalleries
@@ -1149,7 +1159,7 @@ const formatTime = (time: string): string => {
       :galleries="galleries"
       :news="newsItems"
       @close="adminPanelOpen = false"
-      @content-updated="handleContentUpdated"
+      @content-updated="handleContentUpdated($event); refreshLinks()"
       @galleries-updated="handleGalleriesUpdated"
       @news-updated="handleNewsUpdated"
     />

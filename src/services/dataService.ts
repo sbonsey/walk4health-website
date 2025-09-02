@@ -582,10 +582,7 @@ class DataService {
       return data.links || []
     } catch (error) {
       console.error('Error fetching links:', error)
-      if (!this.isProduction()) {
-        const stored = this.getLinksFromStorage()
-        if (stored) return stored
-      }
+      // No fallback: return empty so issues are visible
       return []
     }
   }
@@ -598,9 +595,6 @@ class DataService {
         body: JSON.stringify({ links })
       })
       if (response.ok) {
-        if (!this.isProduction()) {
-          localStorage.setItem('walk4health-links', JSON.stringify(links))
-        }
         return true
       } else {
         const errorText = await response.text()
@@ -609,10 +603,7 @@ class DataService {
       }
     } catch (error) {
       console.error('Error saving links:', error)
-      if (!this.isProduction()) {
-        localStorage.setItem('walk4health-links', JSON.stringify(links))
-        return true
-      }
+      // No fallback
       throw error
     }
   }
