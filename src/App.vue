@@ -550,11 +550,11 @@ const formatTime = (time: string): string => {
     <!-- Navigation -->
     <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
       <div class="max-w-7xl mx-auto px-8">
-        <div class="flex justify-between items-center h-24">
+        <div class="flex justify-between items-center h-16 md:h-24">
             <!-- Logo -->
             <div class="flex items-center gap-3">
-              <h1 class="block md:hidden lg:block text-2xl md:text-3xl font-bold text-gray-800">Walk for Health</h1>
-              <img src="/src/assets/shoes-no-text.png" alt="Walking shoes" class="h-12 md:h-10 w-auto object-cover rounded">
+              <img src="/src/assets/shoes-words.png" alt="Walking shoes" class="h-8 md:h-10 w-auto object-cover rounded">
+              <h1 class="block md:hidden lg:block text-xl md:text-3xl font-bold text-gray-800">Walk for Health</h1>
             </div>
           
           <!-- Desktop Navigation -->
@@ -627,7 +627,7 @@ const formatTime = (time: string): string => {
     </nav>
 
     <!-- Main Content -->
-    <main class="pt-24">
+    <main class="pt-16 md:pt-24">
       <!-- Home Section -->
       <section id="home" class="section bg-gradient-to-br from-primary-50 to-secondary-50 relative overflow-hidden">
         <!-- Background Image -->
@@ -1001,6 +1001,26 @@ const formatTime = (time: string): string => {
                     <p class="font-bold text-gray-900 mb-1">Location</p>
                     <p class="text-gray-700 text-lg">Hutt Valley, New Zealand</p>
                     <p class="text-gray-700">Lower Hutt, Upper Hutt, Petone, Wellington, Coast</p>
+                  </div>
+                </div>
+                
+                <div class="flex items-start p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+                  <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-bold text-gray-900 mb-1">Application Form</p>
+                    <p class="text-gray-700 text-lg">Club membership is $30 per annum, download our membership application form below.</p>
+                    <a href="/src/assets/application.pdf" 
+                       download="Walk4Health_Application_Form.pdf"
+                       class="inline-flex items-center mt-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-all duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-300">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                      </svg>
+                      Download Application Form
+                    </a>
                   </div>
                 </div>
               </div>

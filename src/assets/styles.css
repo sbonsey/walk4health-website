@@ -44,12 +44,12 @@
   
   /* Page anchor spacing - prevent headings from being hidden behind fixed nav */
   #home, #about, #news, #gallery, #contact {
-    scroll-margin-top: 2rem; /* Reduced from 7rem to 2rem */
+    scroll-margin-top: 1rem; /* Reduced from 2rem to 1rem for mobile */
   }
   
   /* Links section scroll margin */
   #links {
-    scroll-margin-top: 2rem; /* Keep consistent with other sections */
+    scroll-margin-top: 1rem; /* Keep consistent with other sections */
   }
   
   /* Smooth scrolling for all anchor links */
@@ -68,7 +68,7 @@
     }
     
     #home, #about, #news, #events, #gallery, #contact {
-      scroll-margin-top: 1.5rem;
+      scroll-margin-top: 0.75rem;
     }
   }
   
@@ -82,7 +82,7 @@
     }
     
     #home, #about, #news, #events, #gallery, #contact {
-      scroll-margin-top: 1rem;
+      scroll-margin-top: 0.5rem;
     }
   }
 }
