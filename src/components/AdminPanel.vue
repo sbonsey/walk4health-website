@@ -370,7 +370,7 @@
               <div class="bg-gray-50 p-4 rounded-lg">
                 <h4 class="font-medium text-gray-900 mb-3">Regular Walking Schedule</h4>
                 <div class="space-y-3">
-                  <div v-for="(ev, idx) in events.recurringEvents" :key="ev.id" class="grid grid-cols-1 md:grid-cols-4 gap-2 items-center bg-white p-3 rounded border">
+                  <div v-for="(ev, idx) in events.recurringEvents" :key="ev.id" class="grid grid-cols-1 md:grid-cols-6 gap-2 items-center bg-white p-3 rounded border">
                     <input v-model="ev.title" type="text" placeholder="Title" class="px-2 py-1 border rounded text-sm">
                     <select v-model="ev.day" class="px-2 py-1 border rounded text-sm">
                       <option value="sunday">Sunday</option>
@@ -381,16 +381,21 @@
                       <option value="friday">Friday</option>
                       <option value="saturday">Saturday</option>
                     </select>
-                    <input v-model="ev.time" type="time" class="px-2 py-1 border rounded text-sm">
+                    <input v-model="ev.time" type="time" class="px-2 py-1 border rounded text-sm" placeholder="Default Time">
+                    <input v-model="ev.winterTime" type="time" class="px-2 py-1 border rounded text-sm" placeholder="Winter Time">
+                    <input v-model="ev.summerTime" type="time" class="px-2 py-1 border rounded text-sm" placeholder="Summer Time">
                     <div class="flex items-center justify-end gap-2">
                       <button @click="removeRecurring(idx)" class="text-red-600 hover:text-red-800">Remove</button>
                     </div>
-                    <textarea v-model="ev.message" placeholder="Optional message" rows="2" class="md:col-span-4 px-2 py-1 border rounded text-sm"></textarea>
+                    <textarea v-model="ev.message" placeholder="Optional message" rows="2" class="md:col-span-6 px-2 py-1 border rounded text-sm"></textarea>
                   </div>
                   <div>
                     <button @click="addRecurring()" class="btn-secondary text-sm">Add Recurring</button>
                   </div>
                 </div>
+                <p class="text-xs text-gray-500 mt-2">
+                  <strong>Time Fields:</strong> Default Time (always shown), Winter Time (Oct-Mar), Summer Time (Apr-Sep). Leave winter/summer times empty to use default time only.
+                </p>
               </div>
               <!-- Club Mission -->
               <div>
@@ -807,7 +812,7 @@ const loadData = async () => {
 const addRecurring = () => {
   events.value.recurringEvents = [
     ...events.value.recurringEvents,
-    { id: Date.now(), title: 'New Walk', day: 'sunday', time: '09:00', message: '' }
+    { id: Date.now(), title: 'New Walk', day: 'sunday', time: '09:00', winterTime: '', summerTime: '', message: '' }
   ]
 }
 

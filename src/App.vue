@@ -678,7 +678,38 @@ const formatTime = (time: string): string => {
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900">{{ event.title }}</h3>
                   </div>
-                  <p class="text-gray-600 mb-2">{{ capitalizeDay(event.day) }} at {{ formatTime(event.time) }}</p>
+                  
+                  <!-- Time Display -->
+                  <div class="text-gray-600 mb-2">
+                    <p class="font-medium">{{ capitalizeDay(event.day) }}</p>
+                    
+                    <!-- Show different times based on what's configured -->
+                    <div v-if="event.winterTime && event.summerTime" class="mt-1">
+                      <p class="text-sm">
+                        <span class="font-medium">Winter (Apr-Sep):</span> {{ formatTime(event.winterTime) }}
+                      </p>
+                      <p class="text-sm">
+                        <span class="font-medium">Summer (Oct-Mar):</span> {{ formatTime(event.summerTime) }}
+                      </p>
+                    </div>
+                    
+                    <div v-else-if="event.winterTime || event.summerTime" class="mt-1">
+                      <p v-if="event.winterTime" class="text-sm">
+                        <span class="font-medium">Winter:</span> {{ formatTime(event.winterTime) }}
+                      </p>
+                      <p v-if="event.summerTime" class="text-sm">
+                        <span class="font-medium">Summer:</span> {{ formatTime(event.summerTime) }}
+                      </p>
+                      <p class="text-sm">
+                        <span class="font-medium">Default:</span> {{ formatTime(event.time) }}
+                      </p>
+                    </div>
+                    
+                    <div v-else class="mt-1">
+                      <p class="text-sm">at {{ formatTime(event.time) }}</p>
+                    </div>
+                  </div>
+                  
                   <p v-if="event.message" class="text-gray-600 mb-2">{{ event.message }}</p>
                 </div>
               </div>
