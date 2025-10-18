@@ -785,7 +785,7 @@ const formatTime = (time: string): string => {
                     </span>
                   </div>
                   <h3 class="text-xl font-bold text-gray-900 mb-3">{{ item.title }}</h3>
-                  <p class="text-gray-600 leading-relaxed">{{ item.content }}</p>
+                  <p class="text-gray-600 leading-relaxed whitespace-pre-wrap">{{ item.content }}</p>
 
                   <!-- Gallery Link -->
                   <div v-if="item.galleryLink" class="mt-4">
@@ -824,7 +824,7 @@ const formatTime = (time: string): string => {
                       </span>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">{{ item.title }}</h3>
-                    <p class="text-gray-600 leading-relaxed">{{ item.content }}</p>
+                    <p class="text-gray-600 leading-relaxed whitespace-pre-wrap">{{ item.content }}</p>
 
                     <!-- Gallery Link -->
                     <div v-if="item.galleryLink" class="mt-4">
