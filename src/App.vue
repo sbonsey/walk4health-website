@@ -684,24 +684,12 @@ const formatTime = (time: string): string => {
                     <p class="font-medium">{{ capitalizeDay(event.day) }}</p>
                     
                     <!-- Show different times based on what's configured -->
-                    <div v-if="event.winterTime && event.summerTime" class="mt-1">
+                    <div v-if="event.seasonalTime" class="mt-1">
                       <p class="text-sm">
-                        <span class="font-medium">Winter (Apr-Sep):</span> {{ formatTime(event.winterTime) }}
-                      </p>
-                      <p class="text-sm">
-                        <span class="font-medium">Summer (Oct-Mar):</span> {{ formatTime(event.summerTime) }}
-                      </p>
-                    </div>
-                    
-                    <div v-else-if="event.winterTime || event.summerTime" class="mt-1">
-                      <p v-if="event.winterTime" class="text-sm">
-                        <span class="font-medium">Winter:</span> {{ formatTime(event.winterTime) }}
-                      </p>
-                      <p v-if="event.summerTime" class="text-sm">
-                        <span class="font-medium">Summer:</span> {{ formatTime(event.summerTime) }}
+                        <span class="font-medium">Summer:</span> {{ formatTime(event.time) }}
                       </p>
                       <p class="text-sm">
-                        <span class="font-medium">Default:</span> {{ formatTime(event.time) }}
+                        <span class="font-medium">Winter:</span> {{ formatTime(event.seasonalTime) }}
                       </p>
                     </div>
                     

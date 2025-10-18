@@ -3,8 +3,7 @@ export interface RecurringEvent {
   title: string
   day: string
   time: string
-  winterTime?: string
-  summerTime?: string
+  seasonalTime?: string
   message?: string
 }
 
