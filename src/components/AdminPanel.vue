@@ -451,6 +451,22 @@
                 <input v-model="content.clubImageCaption" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., Walking together since 2001">
               </div>
               
+              <!-- Contact Information -->
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h4 class="font-medium text-gray-900 mb-3">Contact Information</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs text-gray-600 mb-1">Contact Name</label>
+                    <input v-model="content.contactInfo!.contactName" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" placeholder="e.g., Lynn Young">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-600 mb-1">Contact Phone</label>
+                    <input v-model="content.contactInfo!.contactPhone" type="text" class="w-full px-2 py-1 border border-gray-300 rounded text-sm" placeholder="e.g., 021 048 2790">
+                  </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">This information will be displayed in the contact section of the website.</p>
+              </div>
+              
               <button @click="saveContent" class="btn-primary w-full">Save Changes</button>
             </div>
           </div>
@@ -603,6 +619,10 @@ const content = ref<ClubContent>({
     walksPerWeek: ''
   },
   clubImageCaption: '',
+  contactInfo: {
+    contactName: '',
+    contactPhone: ''
+  },
   lastUpdated: new Date().toISOString()
 })
 
@@ -685,6 +705,10 @@ const loadData = async () => {
           walksPerWeek: ''
         },
         clubImageCaption: contentData.clubImageCaption || '',
+        contactInfo: contentData.contactInfo || {
+          contactName: '',
+          contactPhone: ''
+        },
         lastUpdated: contentData.lastUpdated || new Date().toISOString()
       }
     } else {
@@ -706,6 +730,10 @@ const loadData = async () => {
           walksPerWeek: ''
         },
         clubImageCaption: '',
+        contactInfo: {
+          contactName: '',
+          contactPhone: ''
+        },
         lastUpdated: new Date().toISOString()
       }
     }
@@ -743,6 +771,10 @@ const loadData = async () => {
           },
           walkingStats: storedContent.walkingStats || content.value.walkingStats || undefined,
           clubImageCaption: storedContent.clubImageCaption || content.value.clubImageCaption || '',
+          contactInfo: storedContent.contactInfo || content.value.contactInfo || {
+            contactName: '',
+            contactPhone: ''
+          },
           lastUpdated: storedContent.lastUpdated || new Date().toISOString()
         }
       }
@@ -758,6 +790,10 @@ const loadData = async () => {
         sundaySummer: '',
         sundayWinter: '',
         tuesday: ''
+      },
+      contactInfo: {
+        contactName: '',
+        contactPhone: ''
       },
       lastUpdated: new Date().toISOString()
     }

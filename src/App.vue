@@ -94,25 +94,25 @@ const displayedNewsItems = computed(() => {
       try {
         const dateA = new Date(a.date)
         const dateB = new Date(b.date)
-        
+
         // Check if dates are valid
         if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
           console.warn('⚠️ Invalid date found:', { a: a.date, b: b.date })
           return 0 // Keep original order if dates are invalid
         }
-        
+
         return dateB.getTime() - dateA.getTime() // Newest first
       } catch (error) {
         console.error('❌ Error sorting news by date:', error)
         return 0 // Keep original order on error
       }
     })
-  
+
   console.log('📰 News sorting debug:', {
     original: newsItems.value.map(item => ({ id: item.id, date: item.date, dateObj: new Date(item.date) })),
     sorted: sorted.map(item => ({ id: item.id, date: item.date, dateObj: new Date(item.date) }))
   })
-  
+
   return sorted.slice(0, 3)
 })
 
@@ -123,12 +123,12 @@ const additionalNewsItems = computed(() => {
       try {
         const dateA = new Date(a.date)
         const dateB = new Date(b.date)
-        
+
         // Check if dates are valid
         if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
           return 0 // Keep original order if dates are invalid
         }
-        
+
         return dateB.getTime() - dateA.getTime() // Newest first
       } catch (error) {
         console.error('❌ Error sorting additional news by date:', error)
@@ -144,11 +144,11 @@ onMounted(async () => {
   console.log('🌐 Current hostname:', window.location.hostname)
   console.log('🏭 Production mode:', window.location.hostname !== 'localhost' && !window.location.hostname.includes('localhost'))
   await loadData()
-  
+
   // Add keyboard navigation for lightbox
   const handleKeydown = (event: KeyboardEvent) => {
     if (!lightboxImage.value) return
-    
+
     switch (event.key) {
       case 'Escape':
         closeLightbox()
@@ -165,9 +165,9 @@ onMounted(async () => {
         break
     }
   }
-  
+
   document.addEventListener('keydown', handleKeydown)
-  
+
   // Cleanup
   onUnmounted(() => {
     document.removeEventListener('keydown', handleKeydown)
@@ -185,7 +185,7 @@ const loadData = async () => {
       dataService.getNews(),
       dataService.getLinks()
     ])
-    
+
     // Ensure events data is properly structured
     if (eventsData && typeof eventsData === 'object') {
       recurringEvents.value = eventsData.recurringEvents || []
@@ -194,7 +194,7 @@ const loadData = async () => {
       recurringEvents.value = []
       specialEvents.value = []
     }
-    
+
     // Ensure content data is properly structured
     if (contentData && typeof contentData === 'object') {
       clubContent.value = {
@@ -225,7 +225,7 @@ const loadData = async () => {
         lastUpdated: new Date().toISOString()
       }
     }
-    
+
     // Only fallback to localStorage in development mode
     if (window.location.hostname === 'localhost' || window.location.hostname.includes('localhost')) {
       if (!recurringEvents.value.length && !specialEvents.value.length) {
@@ -235,7 +235,7 @@ const loadData = async () => {
           specialEvents.value = storedEvents.specialEvents || []
         }
       }
-      
+
       if (!clubContent.value.clubDescription) {
         const storedContent = dataService.getContentFromStorage()
         if (storedContent) {
@@ -255,10 +255,10 @@ const loadData = async () => {
         }
       }
     }
-    
+
     // Set galleries data
     galleries.value = galleriesData || []
-    
+
     // Set news data
     newsItems.value = newsData || []
     console.log('📰 News data loaded:', {
@@ -266,18 +266,18 @@ const loadData = async () => {
       newsItemsCount: newsItems.value.length,
       newsItems: newsItems.value
     })
-    
+
     // Set links data
     links.value = Array.isArray(linksData) ? linksData : []
-    
-    console.log('✅ App.vue: Data loaded successfully:', { 
-      recurringEvents: recurringEvents.value, 
+
+    console.log('✅ App.vue: Data loaded successfully:', {
+      recurringEvents: recurringEvents.value,
       specialEvents: specialEvents.value,
       clubContent: clubContent.value,
       galleries: galleries.value,
       links: links.value
     })
-    
+
     // Debug: Log the specific values we're interested in
     console.log('🔍 App.vue: Walking stats from API:', contentData?.walkingStats)
     console.log('🔍 App.vue: Committee from API:', contentData?.committee)
@@ -335,8 +335,8 @@ const handleNewsUpdated = (updatedNews: NewsItem[]) => {
 // News methods
 const formatNewsDate = (dateString: string) => {
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-NZ', { 
-    month: 'long', 
+  return date.toLocaleDateString('en-NZ', {
+    month: 'long',
     day: 'numeric',
     year: 'numeric'
   })
@@ -364,7 +364,7 @@ const closeMobileMenu = () => {
 
 const submitContactForm = async () => {
   let originalText: string | null = null
-  
+
   try {
     // Show loading state
     const submitButton = document.querySelector('button[type="submit"]') as HTMLButtonElement
@@ -376,11 +376,11 @@ const submitContactForm = async () => {
 
     // Send contact form via API
     const success = await dataService.sendContactForm(contactForm.value)
-    
+
     if (success) {
       // Show success message
       alert('Thank you for your message! We will get back to you soon.')
-      
+
       // Reset form
       contactForm.value = {
         name: '',
@@ -421,11 +421,11 @@ const closeLoginModal = () => {
 // Format date for display
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-NZ', { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  return date.toLocaleDateString('en-NZ', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   })
 }
 
@@ -471,10 +471,10 @@ const nextImage = () => {
 
 const scrollGalleries = (direction: 'left' | 'right') => {
   if (!galleriesContainer.value) return
-  
+
   const scrollAmount = 400 // Adjust scroll distance as needed
   const currentScroll = galleriesContainer.value.scrollLeft
-  
+
   if (direction === 'left') {
     galleriesContainer.value.scrollTo({
       left: currentScroll - scrollAmount,
@@ -506,9 +506,9 @@ const handleLogin = () => {
 
 const formatEventDate = (dateString: string) => {
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-NZ', { 
-    month: 'long', 
-    day: 'numeric' 
+  return date.toLocaleDateString('en-NZ', {
+    month: 'long',
+    day: 'numeric'
   })
 }
 
@@ -519,14 +519,14 @@ const capitalizeDay = (day: string): string => {
 
 const formatTime = (time: string): string => {
   if (!time) return ''
-  
+
   try {
     // Convert 24-hour format to 12-hour format with AM/PM
     const [hours, minutes] = time.split(':')
     const hour = parseInt(hours)
     const ampm = hour >= 12 ? 'PM' : 'AM'
     const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
-    
+
     return `${displayHour}:${minutes} ${ampm}`
   } catch (error) {
     // Fallback to original time if parsing fails
@@ -556,7 +556,7 @@ const formatTime = (time: string): string => {
               <img src="/src/assets/shoes-words.png" alt="Walking shoes" class="h-8 md:h-10 w-auto object-cover rounded">
               <h1 class="block md:hidden lg:block text-xl md:text-3xl font-bold text-gray-800">Walk for Health</h1>
             </div>
-          
+
           <!-- Desktop Navigation -->
           <div class="hidden md:flex items-center space-x-12">
             <a href="#home" class="nav-item-elegant">HOME</a>
@@ -566,9 +566,9 @@ const formatTime = (time: string): string => {
             <a href="#gallery" class="nav-item-elegant">GALLERY</a>
             <a href="#contact" class="nav-item-elegant">CONTACT</a>
               <!-- Admin Toggle Button - Show when admin IS logged in (Desktop Only) -->
-            <button 
+            <button
               v-if="isAdmin"
-              @click="toggleAdminPanel" 
+              @click="toggleAdminPanel"
               class="hidden md:block bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
               title="Toggle Admin Panel"
             >
@@ -579,9 +579,9 @@ const formatTime = (time: string): string => {
             </button>
 
             <!-- Admin Login Button - Show when admin is NOT logged in (Desktop Only) -->
-            <button 
+            <button
               v-else
-              @click="showLoginModal = true" 
+              @click="showLoginModal = true"
               class="hidden md:block bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
               title="Admin Login"
             >
@@ -590,7 +590,7 @@ const formatTime = (time: string): string => {
               </svg>
             </button>
           </div>
-          
+
 
           <!-- Mobile menu button -->
           <div class="md:hidden">
@@ -601,10 +601,10 @@ const formatTime = (time: string): string => {
             </button>
           </div>
         </div>
-        
+
         <!-- Elegant Separator Line -->
         <div class="w-full h-px bg-gray-300"></div>
-        
+
         <!-- Mobile Navigation -->
         <div v-if="mobileMenuOpen" class="md:hidden py-8 bg-white/95 backdrop-blur-sm">
           <div class="flex flex-col space-y-6">
@@ -614,12 +614,12 @@ const formatTime = (time: string): string => {
             <a href="#links" @click="closeMobileMenu" class="mobile-nav-item-elegant">LINKS</a>
             <a href="#gallery" @click="closeMobileMenu" class="mobile-nav-item-elegant">GALLERY</a>
             <a href="#contact" @click="closeMobileMenu" class="mobile-nav-item-elegant">CONTACT</a>
-            
+
             <!-- Mobile Admin Section -->
-            <div class="pt-4 border-t border-gray-200">              
+            <div class="pt-4 border-t border-gray-200">
               <!-- Admin Toggle Button - Show when admin IS logged in -->
               <a v-if="isAdmin" href="#" @click="toggleAdminPanel(); closeMobileMenu()" class="mobile-nav-item-elegant">{{ isAdminPanelOpen() ? 'CLOSE ADMIN' : 'ADMIN' }}</a>
-              <a v-else href="#" @click="showLoginModal = true; closeMobileMenu()" class="mobile-nav-item-elegant">ADMIN LOGIN</a>              
+              <a v-else href="#" @click="showLoginModal = true; closeMobileMenu()" class="mobile-nav-item-elegant">ADMIN LOGIN</a>
             </div>
           </div>
         </div>
@@ -632,29 +632,29 @@ const formatTime = (time: string): string => {
       <section id="home" class="section bg-gradient-to-br from-primary-50 to-secondary-50 relative overflow-hidden">
         <!-- Background Image -->
         <div class="absolute inset-0 z-0">
-          <img src="/src/assets/kitera-dent-jWv1ILisuSc-unsplash.jpg" 
-               alt="Group of people walking together" 
+          <img src="/src/assets/kitera-dent-jWv1ILisuSc-unsplash.jpg"
+               alt="Group of people walking together"
                class="w-full h-full object-cover opacity-20">
         </div>
-        
+
         <div class="container relative z-10">
           <div class="text-center">
             <div class="mb-8">
-              <img src="/src/assets/logo-modified.png" 
+              <img src="/src/assets/logo-modified.png"
                    alt="Walk for Health logo"
                    class="h-24 md:h-32 w-auto mx-auto object-contain">
             </div>
             <!-- <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
               Walk For Health
             </h1> -->
-            
+
             <!-- Mission Statement -->
             <div v-if="clubContent.clubMission" class="mb-6">
               <p class="text-xl text-gray-600 italic">
                 "{{ clubContent.clubMission }}"
               </p>
             </div>
-            
+
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
               <!-- <a href="#events" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold text-lg px-8 py-4 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-200 shadow-lg">
                 Join Our Walks
@@ -663,7 +663,7 @@ const formatTime = (time: string): string => {
                 Get in Touch
               </a>
             </div>
-            
+
             <!-- Regular Walking Schedule (Recurring Events) -->
             <div class="mt-16">
               <h3 class="text-2xl font-bold text-center text-gray-900 mb-0">Regular Walking Schedule</h3>
@@ -691,13 +691,13 @@ const formatTime = (time: string): string => {
       <section id="about" class="section bg-white">
         <div class="container">
           <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">About Our Club</h2>
-          
+
           <div class="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <p class="text-gray-600 mb-6">
                 {{ clubContent.clubDescription }}
               </p>
-              
+
               <!-- Walking Stats -->
               <div class="grid grid-cols-3 gap-4 mt-8">
                 <div class="text-center">
@@ -714,19 +714,19 @@ const formatTime = (time: string): string => {
                 </div>
               </div>
             </div>
-            
+
             <div class="space-y-6">
               <!-- Club Image -->
               <div class="relative rounded-xl overflow-hidden shadow-lg">
-                <img src="/src/assets/w4h-walkers-cropped.jpg" 
-                     alt="Walking group on trail" 
+                <img src="/src/assets/w4h-walkers-cropped.jpg"
+                     alt="Walking group on trail"
                      class="w-full h-64 object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                 <div class="absolute bottom-4 left-4 text-white">
                   <p class="text-sm font-medium">{{ clubContent.clubImageCaption || 'Club image caption will appear here once configured' }}</p>
                 </div>
               </div>
-              
+
               <!-- Committee Info -->
               <div class="bg-primary-50 p-6 rounded-xl border border-primary-100">
                 <h4 class="text-xl font-bold text-primary-800 mb-4">{{ clubContent.committee?.title || 'Our Committee' }}</h4>
@@ -749,11 +749,11 @@ const formatTime = (time: string): string => {
       <section id="news" class="section bg-gray-50">
         <div class="container">
           <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Latest News</h2>
-          
+
           <!-- News Items -->
           <div v-if="newsItems.length > 0" class="space-y-6">
             <!-- First 3 News Items (Always Visible) -->
-            <div v-for="(item, index) in displayedNewsItems" :key="item.id" 
+            <div v-for="(item, index) in displayedNewsItems" :key="item.id"
                  class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6">
               <div class="flex items-start justify-between mb-4">
                 <div class="flex-1">
@@ -767,10 +767,10 @@ const formatTime = (time: string): string => {
                   </div>
                   <h3 class="text-xl font-bold text-gray-900 mb-3">{{ item.title }}</h3>
                   <p class="text-gray-600 leading-relaxed">{{ item.content }}</p>
-                  
+
                   <!-- Gallery Link -->
                   <div v-if="item.galleryLink" class="mt-4">
-                    <button @click="openGalleryFromNews(item.galleryLink)" 
+                    <button @click="openGalleryFromNews(item.galleryLink)"
                             class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors">
                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z"></path>
@@ -781,18 +781,18 @@ const formatTime = (time: string): string => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Show More Button -->
             <div v-if="newsItems.length > 3" class="text-center pt-6">
-              <button @click="toggleNewsExpansion" 
+              <button @click="toggleNewsExpansion"
                       class="btn-primary px-8 py-3 text-lg">
                 {{ showAllNews ? 'Show Less' : `Show ${newsItems.length - 3} More News Items` }}
               </button>
             </div>
-            
+
             <!-- Additional News Items (Hidden by Default) -->
             <div v-if="showAllNews" class="space-y-6">
-              <div v-for="(item, index) in additionalNewsItems" :key="item.id" 
+              <div v-for="(item, index) in additionalNewsItems" :key="item.id"
                    class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6">
                 <div class="flex items-start justify-between mb-4">
                   <div class="flex-1">
@@ -806,10 +806,10 @@ const formatTime = (time: string): string => {
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">{{ item.title }}</h3>
                     <p class="text-gray-600 leading-relaxed">{{ item.content }}</p>
-                    
+
                     <!-- Gallery Link -->
                     <div v-if="item.galleryLink" class="mt-4">
-                      <button @click="openGalleryFromNews(item.galleryLink)" 
+                      <button @click="openGalleryFromNews(item.galleryLink)"
                               class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2v12a2 2 0 002 2z"></path>
@@ -822,7 +822,7 @@ const formatTime = (time: string): string => {
               </div>
             </div>
           </div>
-          
+
           <!-- Empty State -->
           <div v-else class="text-center py-12">
             <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -876,20 +876,20 @@ const formatTime = (time: string): string => {
       <section id="gallery" class="section bg-white">
         <div class="container">
           <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Photo Gallery</h2>
-          
+
           <!-- Dynamic Galleries with Horizontal Scrolling -->
           <div v-if="galleries.length > 0" class="relative">
             <!-- Gallery Cards Container -->
             <div ref="galleriesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div v-for="gallery in galleries" :key="gallery.id" 
+              <div v-for="gallery in galleries" :key="gallery.id"
                    class="cursor-pointer"
                    @click="openGallery(gallery)">
                 <!-- Gallery Card -->
                 <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
                   <!-- Featured Image -->
                   <div class="aspect-[4/3] overflow-hidden">
-                    <img v-if="gallery.images.length > 0" 
-                         :src="gallery.images[0]" 
+                    <img v-if="gallery.images.length > 0"
+                         :src="gallery.images[0]"
                          :alt="gallery.title"
                          class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
                     <div v-else class="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -898,7 +898,7 @@ const formatTime = (time: string): string => {
                       </svg>
                     </div>
                   </div>
-                  
+
                   <!-- Gallery Info -->
                   <div class="p-4">
                     <h3 class="font-bold text-lg text-gray-900 mb-2 line-clamp-2">{{ gallery.title }}</h3>
@@ -912,16 +912,16 @@ const formatTime = (time: string): string => {
                 </div>
               </div>
             </div>
-            
+
 
           </div>
-          
+
           <!-- Fallback Gallery (when no galleries exist) -->
           <div v-else class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Walking Trail -->
             <div class="group relative overflow-hidden rounded-lg aspect-square cursor-pointer">
-              <img src="https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
-                   alt="Beautiful walking trail" 
+              <img src="https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                   alt="Beautiful walking trail"
                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
               <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
               <div class="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -929,11 +929,11 @@ const formatTime = (time: string): string => {
                 <p class="text-sm">Beautiful walking paths</p>
               </div>
             </div>
-            
+
             <!-- Club Members -->
             <div class="group relative overflow-hidden rounded-lg aspect-square cursor-pointer">
-              <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
-                   alt="Club members walking" 
+              <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                   alt="Club members walking"
                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
               <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
               <div class="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -941,11 +941,11 @@ const formatTime = (time: string): string => {
                 <p class="text-sm">Walking together</p>
               </div>
             </div>
-            
+
             <!-- Scenic View -->
             <div class="group relative overflow-hidden rounded-lg aspect-square cursor-pointer">
-              <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
-                   alt="Scenic mountain view" 
+              <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                   alt="Scenic mountain view"
                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
               <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
               <div class="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -961,7 +961,7 @@ const formatTime = (time: string): string => {
       <section id="contact" class="section bg-gray-50">
         <div class="container">
           <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Contact Us</h2>
-          
+
           <div class="grid md:grid-cols-2 gap-12">
             <div>
               <h3 class="text-2xl font-bold text-gray-900 mb-6">Get in Touch</h3>
@@ -977,7 +977,7 @@ const formatTime = (time: string): string => {
                     <p class="text-gray-700 text-lg">walk4healthhutt@gmail.com</p>
                   </div>
                 </div>
-                
+
                 <div class="flex items-start p-4 bg-white rounded-lg shadow-sm border border-gray-100">
                   <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
                     <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -986,10 +986,17 @@ const formatTime = (time: string): string => {
                   </div>
                   <div>
                     <p class="font-bold text-gray-900 mb-1">Phone</p>
-                    <p class="text-gray-700 text-lg">Contact information will appear here once configured</p>
+                    <p class="text-gray-700 text-lg">
+                      <span v-if="clubContent.contactInfo?.contactName && clubContent.contactInfo?.contactPhone">
+                        {{ clubContent.contactInfo.contactName }} - <a :href="`tel:${clubContent.contactInfo.contactPhone}`">Call</a>
+                      </span>
+                      <span v-else>
+                        Lynn Young - <a href="tel:021 048 2790">Call</a>
+                      </span>
+                    </p>
                   </div>
                 </div>
-                
+
                 <div class="flex items-start p-4 bg-white rounded-lg shadow-sm border border-gray-100">
                   <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
                     <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1003,7 +1010,7 @@ const formatTime = (time: string): string => {
                     <p class="text-gray-700">Lower Hutt, Upper Hutt, Petone, Wellington, Coast</p>
                   </div>
                 </div>
-                
+
                 <div class="flex items-start p-4 bg-white rounded-lg shadow-sm border border-gray-100">
                   <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
                     <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1013,7 +1020,7 @@ const formatTime = (time: string): string => {
                   <div>
                     <p class="font-bold text-gray-900 mb-1">Application Form</p>
                     <p class="text-gray-700 text-lg">Club membership is $30 per annum, download our membership application form below.</p>
-                    <a href="/src/assets/application.pdf" 
+                    <a href="/src/assets/application.pdf"
                        download="Walk4Health_Application_Form.pdf"
                        class="inline-flex items-center mt-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-all duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-300">
                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1025,7 +1032,7 @@ const formatTime = (time: string): string => {
                 </div>
               </div>
             </div>
-            
+
             <div class="card bg-white shadow-lg">
               <h3 class="text-xl font-bold text-gray-900 mb-4">Send us a Message</h3>
               <form @submit.prevent="submitContactForm" class="space-y-4">
@@ -1033,12 +1040,12 @@ const formatTime = (time: string): string => {
                   <label for="name" class="block text-sm font-semibold text-gray-800 mb-2">Name</label>
                   <input type="text" id="name" v-model="contactForm.name" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all duration-200 bg-white text-gray-900 placeholder-gray-500">
                 </div>
-                
+
                 <div>
                   <label for="email" class="block text-sm font-semibold text-gray-800 mb-2">Email</label>
                   <input type="email" id="email" v-model="contactForm.email" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all duration-200 bg-white text-gray-900 placeholder-gray-500">
                 </div>
-                
+
                 <div>
                   <label for="subject" class="block text-sm font-semibold text-gray-800 mb-2">Subject</label>
                   <select id="subject" v-model="contactForm.subject" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all duration-200 bg-white text-gray-900">
@@ -1049,12 +1056,12 @@ const formatTime = (time: string): string => {
                     <option value="other">Other</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label for="message" class="block text-sm font-semibold text-gray-800 mb-2">Message</label>
                   <textarea id="message" v-model="contactForm.message" rows="4" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all duration-200 bg-white text-gray-900 placeholder-gray-500 resize-none"></textarea>
                 </div>
-                
+
                 <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-300 text-base">
                   Send Message
                 </button>
@@ -1066,7 +1073,7 @@ const formatTime = (time: string): string => {
     </main>
 
     <!-- Gallery Detail Modal -->
-    <div v-if="selectedGallery" 
+    <div v-if="selectedGallery"
          class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
          @click="closeGalleryModal">
       <!-- Modal Content -->
@@ -1086,7 +1093,7 @@ const formatTime = (time: string): string => {
                 <span>{{ selectedGallery.images.length }} photos</span>
               </div>
             </div>
-            <button @click="closeGalleryModal" 
+            <button @click="closeGalleryModal"
                     class="text-white hover:text-orange-100 p-2 rounded-full hover:bg-white/10 transition-colors">
               <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -1094,15 +1101,15 @@ const formatTime = (time: string): string => {
             </button>
           </div>
         </div>
-        
+
         <!-- Gallery Images Grid -->
         <div class="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-          <div v-if="selectedGallery && selectedGallery.images.length > 0" 
+          <div v-if="selectedGallery && selectedGallery.images.length > 0"
                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            <div v-for="(image, index) in selectedGallery.images" :key="index" 
+            <div v-for="(image, index) in selectedGallery.images" :key="index"
                  class="group relative aspect-square overflow-hidden rounded-lg cursor-pointer"
                  @click="openImageLightbox(image, index)">
-              <img :src="image" 
+              <img :src="image"
                    :alt="`${selectedGallery.title} - Image ${index + 1}`"
                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
               <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
@@ -1111,7 +1118,7 @@ const formatTime = (time: string): string => {
               </div>
             </div>
           </div>
-          
+
           <!-- Empty State -->
           <div v-else class="text-center py-12">
             <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1123,44 +1130,44 @@ const formatTime = (time: string): string => {
         </div>
       </div>
     </div>
-    
+
     <!-- Image Lightbox Modal -->
-    <div v-if="lightboxImage" 
+    <div v-if="lightboxImage"
          class="fixed inset-0 bg-black z-[60] flex items-center justify-center p-4"
          @click="closeLightbox">
       <div class="relative max-w-7xl max-h-[90vh]">
         <!-- Navigation Arrows -->
-        <button v-if="lightboxIndex > 0" 
+        <button v-if="lightboxIndex > 0"
                 @click="previousImage"
                 class="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all z-10">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
           </svg>
         </button>
-        
-        <button v-if="selectedGallery && lightboxIndex < selectedGallery.images.length - 1" 
+
+        <button v-if="selectedGallery && lightboxIndex < selectedGallery.images.length - 1"
                 @click="nextImage"
                 class="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all z-10">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
           </svg>
         </button>
-        
+
         <!-- Close Button -->
-        <button @click="closeLightbox" 
+        <button @click="closeLightbox"
                 class="absolute top-4 right-4 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all z-10">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
-        
+
         <!-- Image Counter -->
         <div class="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm z-10">
           {{ lightboxIndex + 1 }} / {{ selectedGallery?.images.length || 0 }}
         </div>
-        
+
         <!-- Main Image -->
-        <img :src="lightboxImage" 
+        <img :src="lightboxImage"
              :alt="`${selectedGallery?.title || 'Gallery'} - Image ${lightboxIndex + 1}`"
              class="max-w-full max-h-[90vh] object-contain rounded-lg">
       </div>
@@ -1174,8 +1181,8 @@ const formatTime = (time: string): string => {
     </footer>
 
     <!-- Admin Panel -->
-    <AdminPanel 
-      :is-admin="isAdmin" 
+    <AdminPanel
+      :is-admin="isAdmin"
       :is-open="adminPanelOpen"
       :galleries="galleries"
       :news="newsItems"
@@ -1189,30 +1196,30 @@ const formatTime = (time: string): string => {
     <div v-if="showLoginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
       <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
         <h3 class="text-2xl font-bold text-gray-900 mb-6">Admin Login</h3>
-        
+
         <form @submit.prevent="handleLogin" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-            <input 
-              v-model="loginForm.username" 
-              type="text" 
+            <input
+              v-model="loginForm.username"
+              type="text"
               required
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-200"
             >
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input 
-              v-model="loginForm.password" 
-              type="password" 
+            <input
+              v-model="loginForm.password"
+              type="password"
               required
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-200"
             >
           </div>
-          
+
           <div v-if="loginError" class="text-red-600 text-sm">{{ loginError }}</div>
-          
+
           <div class="flex space-x-3">
             <button type="submit" class="btn-primary flex-1">Login</button>
             <button type="button" @click="closeLoginModal" class="btn-secondary flex-1">Cancel</button>
@@ -1222,9 +1229,9 @@ const formatTime = (time: string): string => {
     </div>
 
     <!-- Admin Toggle Button - Show when admin IS logged in (Desktop Only) -->
-    <!-- <button 
+    <!-- <button
       v-if="isAdmin"
-      @click="toggleAdminPanel" 
+      @click="toggleAdminPanel"
       class="hidden md:block fixed right-4 top-8 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
       title="Toggle Admin Panel"
     >
@@ -1235,9 +1242,9 @@ const formatTime = (time: string): string => {
     </button> -->
 
     <!-- Admin Login Button - Show when admin is NOT logged in (Desktop Only) -->
-    <!-- <button 
+    <!-- <button
       v-else
-      @click="showLoginModal = true" 
+      @click="showLoginModal = true"
       class="hidden md:block fixed right-4 top-8 z-50 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
       title="Admin Login"
     >

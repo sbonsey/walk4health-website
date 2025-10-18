@@ -40,6 +40,10 @@ export interface ClubContent {
     walksPerWeek: string
   }
   clubImageCaption?: string
+  contactInfo?: {
+    contactName: string
+    contactPhone: string
+  }
   lastUpdated: string
 }
 

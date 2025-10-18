@@ -57,9 +57,9 @@ export default async function handler(req, res) {
 
     case 'POST':
       try {
-        const { clubMission, clubDescription, committee, walkingStats, clubImageCaption } = req.body
+        const { clubMission, clubDescription, committee, walkingStats, clubImageCaption, contactInfo } = req.body
         
-        console.log('💾 POST Content - Received data:', { clubMission, clubDescription, committee, walkingStats, clubImageCaption })
+        console.log('💾 POST Content - Received data:', { clubMission, clubDescription, committee, walkingStats, clubImageCaption, contactInfo })
         
         // Validate data
         if (!clubMission || !clubDescription) {
@@ -73,6 +73,7 @@ export default async function handler(req, res) {
           committee: committee || null,
           walkingStats: walkingStats || null,
           clubImageCaption: clubImageCaption || null,
+          contactInfo: contactInfo || null,
           lastUpdated: new Date().toISOString()
         }
 
