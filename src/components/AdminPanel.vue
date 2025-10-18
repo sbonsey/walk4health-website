@@ -256,27 +256,42 @@
                 <h4 class="font-medium text-gray-700 mb-3">Manage Galleries</h4>
                 <div class="space-y-4">
                   <div v-for="gallery in galleries" :key="gallery.id" class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <!-- Gallery Header -->
-                    <div class="flex justify-between items-start mb-3">
-                      <div class="flex-1">
-                        <h5 class="font-medium text-gray-900">{{ gallery.title }}</h5>
-                        <p class="text-sm text-gray-600">{{ gallery.description }}</p>
-                        <p class="text-sm text-gray-500">{{ formatDate(gallery.date) }} • {{ gallery.location }}</p>
-                        <p class="text-xs text-gray-400">{{ gallery.images.length }} images</p>
-                      </div>
+                    <!-- Edit Form (when editing) -->
+                    <div v-if="editingGallery && editingGallery.id === gallery.id" class="space-y-3">
+                      <h5 class="font-medium text-gray-900">Edit Gallery</h5>
+                      <input v-model="editingGallery.title" type="text" placeholder="Gallery Title" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                      <textarea v-model="editingGallery.description" placeholder="Gallery Description" rows="2" class="w-full px-2 py-1 border border-gray-300 rounded text-sm"></textarea>
+                      <input v-model="editingGallery.date" type="date" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                      <input v-model="editingGallery.location" type="text" placeholder="Location (optional)" class="w-full px-2 py-1 border border-gray-300 rounded text-sm">
                       <div class="flex space-x-2">
-                        <button @click="editGallery(gallery.id)" class="text-blue-600 hover:text-blue-800">
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                          </svg>
-                        </button>
-                        <button @click="deleteGallery(gallery.id)" class="text-red-600 hover:text-red-800">
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                          </svg>
-                        </button>
+                        <button @click="saveGalleryEdit" class="btn-primary text-xs flex-1">Save</button>
+                        <button @click="cancelGalleryEdit" class="btn-secondary text-xs flex-1">Cancel</button>
                       </div>
                     </div>
+                    
+                    <!-- Display View (when not editing) -->
+                    <div v-else>
+                      <!-- Gallery Header -->
+                      <div class="flex justify-between items-start mb-3">
+                        <div class="flex-1">
+                          <h5 class="font-medium text-gray-900">{{ gallery.title }}</h5>
+                          <p class="text-sm text-gray-600">{{ gallery.description }}</p>
+                          <p class="text-sm text-gray-500">{{ formatDate(gallery.date) }} • {{ gallery.location }}</p>
+                          <p class="text-xs text-gray-400">{{ gallery.images.length }} images</p>
+                        </div>
+                        <div class="flex space-x-2">
+                          <button @click="editGallery(gallery)" class="text-blue-600 hover:text-blue-800">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                          </button>
+                          <button @click="deleteGallery(gallery.id)" class="text-red-600 hover:text-red-800">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
 
                     <!-- Add Photos to Gallery -->
                     <div class="mb-3 p-3 bg-white rounded border border-gray-200">
@@ -343,6 +358,7 @@
                     
                     <div v-else class="text-center py-4 text-gray-500 text-sm">
                       No images in this gallery yet
+                    </div>
                     </div>
                   </div>
                 </div>
@@ -559,6 +575,7 @@ const showAddNewsForm = ref(false)
 const editingRecurringEvent = ref<any>(null)
 const editingSpecialEvent = ref<any>(null)
 const editingNewsItem = ref<NewsItem | null>(null)
+const editingGallery = ref<GalleryMeta | null>(null)
 
 // Tabs configuration
 const tabs = [
@@ -994,9 +1011,53 @@ const deleteGallery = async (id: string) => {
 }
 
 // Edit gallery
-const editGallery = (id: string) => {
-  // TODO: Implement gallery editing
-  console.log('Edit gallery:', id)
+const editGallery = (gallery: GalleryMeta) => {
+  editingGallery.value = { ...gallery }
+}
+
+const saveGalleryEdit = async () => {
+  if (!editingGallery.value) return
+  
+  try {
+    loading.value = true
+    saveStatus.value = 'Saving gallery changes...'
+    
+    // Update local state
+    const index = galleries.value.findIndex(g => g.id === editingGallery.value!.id)
+    if (index !== -1) {
+      galleries.value[index] = { ...editingGallery.value }
+    }
+    
+    // Save to backend via data service
+    const success = await dataService.updateGallery(editingGallery.value.id, {
+      title: editingGallery.value.title,
+      description: editingGallery.value.description,
+      date: editingGallery.value.date,
+      location: editingGallery.value.location
+    })
+    
+    if (success) {
+      // Emit update to parent component
+      emit('galleriesUpdated', galleries.value)
+      
+      saveStatus.value = 'Gallery updated successfully!'
+      setTimeout(() => saveStatus.value = '', 3000)
+      
+      // Exit edit mode
+      editingGallery.value = null
+    } else {
+      throw new Error('Failed to save gallery changes to backend')
+    }
+  } catch (error) {
+    saveStatus.value = 'Error updating gallery'
+    console.error('Error updating gallery:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const cancelGalleryEdit = () => {
+  editingGallery.value = null
 }
 
 // Show photo upload for specific gallery
