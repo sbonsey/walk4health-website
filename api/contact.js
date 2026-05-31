@@ -1,7 +1,5 @@
 import sgMail from '@sendgrid/mail'
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY)
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST'])
@@ -84,6 +82,7 @@ export default async function handler(req, res) {
 
     let emailResponse
     if (sendgridApiKey) {
+      sgMail.setApiKey(sendgridApiKey)
       console.log('📧 Sending email via SendGrid SDK...')
       const msg = {
         to: inquiryEmail,
@@ -221,8 +220,10 @@ This message was sent from the Walk4Health website contact form.
     // Return more specific error messages
     let errorMessage = 'Failed to process contact form. Please try again later.'
 
-    if (error.message.includes('API key')) {
+    if (error.message.includes('API key') || error.message.includes('Invalid SendGrid API key')) {
       errorMessage = 'Email service configuration error. Please contact the administrator.'
+    } else if (error.message.includes('SendGrid API key not authorized') || error.message.includes('sender email')) {
+      errorMessage = 'Email service setup error. Please contact the administrator.'
     } else if (error.message.includes('Domain not verified')) {
       errorMessage = 'Email service setup incomplete. Please contact the administrator.'
     } else if (error.message.includes('Invalid email format')) {
