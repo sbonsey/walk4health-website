@@ -110,11 +110,21 @@ export default async function handler(req, res) {
         `
       }
 
-      const [response] = await sgMail.send(msg)
-      emailResponse = {
-        ok: response.statusCode >= 200 && response.statusCode < 300,
-        status: response.statusCode,
-        body: response.body || ''
+      try {
+        const response = await sgMail.send(msg)
+        console.log('✅ SendGrid response received:', { statusCode: response?.[0]?.statusCode })
+        emailResponse = {
+          ok: true,
+          status: 202,
+          body: ''
+        }
+      } catch (sgError) {
+        console.error('❌ SendGrid API error:', sgError.code, sgError.message)
+        emailResponse = {
+          ok: false,
+          status: sgError.code || 500,
+          body: sgError.message
+        }
       }
     } else {
       console.log('📧 Sending email via Resend...')

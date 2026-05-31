@@ -41,14 +41,14 @@ export default async function handler(req, res) {
     const result = await sgMail.send(msg)
 
     console.log('✅ Test email sent successfully via SendGrid')
-    console.log('📨 SendGrid Response:', result[0]?.headers?.['x-message-id'])
+    console.log('📨 SendGrid Response:', { statusCode: result?.[0]?.statusCode })
 
     res.status(200).json({
       success: true,
       message: 'Test email sent successfully via SendGrid',
       timestamp: new Date().toISOString(),
       recipient: msg.to,
-      messageId: result[0]?.headers?.['x-message-id']
+      statusCode: result?.[0]?.statusCode || 202
     })
 
   } catch (error) {
