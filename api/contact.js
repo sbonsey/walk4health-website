@@ -6,9 +6,9 @@ export default async function handler(req, res) {
 
   try {
     const { name, email, subject, message } = req.body
-    
+
     console.log('📧 Contact form submission received:', { name, email, subject, message: message.substring(0, 100) + '...' })
-    
+
     // Validate required fields
     if (!name || !email || !subject || !message) {
       console.error('❌ Missing required fields:', { name: !!name, email: !!email, subject: !!subject, message: !!message })
@@ -18,13 +18,13 @@ export default async function handler(req, res) {
     // Get email configuration
     const redisUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
     const redisToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
-    
-    console.log('🔍 Redis config check:', { 
-      hasRedisUrl: !!redisUrl, 
+
+    console.log('🔍 Redis config check:', {
+      hasRedisUrl: !!redisUrl,
       hasRedisToken: !!redisToken,
       redisUrl: redisUrl ? '***SET***' : 'NOT SET'
     })
-    
+
     if (!redisUrl || !redisToken) {
       console.error('❌ Redis environment variables not set')
       return res.status(500).json({ error: 'Email configuration not available' })
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     // Get email config from Redis
     let inquiryEmail = 'admin@walk4health.co.nz'
     let subjectPrefix = '[Walk4Health]'
-    
+
     try {
       console.log('🔍 Fetching email config from Redis...')
       const configResponse = await fetch(`${redisUrl}/get/walk4health:email-config`, {
@@ -41,13 +41,13 @@ export default async function handler(req, res) {
           'Authorization': `Bearer ${redisToken}`
         }
       })
-      
+
       console.log('🔍 Email config response status:', configResponse.status)
-      
+
       if (configResponse.ok) {
         const configResult = await configResponse.json()
         console.log('🔍 Email config result:', configResult)
-        
+
         if (configResult.result) {
           const config = JSON.parse(configResult.result)
           inquiryEmail = config.inquiryEmail || inquiryEmail
@@ -205,17 +205,17 @@ This message was sent from the Walk4Health website contact form.
     }
 
     // Return success
-    res.status(200).json({ 
-      success: true, 
+    res.status(200).json({
+      success: true,
       message: 'Contact form submitted successfully. We will get back to you soon!'
     })
 
   } catch (error) {
     console.error('❌ Error processing contact form:', error)
-    
+
     // Return more specific error messages
     let errorMessage = 'Failed to process contact form. Please try again later.'
-    
+
     if (error.message.includes('API key')) {
       errorMessage = 'Email service configuration error. Please contact the administrator.'
     } else if (error.message.includes('Domain not verified')) {
@@ -223,7 +223,7 @@ This message was sent from the Walk4Health website contact form.
     } else if (error.message.includes('Invalid email format')) {
       errorMessage = 'Invalid email format. Please check your email address.'
     }
-    
+
     res.status(500).json({ error: errorMessage })
   }
 }

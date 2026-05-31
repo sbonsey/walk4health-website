@@ -6,7 +6,7 @@ export default async function handler(req, res) {
 
   try {
     console.log('🧪 Email test endpoint called')
-    
+
     // Check environment variables
     const envCheck = {
       NODE_ENV: process.env.NODE_ENV,
@@ -15,16 +15,16 @@ export default async function handler(req, res) {
       KV_REST_API_URL: process.env.KV_REST_API_URL ? '***SET***' : 'NOT SET',
       UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL ? '***SET***' : 'NOT SET'
     }
-    
+
     console.log('🔍 Environment check:', envCheck)
-    
+
     // Check Redis connection
     const redisUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
     const redisToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
-    
+
     let redisStatus = 'NOT CONFIGURED'
     let emailConfig = null
-    
+
     if (redisUrl && redisToken) {
       try {
         const configResponse = await fetch(`${redisUrl}/get/walk4health:email-config`, {
@@ -32,7 +32,7 @@ export default async function handler(req, res) {
             'Authorization': `Bearer ${redisToken}`
           }
         })
-        
+
         if (configResponse.ok) {
           const configResult = await configResponse.json()
           if (configResult.result) {
@@ -48,12 +48,12 @@ export default async function handler(req, res) {
         redisStatus = `CONNECTED - Error: ${error.message}`
       }
     }
-    
+
     const resendApiKey = process.env.RESEND_API_KEY
     const sendgridApiKey = process.env.SENDGRID_API_KEY
     let resendStatus = 'NOT CONFIGURED'
     let sendgridStatus = 'NOT CONFIGURED'
-    
+
     if (resendApiKey) {
       try {
         const testResponse = await fetch('https://api.resend.com/domains', {
@@ -105,7 +105,7 @@ export default async function handler(req, res) {
       emailConfig,
       recommendations: []
     }
-    
+
     // Add recommendations based on current status
     if (!resendApiKey && !sendgridApiKey) {
       status.recommendations.push('Set RESEND_API_KEY or SENDGRID_API_KEY environment variable')
@@ -116,20 +116,20 @@ export default async function handler(req, res) {
     if (resendApiKey) {
       status.recommendations.push('Resend is configured; verify the Resend sending domain is verified')
     }
-    
+
     if (redisStatus.includes('NOT CONFIGURED')) {
       status.recommendations.push('Configure Redis/KV environment variables')
     }
-    
+
     if (!emailConfig) {
       status.recommendations.push('Set up email configuration in admin panel')
     }
-    
+
     res.status(200).json(status)
-    
+
   } catch (error) {
     console.error('❌ Email test endpoint error:', error)
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Email test failed',
       message: error.message
     })
