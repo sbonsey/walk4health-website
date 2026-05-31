@@ -3,6 +3,8 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import AdminPanel from './components/AdminPanel.vue'
 import { dataService, type EventsData, type ClubContent, type GalleryMeta, type LinkItem } from './services/dataService'
 
+const applicationPdfUrl = new URL('./assets/application.pdf', import.meta.url).href
+
 // Types
 interface NewsItem {
   id: string
@@ -1039,7 +1041,7 @@ const formatTime = (time: string): string => {
                   <div>
                     <p class="font-bold text-gray-900 mb-1">Application Form</p>
                     <p class="text-gray-700 text-lg">Club membership is $30 per annum, download our membership application form below.</p>
-                    <a href="/src/assets/application.pdf"
+                      <a :href="applicationPdfUrl"
                        download="Walk4Health_Application_Form.pdf"
                        class="inline-flex items-center mt-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-all duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-300">
                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
