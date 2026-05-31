@@ -67,11 +67,14 @@ export default async function handler(req, res) {
 
     const resendApiKey = process.env.RESEND_API_KEY
     const sendgridApiKey = process.env.SENDGRID_API_KEY
+    const sendgridFromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@walk4health.co.nz'
+    const sendgridFromName = process.env.SENDGRID_FROM_NAME || 'Walk4Health Website'
     const activeProvider = resendApiKey ? 'Resend' : sendgridApiKey ? 'SendGrid' : 'None'
 
     console.log('🔍 Email service check:', {
       hasResendKey: !!resendApiKey,
       hasSendgridKey: !!sendgridApiKey,
+      sendgridFromEmail,
       activeProvider
     })
 
@@ -86,8 +89,8 @@ export default async function handler(req, res) {
       console.log('📧 Sending email via SendGrid SDK...')
       const msg = {
         to: inquiryEmail,
-        from: { email: 'noreply@walk4health.co.nz', name: 'Walk4Health Website' },
-        reply_to: { email, name },
+        from: { email: sendgridFromEmail, name: sendgridFromName },
+        replyTo: { email, name },
         subject: `${subjectPrefix} ${subject}`,
         text: `New Contact Form Submission\n\nName: ${name}\nEmail: ${email}\nSubject: ${subject}\n\nMessage:\n${message}\n\n---\nThis message was sent from the Walk4Health website contact form.`,
         html: `
@@ -118,11 +121,11 @@ export default async function handler(req, res) {
           body: ''
         }
       } catch (sgError) {
-        console.error('❌ SendGrid API error:', sgError.code, sgError.message)
+        console.error('❌ SendGrid API error:', sgError.code, sgError.message, sgError.response?.body)
         emailResponse = {
           ok: false,
-          status: sgError.code || 500,
-          body: sgError.message
+          status: sgError.code || sgError.response?.statusCode || 500,
+          body: sgError.response?.body || sgError.message
         }
       }
     } else {
@@ -230,6 +233,9 @@ This message was sent from the Walk4Health website contact form.
       errorMessage = 'Invalid email format. Please check your email address.'
     }
 
-    res.status(500).json({ error: errorMessage })
+    res.status(500).json({
+      error: errorMessage,
+      details: error.message
+    })
   }
 }

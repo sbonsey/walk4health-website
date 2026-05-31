@@ -24,10 +24,13 @@ export default async function handler(req, res) {
 
     console.log('📧 Sending test email via SendGrid...')
 
+    const sendgridFromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@walk4health.co.nz'
+    const sendgridFromName = process.env.SENDGRID_FROM_NAME || 'Walk4Health Website'
+
     // Send test email
     const msg = {
       to: process.env.TEST_EMAIL_RECIPIENT || 'admin@walk4health.co.nz',
-      from: 'noreply@walk4health.co.nz',
+      from: { email: sendgridFromEmail, name: sendgridFromName },
       subject: '[Walk4Health] Test Email - SendGrid API',
       html: `
         <h2>🧪 Walk4Health Email System Test</h2>
