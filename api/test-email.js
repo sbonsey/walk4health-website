@@ -49,9 +49,10 @@ export default async function handler(req, res) {
       }
     }
     
-    // Test Resend API key if available
-    const resendApiKey = process.env.RESEND_API_KEY || process.env.SENDGRID_API_KEY
+    const resendApiKey = process.env.RESEND_API_KEY
+    const sendgridApiKey = process.env.SENDGRID_API_KEY
     let resendStatus = 'NOT CONFIGURED'
+    let sendgridStatus = 'NOT CONFIGURED'
     
     if (resendApiKey) {
       try {
@@ -60,30 +61,60 @@ export default async function handler(req, res) {
             'Authorization': `Bearer ${resendApiKey}`
           }
         })
-        
+
         if (testResponse.ok) {
           const domains = await testResponse.json()
           resendStatus = `CONFIGURED - ${domains.data?.length || 0} domains found`
         } else {
+          const errorText = await testResponse.text()
           resendStatus = `CONFIGURED - API test failed (${testResponse.status})`
+          console.warn('🔍 Resend domains test failure:', testResponse.status, errorText)
         }
       } catch (error) {
         resendStatus = `CONFIGURED - Error: ${error.message}`
       }
     }
-    
+
+    if (sendgridApiKey) {
+      try {
+        const testResponse = await fetch('https://api.sendgrid.com/v3/user/account', {
+          headers: {
+            'Authorization': `Bearer ${sendgridApiKey}`
+          }
+        })
+
+        if (testResponse.ok) {
+          const account = await testResponse.json()
+          sendgridStatus = `CONFIGURED - SendGrid user ${account.username || 'unknown'} detected`
+        } else {
+          const errorText = await testResponse.text()
+          sendgridStatus = `CONFIGURED - API test failed (${testResponse.status})`
+          console.warn('🔍 SendGrid account test failure:', testResponse.status, errorText)
+        }
+      } catch (error) {
+        sendgridStatus = `CONFIGURED - Error: ${error.message}`
+      }
+    }
+
     const status = {
       timestamp: new Date().toISOString(),
       environment: envCheck,
       redis: redisStatus,
       resend: resendStatus,
+      sendgrid: sendgridStatus,
       emailConfig,
       recommendations: []
     }
     
     // Add recommendations based on current status
-    if (!resendApiKey) {
-      status.recommendations.push('Set RESEND_API_KEY environment variable')
+    if (!resendApiKey && !sendgridApiKey) {
+      status.recommendations.push('Set RESEND_API_KEY or SENDGRID_API_KEY environment variable')
+    }
+    if (sendgridApiKey) {
+      status.recommendations.push('SendGrid is configured; verify the SendGrid from address is authorized and the key is valid')
+    }
+    if (resendApiKey) {
+      status.recommendations.push('Resend is configured; verify the Resend sending domain is verified')
     }
     
     if (redisStatus.includes('NOT CONFIGURED')) {
@@ -92,10 +123,6 @@ export default async function handler(req, res) {
     
     if (!emailConfig) {
       status.recommendations.push('Set up email configuration in admin panel')
-    }
-    
-    if (resendStatus.includes('API test failed')) {
-      status.recommendations.push('Check Resend API key validity')
     }
     
     res.status(200).json(status)

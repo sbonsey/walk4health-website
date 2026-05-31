@@ -63,50 +63,99 @@ export default async function handler(req, res) {
       console.error('⚠️ Error fetching email config, using defaults:', configError)
     }
 
-    // Check if Resend API key is configured
-    const resendApiKey = process.env.RESEND_API_KEY || process.env.SENDGRID_API_KEY
-    console.log('🔍 Email service check:', { 
+    const resendApiKey = process.env.RESEND_API_KEY
+    const sendgridApiKey = process.env.SENDGRID_API_KEY
+    const activeProvider = resendApiKey ? 'Resend' : sendgridApiKey ? 'SendGrid' : 'None'
+
+    console.log('🔍 Email service check:', {
       hasResendKey: !!resendApiKey,
-      keySource: process.env.RESEND_API_KEY ? 'RESEND_API_KEY' : process.env.SENDGRID_API_KEY ? 'SENDGRID_API_KEY' : 'NONE'
+      hasSendgridKey: !!sendgridApiKey,
+      activeProvider
     })
-    
-    if (!resendApiKey) {
-      console.error('❌ Resend API key not configured')
+
+    if (!resendApiKey && !sendgridApiKey) {
+      console.error('❌ No email provider API key configured')
       return res.status(500).json({ error: 'Email service not configured. Please contact the administrator.' })
     }
 
-    // Send email using Resend
-    console.log('📧 Sending email via Resend...')
-    const emailResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-          // Using Resend's default verified domain for immediate functionality
-          // Change to 'noreply@walk4health.org.nz' once domain verification is fully complete
-          from: 'onboarding@resend.dev',
-          to: inquiryEmail,
-          subject: `${subjectPrefix} ${subject}`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #2563eb;">New Contact Form Submission</h2>
-              <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <p><strong>Name:</strong> ${name}</p>
-                <p><strong>Email:</strong> ${email}</p>
-                <p><strong>Subject:</strong> ${subject}</p>
-                <p><strong>Message:</strong></p>
-                <div style="background-color: white; padding: 15px; border-radius: 4px; border-left: 4px solid #2563eb;">
-                  ${message.replace(/\n/g, '<br>')}
+    let emailResponse
+    if (sendgridApiKey) {
+      console.log('📧 Sending email via SendGrid...')
+      const sendGridPayload = {
+        personalizations: [
+          {
+            to: [{ email: inquiryEmail }],
+            subject: `${subjectPrefix} ${subject}`
+          }
+        ],
+        from: { email: 'noreply@walk4health.co.nz', name: 'Walk4Health Website' },
+        reply_to: { email, name },
+        content: [
+          {
+            type: 'text/html',
+            value: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #2563eb;">New Contact Form Submission</h2>
+                <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <p><strong>Name:</strong> ${name}</p>
+                  <p><strong>Email:</strong> ${email}</p>
+                  <p><strong>Subject:</strong> ${subject}</p>
+                  <p><strong>Message:</strong></p>
+                  <div style="background-color: white; padding: 15px; border-radius: 4px; border-left: 4px solid #2563eb;">
+                    ${message.replace(/\n/g, '<br>')}
+                  </div>
                 </div>
+                <p style="color: #64748b; font-size: 14px;">
+                  This message was sent from the Walk4Health website contact form.
+                </p>
               </div>
-              <p style="color: #64748b; font-size: 14px;">
-                This message was sent from the Walk4Health website contact form.
-              </p>
-            </div>
-          `,
-          text: `
+            `
+          },
+          {
+            type: 'text/plain',
+            value: `New Contact Form Submission\n\nName: ${name}\nEmail: ${email}\nSubject: ${subject}\n\nMessage:\n${message}\n\n---\nThis message was sent from the Walk4Health website contact form.`
+          }
+        ]
+      }
+
+      emailResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${sendgridApiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(sendGridPayload)
+      })
+    } else {
+      console.log('📧 Sending email via Resend...')
+      emailResponse = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            from: 'onboarding@resend.dev',
+            to: inquiryEmail,
+            subject: `${subjectPrefix} ${subject}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #2563eb;">New Contact Form Submission</h2>
+                <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <p><strong>Name:</strong> ${name}</p>
+                  <p><strong>Email:</strong> ${email}</p>
+                  <p><strong>Subject:</strong> ${subject}</p>
+                  <p><strong>Message:</strong></p>
+                  <div style="background-color: white; padding: 15px; border-radius: 4px; border-left: 4px solid #2563eb;">
+                    ${message.replace(/\n/g, '<br>')}
+                  </div>
+                </div>
+                <p style="color: #64748b; font-size: 14px;">
+                  This message was sent from the Walk4Health website contact form.
+                </p>
+              </div>
+            `,
+            text: `
 New Contact Form Submission
 
 Name: ${name}
@@ -118,30 +167,42 @@ ${message}
 
 ---
 This message was sent from the Walk4Health website contact form.
-          `
+            `
+        })
       })
-    })
-
-    console.log('📧 Resend API response status:', emailResponse.status)
-    
-    if (!emailResponse.ok) {
-      const errorText = await emailResponse.text()
-      console.error('❌ Resend API error:', emailResponse.status, errorText)
-      
-      // Provide more specific error messages
-      if (emailResponse.status === 401) {
-        throw new Error('Invalid API key - please check email service configuration')
-      } else if (emailResponse.status === 403) {
-        throw new Error('Domain not verified - please verify noreply@walk4health.co.nz with Resend')
-      } else if (emailResponse.status === 422) {
-        throw new Error('Invalid email format or domain')
-      } else {
-        throw new Error(`Email service error: ${emailResponse.status} - ${errorText}`)
-      }
     }
 
-    const emailResult = await emailResponse.json()
-    console.log('✅ Email sent successfully:', emailResult)
+    console.log('📧 Email provider API response status:', emailResponse.status)
+
+    if (!emailResponse.ok) {
+      const errorText = await emailResponse.text()
+      console.error('❌ Email provider API error:', emailResponse.status, errorText)
+
+      if (sendgridApiKey) {
+        if (emailResponse.status === 401) {
+          throw new Error('Invalid SendGrid API key - please check email service configuration')
+        } else if (emailResponse.status === 403) {
+          throw new Error('SendGrid API key not authorized or sending domain not verified')
+        } else if (emailResponse.status === 400) {
+          throw new Error('Invalid SendGrid payload or sender email. Verify the `from` address is allowed.')
+        }
+      } else {
+        if (emailResponse.status === 401) {
+          throw new Error('Invalid Resend API key - please check email service configuration')
+        } else if (emailResponse.status === 403) {
+          throw new Error('Domain not verified - please verify your Resend sending domain')
+        } else if (emailResponse.status === 422) {
+          throw new Error('Invalid email format or domain')
+        }
+      }
+      throw new Error(`Email service error: ${emailResponse.status} - ${errorText}`)
+    }
+
+    if (sendgridApiKey) {
+      console.log('✅ Email sent successfully via SendGrid')
+    } else {
+      console.log('✅ Email sent successfully via Resend')
+    }
 
     // Return success
     res.status(200).json({ 

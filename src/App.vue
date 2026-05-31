@@ -680,11 +680,11 @@ const formatTime = (time: string): string => {
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900">{{ event.title }}</h3>
                   </div>
-                  
+
                   <!-- Time Display -->
                   <div class="text-gray-600 mb-2">
                     <p class="font-medium">{{ capitalizeDay(event.day) }}</p>
-                    
+
                     <!-- Show different times based on what's configured -->
                     <div v-if="event.seasonalTime" class="mt-1">
                       <p class="text-sm">
@@ -694,12 +694,12 @@ const formatTime = (time: string): string => {
                         <span class="font-medium">Winter:</span> {{ formatTime(event.seasonalTime) }}
                       </p>
                     </div>
-                    
+
                     <div v-else class="mt-1">
                       <p class="text-sm">at {{ formatTime(event.time) }}</p>
                     </div>
                   </div>
-                  
+
                   <p v-if="event.message" class="text-gray-600 mb-2">{{ event.message }}</p>
                 </div>
               </div>
