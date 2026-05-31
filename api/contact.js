@@ -1,3 +1,7 @@
+import sgMail from '@sendgrid/mail'
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST'])
@@ -80,52 +84,38 @@ export default async function handler(req, res) {
 
     let emailResponse
     if (sendgridApiKey) {
-      console.log('📧 Sending email via SendGrid...')
-      const sendGridPayload = {
-        personalizations: [
-          {
-            to: [{ email: inquiryEmail }],
-            subject: `${subjectPrefix} ${subject}`
-          }
-        ],
+      console.log('📧 Sending email via SendGrid SDK...')
+      const msg = {
+        to: inquiryEmail,
         from: { email: 'noreply@walk4health.co.nz', name: 'Walk4Health Website' },
         reply_to: { email, name },
-        content: [
-          {
-            type: 'text/html',
-            value: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #2563eb;">New Contact Form Submission</h2>
-                <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                  <p><strong>Name:</strong> ${name}</p>
-                  <p><strong>Email:</strong> ${email}</p>
-                  <p><strong>Subject:</strong> ${subject}</p>
-                  <p><strong>Message:</strong></p>
-                  <div style="background-color: white; padding: 15px; border-radius: 4px; border-left: 4px solid #2563eb;">
-                    ${message.replace(/\n/g, '<br>')}
-                  </div>
-                </div>
-                <p style="color: #64748b; font-size: 14px;">
-                  This message was sent from the Walk4Health website contact form.
-                </p>
+        subject: `${subjectPrefix} ${subject}`,
+        text: `New Contact Form Submission\n\nName: ${name}\nEmail: ${email}\nSubject: ${subject}\n\nMessage:\n${message}\n\n---\nThis message was sent from the Walk4Health website contact form.`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #2563eb;">New Contact Form Submission</h2>
+            <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <p><strong>Name:</strong> ${name}</p>
+              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>Subject:</strong> ${subject}</p>
+              <p><strong>Message:</strong></p>
+              <div style="background-color: white; padding: 15px; border-radius: 4px; border-left: 4px solid #2563eb;">
+                ${message.replace(/\n/g, '<br>')}
               </div>
-            `
-          },
-          {
-            type: 'text/plain',
-            value: `New Contact Form Submission\n\nName: ${name}\nEmail: ${email}\nSubject: ${subject}\n\nMessage:\n${message}\n\n---\nThis message was sent from the Walk4Health website contact form.`
-          }
-        ]
+            </div>
+            <p style="color: #64748b; font-size: 14px;">
+              This message was sent from the Walk4Health website contact form.
+            </p>
+          </div>
+        `
       }
 
-      emailResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${sendgridApiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(sendGridPayload)
-      })
+      const [response] = await sgMail.send(msg)
+      emailResponse = {
+        ok: response.statusCode >= 200 && response.statusCode < 300,
+        status: response.statusCode,
+        body: response.body || ''
+      }
     } else {
       console.log('📧 Sending email via Resend...')
       emailResponse = await fetch('https://api.resend.com/emails', {
@@ -175,7 +165,12 @@ This message was sent from the Walk4Health website contact form.
     console.log('📧 Email provider API response status:', emailResponse.status)
 
     if (!emailResponse.ok) {
-      const errorText = await emailResponse.text()
+      let errorText = ''
+      if (typeof emailResponse.text === 'function') {
+        errorText = await emailResponse.text()
+      } else {
+        errorText = emailResponse.body || ''
+      }
       console.error('❌ Email provider API error:', emailResponse.status, errorText)
 
       if (sendgridApiKey) {
