@@ -69,11 +69,13 @@ export default async function handler(req, res) {
     const sendgridApiKey = process.env.SENDGRID_API_KEY
     const sendgridFromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@walk4health.co.nz'
     const sendgridFromName = process.env.SENDGRID_FROM_NAME || 'Walk4Health Website'
+    const sendgridKeyLooksValid = typeof sendgridApiKey === 'string' && sendgridApiKey.startsWith('SG.')
     const activeProvider = resendApiKey ? 'Resend' : sendgridApiKey ? 'SendGrid' : 'None'
 
     console.log('🔍 Email service check:', {
       hasResendKey: !!resendApiKey,
       hasSendgridKey: !!sendgridApiKey,
+      sendgridKeyLooksValid,
       sendgridFromEmail,
       activeProvider
     })
@@ -85,6 +87,31 @@ export default async function handler(req, res) {
 
     let emailResponse
     if (sendgridApiKey) {
+      if (!sendgridKeyLooksValid) {
+        console.error('❌ SENDGRID_API_KEY does not look like a SendGrid key')
+        return res.status(500).json({
+          error: 'SendGrid API key appears invalid',
+          details: 'SENDGRID_API_KEY must begin with SG.'
+        })
+      }
+
+      const validationResponse = await fetch('https://api.sendgrid.com/v3/user/account', {
+        headers: {
+          Authorization: `Bearer ${sendgridApiKey}`
+        }
+      })
+
+      const validationBody = await validationResponse.text()
+      console.log('🔍 SendGrid key validation status:', validationResponse.status)
+      if (!validationResponse.ok) {
+        console.error('❌ SendGrid key validation failed:', validationBody)
+        return res.status(500).json({
+          error: 'SendGrid API key validation failed',
+          status: validationResponse.status,
+          details: validationBody
+        })
+      }
+
       sgMail.setApiKey(sendgridApiKey)
       console.log('📧 Sending email via SendGrid SDK...')
       const msg = {
