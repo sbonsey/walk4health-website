@@ -95,23 +95,8 @@ export default async function handler(req, res) {
         })
       }
 
-      const validationResponse = await fetch('https://api.sendgrid.com/v3/user/account', {
-        headers: {
-          Authorization: `Bearer ${sendgridApiKey}`
-        }
-      })
-
-      const validationBody = await validationResponse.text()
-      console.log('🔍 SendGrid key validation status:', validationResponse.status)
-      if (!validationResponse.ok) {
-        console.error('❌ SendGrid key validation failed:', validationBody)
-        return res.status(500).json({
-          error: 'SendGrid API key validation failed',
-          status: validationResponse.status,
-          details: validationBody
-        })
-      }
-
+      // Skip account validation because restricted SendGrid API keys may be valid for sending
+      // email but not authorized to call /v3/user/account.
       sgMail.setApiKey(sendgridApiKey)
       console.log('📧 Sending email via SendGrid SDK...')
       const msg = {

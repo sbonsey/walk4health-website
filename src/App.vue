@@ -31,10 +31,22 @@ const isAdmin = ref(false)
 const adminPanelOpen = ref(false)
 const showLoginModal = ref(false)
 const loginError = ref('')
+const showChangePasswordModal = ref(false)
+const passwordChangeError = ref('')
+const passwordChangeSuccess = ref('')
 const loginForm = ref({
   username: '',
   password: ''
 })
+const changePasswordForm = ref({
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+
+const ADMIN_USERNAME = 'admin'
+const DEFAULT_ADMIN_PASSWORD = 'walk4health2025'
+const ADMIN_PASSWORD_STORAGE_KEY = 'walk4health_admin_password'
 
 // Event data - loaded from data service
 const recurringEvents = ref<EventsData['recurringEvents']>([])
@@ -420,6 +432,41 @@ const closeLoginModal = () => {
   loginForm.value = { username: '', password: '' }
 }
 
+const getAdminPassword = () => {
+  const storedPassword = localStorage.getItem(ADMIN_PASSWORD_STORAGE_KEY)
+  return storedPassword || DEFAULT_ADMIN_PASSWORD
+}
+
+const openChangePasswordModal = () => {
+  showChangePasswordModal.value = true
+  passwordChangeError.value = ''
+  passwordChangeSuccess.value = ''
+  changePasswordForm.value = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  }
+}
+
+const closeChangePasswordModal = () => {
+  showChangePasswordModal.value = false
+  passwordChangeError.value = ''
+  passwordChangeSuccess.value = ''
+  changePasswordForm.value = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  }
+}
+
+const handleLogout = () => {
+  isAdmin.value = false
+  adminPanelOpen.value = false
+  showLoginModal.value = false
+  showChangePasswordModal.value = false
+  closeMobileMenu()
+}
+
 // Format date for display
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
@@ -492,13 +539,47 @@ const scrollGalleries = (direction: 'left' | 'right') => {
 
 const handleLogin = () => {
   // Simple authentication - in production, this would connect to a backend
-  if (loginForm.value.username === 'admin' && loginForm.value.password === 'walk4health2025') {
+  if (loginForm.value.username === ADMIN_USERNAME && loginForm.value.password === getAdminPassword()) {
     isAdmin.value = true
     showLoginModal.value = false
     loginError.value = ''
     loginForm.value = { username: '', password: '' }
   } else {
     loginError.value = 'Invalid username or password'
+  }
+}
+
+const handleChangePassword = () => {
+  passwordChangeError.value = ''
+  passwordChangeSuccess.value = ''
+
+  if (!isAdmin.value) {
+    passwordChangeError.value = 'You must be logged in as administrator.'
+    return
+  }
+
+  if (changePasswordForm.value.currentPassword !== getAdminPassword()) {
+    passwordChangeError.value = 'Current password is incorrect.'
+    return
+  }
+
+  if (changePasswordForm.value.newPassword.length < 8) {
+    passwordChangeError.value = 'New password must be at least 8 characters long.'
+    return
+  }
+
+  if (changePasswordForm.value.newPassword !== changePasswordForm.value.confirmPassword) {
+    passwordChangeError.value = 'New password and confirmation do not match.'
+    return
+  }
+
+  localStorage.setItem(ADMIN_PASSWORD_STORAGE_KEY, changePasswordForm.value.newPassword)
+  passwordChangeSuccess.value = 'Password updated successfully.'
+
+  changePasswordForm.value = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   }
 }
 
@@ -580,6 +661,24 @@ const formatTime = (time: string): string => {
               </svg>
             </button>
 
+            <button
+              v-if="isAdmin"
+              @click="openChangePasswordModal"
+              class="hidden md:block bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border-0 text-sm font-medium"
+              title="Change Admin Password"
+            >
+              Change Password
+            </button>
+
+            <button
+              v-if="isAdmin"
+              @click="handleLogout"
+              class="hidden md:block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border-0 text-sm font-medium"
+              title="Admin Logout"
+            >
+              Logout
+            </button>
+
             <!-- Admin Login Button - Show when admin is NOT logged in (Desktop Only) -->
             <button
               v-else
@@ -621,6 +720,8 @@ const formatTime = (time: string): string => {
             <div class="pt-4 border-t border-gray-200">
               <!-- Admin Toggle Button - Show when admin IS logged in -->
               <a v-if="isAdmin" href="#" @click="toggleAdminPanel(); closeMobileMenu()" class="mobile-nav-item-elegant">{{ isAdminPanelOpen() ? 'CLOSE ADMIN' : 'ADMIN' }}</a>
+              <a v-if="isAdmin" href="#" @click="openChangePasswordModal(); closeMobileMenu()" class="mobile-nav-item-elegant">CHANGE PASSWORD</a>
+              <a v-if="isAdmin" href="#" @click="handleLogout()" class="mobile-nav-item-elegant">LOGOUT</a>
               <a v-else href="#" @click="showLoginModal = true; closeMobileMenu()" class="mobile-nav-item-elegant">ADMIN LOGIN</a>
             </div>
           </div>
@@ -1244,6 +1345,56 @@ const formatTime = (time: string): string => {
           <div class="flex space-x-3">
             <button type="submit" class="btn-primary flex-1">Login</button>
             <button type="button" @click="closeLoginModal" class="btn-secondary flex-1">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div v-if="showChangePasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+      <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
+        <h3 class="text-2xl font-bold text-gray-900 mb-6">Change Admin Password</h3>
+
+        <form @submit.prevent="handleChangePassword" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+            <input
+              v-model="changePasswordForm.currentPassword"
+              type="password"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-200"
+            >
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+            <input
+              v-model="changePasswordForm.newPassword"
+              type="password"
+              minlength="8"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-200"
+            >
+            <p class="text-xs text-gray-500 mt-1">Use at least 8 characters.</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+            <input
+              v-model="changePasswordForm.confirmPassword"
+              type="password"
+              minlength="8"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-200"
+            >
+          </div>
+
+          <div v-if="passwordChangeError" class="text-red-600 text-sm">{{ passwordChangeError }}</div>
+          <div v-if="passwordChangeSuccess" class="text-green-600 text-sm">{{ passwordChangeSuccess }}</div>
+
+          <div class="flex space-x-3">
+            <button type="submit" class="btn-primary flex-1">Save Password</button>
+            <button type="button" @click="closeChangePasswordModal" class="btn-secondary flex-1">Close</button>
           </div>
         </form>
       </div>
