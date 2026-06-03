@@ -664,7 +664,7 @@ const formatTime = (time: string): string => {
             <button
               v-if="isAdmin"
               @click="openChangePasswordModal"
-              class="hidden md:block bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border-0 text-sm font-medium"
+              class="hidden md:inline-flex btn-secondary items-center gap-2 text-sm"
               title="Change Admin Password"
             >
               Change Password
@@ -673,7 +673,7 @@ const formatTime = (time: string): string => {
             <button
               v-if="isAdmin"
               @click="handleLogout"
-              class="hidden md:block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border-0 text-sm font-medium"
+              class="hidden md:inline-flex btn-danger items-center gap-2 text-sm"
               title="Admin Logout"
             >
               Logout
@@ -683,12 +683,13 @@ const formatTime = (time: string): string => {
             <button
               v-else
               @click="showLoginModal = true"
-              class="hidden md:block bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-0"
+              class="hidden md:inline-flex btn-secondary items-center gap-2 text-sm"
               title="Admin Login"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
               </svg>
+              Admin Login
             </button>
           </div>
 
@@ -717,7 +718,7 @@ const formatTime = (time: string): string => {
             <a href="#contact" @click="closeMobileMenu" class="mobile-nav-item-elegant">CONTACT</a>
 
             <!-- Mobile Admin Section -->
-            <div class="pt-4 border-t border-gray-200">
+            <div class="pt-4 border-t border-gray-200 flex flex-col gap-3">
               <!-- Admin Toggle Button - Show when admin IS logged in -->
               <a v-if="isAdmin" href="#" @click="toggleAdminPanel(); closeMobileMenu()" class="mobile-nav-item-elegant">{{ isAdminPanelOpen() ? 'CLOSE ADMIN' : 'ADMIN' }}</a>
               <a v-if="isAdmin" href="#" @click="openChangePasswordModal(); closeMobileMenu()" class="mobile-nav-item-elegant">CHANGE PASSWORD</a>
