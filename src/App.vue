@@ -642,7 +642,7 @@ const formatTime = (time: string): string => {
   <!-- Main Content (only show when not loading) -->
   <div v-else>
     <!-- Navigation -->
-    <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+    <nav class="bg-white shadow-lg fixed w-full top-0 z-[80]">
       <div class="max-w-7xl mx-auto px-8">
         <div class="flex justify-between items-center h-16 md:h-24">
             <!-- Logo -->
