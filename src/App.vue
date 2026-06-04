@@ -660,7 +660,7 @@ const formatTime = (time: string): string => {
             <a href="#gallery" class="nav-item-elegant">GALLERY</a>
             <a href="#contact" class="nav-item-elegant">CONTACT</a>
               <!-- Admin Toggle Button - Show when admin IS logged in (Desktop Only) -->
-            <div class="relative hidden md:block">
+            <div class="relative hidden md:block z-[999]">
               <button
                 v-if="isAdmin"
                 @click="toggleAdminMenu"
@@ -672,7 +672,7 @@ const formatTime = (time: string): string => {
                 </svg>
               </button>
 
-              <div v-if="isAdmin && showAdminMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl ring-1 ring-black ring-opacity-5 z-[100]">
+              <div v-if="isAdmin && showAdminMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl ring-1 ring-black ring-opacity-5 z-[10000]">
                 <button @click="toggleAdminPanel(); closeAdminMenu()" class="w-full text-left px-4 py-3 hover:bg-slate-50 text-gray-700 font-medium rounded-t-2xl">Admin Panel</button>
                 <button @click="openChangePasswordModal(); closeAdminMenu()" class="w-full text-left px-4 py-3 hover:bg-slate-50 text-gray-700 font-medium">Change Password</button>
                 <button @click="handleLogout(); closeAdminMenu()" class="w-full text-left px-4 py-3 hover:bg-slate-50 text-red-600 font-medium rounded-b-2xl">Logout</button>
