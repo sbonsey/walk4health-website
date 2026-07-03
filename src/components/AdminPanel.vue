@@ -558,7 +558,7 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Style</label>
                 <select v-model="announcement.style" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                  <option value="info">Info (blue)</option>
+                  <option value="info">Club orange (default)</option>
                   <option value="success">Success (green)</option>
                   <option value="warning">Warning (amber)</option>
                 </select>
@@ -567,16 +567,30 @@
               <!-- Preview -->
               <div v-if="announcement.message.trim()">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Preview</label>
-                <div class="border-b rounded" :class="{
-                  'bg-green-50 border-green-100 text-green-800': announcement.style === 'success',
-                  'bg-amber-50 border-amber-100 text-amber-800': announcement.style === 'warning',
-                  'bg-blue-50 border-blue-100 text-blue-800': !announcement.style || announcement.style === 'info'
+                <div class="border-b rounded shadow-sm" :class="{
+                  'bg-green-50 border-green-100': announcement.style === 'success',
+                  'bg-amber-50 border-amber-100': announcement.style === 'warning',
+                  'bg-primary-50 border-primary-100': !announcement.style || announcement.style === 'info'
                 }">
-                  <div class="px-4 py-2.5 flex items-center gap-3">
-                    <svg class="w-4 h-4 flex-shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
-                    </svg>
-                    <p class="flex-1 text-sm text-center">
+                  <div class="px-4 py-3 flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" :class="{
+                      'bg-green-100': announcement.style === 'success',
+                      'bg-amber-100': announcement.style === 'warning',
+                      'bg-primary-100': !announcement.style || announcement.style === 'info'
+                    }">
+                      <svg class="w-4 h-4" :class="{
+                        'text-green-600': announcement.style === 'success',
+                        'text-amber-600': announcement.style === 'warning',
+                        'text-primary-600': !announcement.style || announcement.style === 'info'
+                      }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
+                      </svg>
+                    </span>
+                    <p class="flex-1 text-sm font-medium text-center" :class="{
+                      'text-green-800': announcement.style === 'success',
+                      'text-amber-800': announcement.style === 'warning',
+                      'text-primary-800': !announcement.style || announcement.style === 'info'
+                    }">
                       {{ announcement.message }}
                       <span v-if="announcement.link" class="font-semibold underline underline-offset-2 ml-1">Learn more →</span>
                     </p>

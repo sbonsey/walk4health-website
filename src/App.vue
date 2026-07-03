@@ -86,11 +86,26 @@ const showAnnouncement = computed(() => {
 const announcementClasses = computed(() => {
   switch (announcement.value?.style) {
     case 'success':
-      return 'bg-green-50 border-green-100 text-green-800'
+      return {
+        wrapper: 'bg-green-50 border-green-100',
+        iconBg: 'bg-green-100',
+        icon: 'text-green-600',
+        text: 'text-green-800'
+      }
     case 'warning':
-      return 'bg-amber-50 border-amber-100 text-amber-800'
+      return {
+        wrapper: 'bg-amber-50 border-amber-100',
+        iconBg: 'bg-amber-100',
+        icon: 'text-amber-600',
+        text: 'text-amber-800'
+      }
     default:
-      return 'bg-blue-50 border-blue-100 text-blue-800'
+      return {
+        wrapper: 'bg-primary-50 border-primary-100',
+        iconBg: 'bg-primary-100',
+        icon: 'text-primary-600',
+        text: 'text-primary-800'
+      }
   }
 })
 
@@ -776,18 +791,20 @@ const formatTime = (time: string): string => {
     <!-- Main Content -->
     <main class="pt-16 md:pt-24">
       <!-- Announcement Banner -->
-      <div v-if="showAnnouncement" :class="announcementClasses" class="border-b">
-        <div class="max-w-7xl mx-auto px-8 py-2.5 flex items-center gap-3">
-          <svg class="w-4 h-4 flex-shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
-          </svg>
-          <p class="flex-1 text-sm text-center">
+      <div v-if="showAnnouncement" :class="announcementClasses.wrapper" class="border-b shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center gap-3">
+          <span :class="announcementClasses.iconBg" class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
+            <svg :class="announcementClasses.icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
+            </svg>
+          </span>
+          <p :class="announcementClasses.text" class="flex-1 text-sm md:text-base font-medium text-center">
             {{ announcement?.message }}
             <a v-if="announcement?.link" :href="announcement.link" class="font-semibold underline underline-offset-2 hover:opacity-75 ml-1 whitespace-nowrap">
               Learn more →
             </a>
           </p>
-          <button @click="dismissAnnouncement" class="flex-shrink-0 p-1 rounded hover:bg-black/5 transition-colors" title="Dismiss announcement">
+          <button @click="dismissAnnouncement" :class="announcementClasses.text" class="flex-shrink-0 p-1.5 rounded-full hover:bg-black/5 transition-colors duration-200" title="Dismiss announcement">
             <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
