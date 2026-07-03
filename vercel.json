@@ -21,6 +21,9 @@
     },
     "api/news.js": {
       "maxDuration": 30
+    },
+    "api/announcement.js": {
+      "maxDuration": 30
     }
   },
   "routes": [

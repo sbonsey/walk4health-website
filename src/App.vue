@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import AdminPanel from './components/AdminPanel.vue'
-import { dataService, type EventsData, type ClubContent, type GalleryMeta, type LinkItem } from './services/dataService'
+import { dataService, type EventsData, type ClubContent, type GalleryMeta, type LinkItem, type AnnouncementData } from './services/dataService'
 
 const applicationPdfUrl = new URL('./assets/application.pdf', import.meta.url).href
 
@@ -71,6 +71,47 @@ const galleries = ref<GalleryMeta[]>([])
 // News data - loaded from data service
 const newsItems = ref<NewsItem[]>([])
 const showAllNews = ref(false)
+
+// Announcement banner - loaded from data service
+const ANNOUNCEMENT_DISMISSED_KEY = 'walk4health-announcement-dismissed'
+const announcement = ref<AnnouncementData | null>(null)
+const announcementDismissed = ref(false)
+
+const showAnnouncement = computed(() => {
+  return !!announcement.value?.enabled &&
+    !!announcement.value?.message.trim() &&
+    !announcementDismissed.value
+})
+
+const announcementClasses = computed(() => {
+  switch (announcement.value?.style) {
+    case 'success':
+      return 'bg-green-50 border-green-100 text-green-800'
+    case 'warning':
+      return 'bg-amber-50 border-amber-100 text-amber-800'
+    default:
+      return 'bg-blue-50 border-blue-100 text-blue-800'
+  }
+})
+
+const syncAnnouncementDismissed = () => {
+  // Dismissal is per-announcement: editing the announcement brings it back
+  announcementDismissed.value =
+    sessionStorage.getItem(ANNOUNCEMENT_DISMISSED_KEY) === announcement.value?.lastUpdated
+}
+
+const dismissAnnouncement = () => {
+  announcementDismissed.value = true
+  if (announcement.value) {
+    sessionStorage.setItem(ANNOUNCEMENT_DISMISSED_KEY, announcement.value.lastUpdated)
+  }
+}
+
+// Handle announcement updates from admin panel
+const handleAnnouncementUpdated = (updated: AnnouncementData) => {
+  announcement.value = updated
+  syncAnnouncementDismissed()
+}
 
 // Template refs
 const eventsContainer = ref<HTMLElement>()
@@ -193,12 +234,13 @@ onMounted(async () => {
 const loadData = async () => {
   isLoading.value = true
   try {
-    const [eventsData, contentData, galleriesData, newsData, linksData] = await Promise.all([
+    const [eventsData, contentData, galleriesData, newsData, linksData, announcementData] = await Promise.all([
       dataService.getEvents(),
       dataService.getContent(),
       dataService.getGalleries(),
       dataService.getNews(),
-      dataService.getLinks()
+      dataService.getLinks(),
+      dataService.getAnnouncement()
     ])
 
     // Ensure events data is properly structured
@@ -284,6 +326,10 @@ const loadData = async () => {
 
     // Set links data
     links.value = Array.isArray(linksData) ? linksData : []
+
+    // Set announcement banner data
+    announcement.value = announcementData || null
+    syncAnnouncementDismissed()
 
     console.log('✅ App.vue: Data loaded successfully:', {
       recurringEvents: recurringEvents.value,
@@ -729,6 +775,26 @@ const formatTime = (time: string): string => {
 
     <!-- Main Content -->
     <main class="pt-16 md:pt-24">
+      <!-- Announcement Banner -->
+      <div v-if="showAnnouncement" :class="announcementClasses" class="border-b">
+        <div class="max-w-7xl mx-auto px-8 py-2.5 flex items-center gap-3">
+          <svg class="w-4 h-4 flex-shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
+          </svg>
+          <p class="flex-1 text-sm text-center">
+            {{ announcement?.message }}
+            <a v-if="announcement?.link" :href="announcement.link" class="font-semibold underline underline-offset-2 hover:opacity-75 ml-1 whitespace-nowrap">
+              Learn more →
+            </a>
+          </p>
+          <button @click="dismissAnnouncement" class="flex-shrink-0 p-1 rounded hover:bg-black/5 transition-colors" title="Dismiss announcement">
+            <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
       <!-- Home Section -->
       <section id="home" class="section bg-gradient-to-br from-primary-50 to-secondary-50 relative overflow-hidden">
         <!-- Background Image -->
@@ -1310,6 +1376,7 @@ const formatTime = (time: string): string => {
       @content-updated="handleContentUpdated($event); refreshLinks()"
       @galleries-updated="handleGalleriesUpdated"
       @news-updated="handleNewsUpdated"
+      @announcement-updated="handleAnnouncementUpdated"
     />
 
     <!-- Admin Login Modal -->

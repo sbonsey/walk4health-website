@@ -85,6 +85,14 @@ export interface LinkItem {
   description: string
 }
 
+export interface AnnouncementData {
+  enabled: boolean
+  message: string
+  link?: string
+  style?: 'info' | 'success' | 'warning'
+  lastUpdated: string
+}
+
 class DataService {
   // Check if we're in production (Vercel)
   private isProduction(): boolean {
@@ -664,6 +672,71 @@ class DataService {
         // In production, fail if API doesn't work
         throw error
       }
+    }
+  }
+
+  // Announcement banner methods
+  async getAnnouncement(): Promise<AnnouncementData> {
+    try {
+      const response = await fetch('/api/announcement')
+      if (!response.ok) throw new Error('Failed to fetch announcement')
+      return await response.json()
+    } catch (error) {
+      console.error('Error fetching announcement:', error)
+      // Only fallback to localStorage in development
+      if (!this.isProduction()) {
+        const stored = this.getAnnouncementFromStorage()
+        if (stored) return stored
+      }
+      return {
+        enabled: false,
+        message: '',
+        link: '',
+        style: 'info',
+        lastUpdated: new Date().toISOString()
+      }
+    }
+  }
+
+  async saveAnnouncement(announcement: AnnouncementData): Promise<AnnouncementData> {
+    try {
+      const response = await fetch('/api/announcement', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(announcement)
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        const saved: AnnouncementData = result.announcement || announcement
+        // Only store in localStorage as backup in development
+        if (!this.isProduction()) {
+          localStorage.setItem('walk4health-announcement', JSON.stringify(saved))
+        }
+        return saved
+      } else {
+        const errorText = await response.text()
+        console.error('Failed to save announcement:', response.status, errorText)
+        throw new Error(`API save failed: ${response.status} ${errorText}`)
+      }
+    } catch (error) {
+      console.error('Error saving announcement:', error)
+      // Only fallback to localStorage in development
+      if (!this.isProduction()) {
+        const saved = { ...announcement, lastUpdated: new Date().toISOString() }
+        localStorage.setItem('walk4health-announcement', JSON.stringify(saved))
+        return saved
+      }
+      throw error
+    }
+  }
+
+  private getAnnouncementFromStorage(): AnnouncementData | null {
+    try {
+      const stored = localStorage.getItem('walk4health-announcement')
+      return stored ? JSON.parse(stored) : null
+    } catch {
+      return null
     }
   }
 

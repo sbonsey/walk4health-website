@@ -526,6 +526,67 @@
               <button @click="saveEmailConfig" class="btn-primary w-full">Save Email Configuration</button>
             </div>
           </div>
+
+          <!-- Announcement Banner Tab -->
+          <div v-if="activeTab === 'banner'" class="space-y-4">
+            <!-- Status Display -->
+            <div v-if="saveStatus" class="p-3 rounded-lg text-sm" :class="saveStatus.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'">
+              {{ saveStatus }}
+            </div>
+
+            <h3 class="text-lg font-semibold text-gray-900">Announcement Banner</h3>
+            <p class="text-sm text-gray-600">Show a subtle banner under the navigation bar for club announcements (e.g. cancelled walks, upcoming events).</p>
+
+            <div class="space-y-3">
+              <label class="flex items-center gap-3 bg-gray-50 p-3 rounded-lg cursor-pointer">
+                <input v-model="announcement.enabled" type="checkbox" class="w-4 h-4 text-primary-600 border-gray-300 rounded">
+                <span class="text-sm font-medium text-gray-700">Show announcement banner on the website</span>
+              </label>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                <textarea v-model="announcement.message" rows="2" maxlength="200" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g. Sunday's walk is cancelled due to weather"></textarea>
+                <p class="text-xs text-gray-500 mt-1">{{ announcement.message.length }}/200 characters. Keep it short - one sentence works best.</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Link (Optional)</label>
+                <input v-model="announcement.link" type="url" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="https://example.com/more-details">
+                <p class="text-xs text-gray-500 mt-1">If set, a "Learn more" link is shown after the message.</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Style</label>
+                <select v-model="announcement.style" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                  <option value="info">Info (blue)</option>
+                  <option value="success">Success (green)</option>
+                  <option value="warning">Warning (amber)</option>
+                </select>
+              </div>
+
+              <!-- Preview -->
+              <div v-if="announcement.message.trim()">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Preview</label>
+                <div class="border-b rounded" :class="{
+                  'bg-green-50 border-green-100 text-green-800': announcement.style === 'success',
+                  'bg-amber-50 border-amber-100 text-amber-800': announcement.style === 'warning',
+                  'bg-blue-50 border-blue-100 text-blue-800': !announcement.style || announcement.style === 'info'
+                }">
+                  <div class="px-4 py-2.5 flex items-center gap-3">
+                    <svg class="w-4 h-4 flex-shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
+                    </svg>
+                    <p class="flex-1 text-sm text-center">
+                      {{ announcement.message }}
+                      <span v-if="announcement.link" class="font-semibold underline underline-offset-2 ml-1">Learn more →</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <button @click="saveAnnouncement" class="btn-primary w-full">Save Announcement</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -534,7 +595,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch, computed } from 'vue'
-import { dataService, type ClubContent, type GalleryMeta, type LinkItem, type EventsData } from '../services/dataService'
+import { dataService, type ClubContent, type GalleryMeta, type LinkItem, type EventsData, type AnnouncementData } from '../services/dataService'
 
 // Types
 interface NewsItem {
@@ -560,6 +621,7 @@ const emit = defineEmits<{
   'content-updated': [ClubContent]
   galleriesUpdated: [GalleryMeta[]]
   newsUpdated: [NewsItem[]]
+  announcementUpdated: [AnnouncementData]
 }>()
 
 // Reactive data
@@ -583,7 +645,8 @@ const tabs = [
   { id: 'news', name: 'News' },
   { id: 'photos', name: 'Photos' },
   { id: 'content', name: 'Content' },
-  { id: 'email', name: 'Email' }
+  { id: 'email', name: 'Email' },
+  { id: 'banner', name: 'Banner' }
 ]
 
 // Form data for recurring events
@@ -621,6 +684,15 @@ const newNewsItem = reactive({
 
 // (Events removed)
 const events = ref<EventsData>({ recurringEvents: [], specialEvents: [] })
+
+// Announcement banner data
+const announcement = ref<AnnouncementData>({
+  enabled: false,
+  message: '',
+  link: '',
+  style: 'info',
+  lastUpdated: new Date().toISOString()
+})
 
 const content = ref<ClubContent>({
   clubMission: '',
@@ -687,12 +759,13 @@ const loadData = async () => {
     console.log('🔄 AdminPanel: Starting to load data from API...')
     console.log('🔄 AdminPanel: Current hostname:', window.location.hostname)
     
-    const [linksData, eventsData, contentData, galleriesData, emailConfigData] = await Promise.all([
+    const [linksData, eventsData, contentData, galleriesData, emailConfigData, announcementData] = await Promise.all([
       dataService.getLinks(),
       dataService.getEvents(),
       dataService.getContent(),
       dataService.getGalleries(),
-      dataService.getEmailConfig()
+      dataService.getEmailConfig(),
+      dataService.getAnnouncement()
     ])
     
     console.log('🔄 AdminPanel: API responses received:', { linksData, contentData, galleriesData, emailConfigData })
@@ -763,6 +836,17 @@ const loadData = async () => {
     if (emailConfigData && typeof emailConfigData === 'object') {
       emailConfig.inquiryEmail = (emailConfigData as any).inquiryEmail || ''
       emailConfig.subjectPrefix = (emailConfigData as any).subjectPrefix || ''
+    }
+
+    // Load announcement banner
+    if (announcementData && typeof announcementData === 'object') {
+      announcement.value = {
+        enabled: !!announcementData.enabled,
+        message: announcementData.message || '',
+        link: announcementData.link || '',
+        style: announcementData.style || 'info',
+        lastUpdated: announcementData.lastUpdated || new Date().toISOString()
+      }
     }
     
     // Ensure galleries data is properly structured
@@ -933,6 +1017,26 @@ const saveContent = async () => {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : 'No stack trace'
     })
+  }
+}
+
+// Save announcement banner
+const saveAnnouncement = async () => {
+  if (announcement.value.enabled && !announcement.value.message.trim()) {
+    saveStatus.value = 'Error: please enter a message before enabling the banner'
+    setTimeout(() => saveStatus.value = '', 3000)
+    return
+  }
+
+  try {
+    const saved = await dataService.saveAnnouncement(announcement.value)
+    announcement.value = saved
+    saveStatus.value = 'Announcement saved successfully!'
+    emit('announcementUpdated', saved)
+    setTimeout(() => saveStatus.value = '', 3000)
+  } catch (error) {
+    saveStatus.value = 'Error saving announcement'
+    console.error('❌ AdminPanel: Error saving announcement:', error)
   }
 }
 
