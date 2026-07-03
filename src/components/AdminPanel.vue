@@ -486,7 +486,22 @@
                 </div>
                 <p class="text-xs text-gray-500 mt-2">This information will be displayed in the contact section of the website.</p>
               </div>
-              
+
+              <!-- Membership Application Form -->
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h4 class="font-medium text-gray-900 mb-3">Membership Application Form</h4>
+                <p class="text-sm text-gray-600 mb-3">Upload a PDF to replace the application form that visitors download from the Contact section. The new form goes live as soon as the upload finishes.</p>
+                <div class="flex flex-wrap items-center gap-3">
+                  <button @click="applicationFormInput?.click()" :disabled="uploadingApplicationForm" class="btn-secondary text-sm" :class="{ 'opacity-50 cursor-not-allowed': uploadingApplicationForm }">
+                    {{ uploadingApplicationForm ? 'Uploading...' : 'Upload New Form (PDF)' }}
+                  </button>
+                  <a v-if="content.applicationFormUrl" :href="content.applicationFormUrl" target="_blank" rel="noopener" class="text-sm text-blue-600 hover:text-blue-800 underline">View current form</a>
+                  <span v-else class="text-sm text-gray-500">Currently using the built-in default form</span>
+                </div>
+                <input ref="applicationFormInput" type="file" accept="application/pdf,.pdf" class="hidden" @change="handleApplicationFormUpload">
+                <p class="text-xs text-gray-500 mt-2">PDF only, up to 3.5MB.</p>
+              </div>
+
               <button @click="saveContent" class="btn-primary w-full">Save Changes</button>
             </div>
           </div>
@@ -730,6 +745,7 @@ const content = ref<ClubContent>({
     contactName: '',
     contactPhone: ''
   },
+  applicationFormUrl: '',
   lastUpdated: new Date().toISOString()
 })
 
@@ -817,6 +833,7 @@ const loadData = async () => {
           contactName: '',
           contactPhone: ''
         },
+        applicationFormUrl: contentData.applicationFormUrl || '',
         lastUpdated: contentData.lastUpdated || new Date().toISOString()
       }
     } else {
@@ -842,6 +859,7 @@ const loadData = async () => {
           contactName: '',
           contactPhone: ''
         },
+        applicationFormUrl: '',
         lastUpdated: new Date().toISOString()
       }
     }
@@ -894,6 +912,7 @@ const loadData = async () => {
             contactName: '',
             contactPhone: ''
           },
+          applicationFormUrl: storedContent.applicationFormUrl || content.value.applicationFormUrl || '',
           lastUpdated: storedContent.lastUpdated || new Date().toISOString()
         }
       }
@@ -1031,6 +1050,53 @@ const saveContent = async () => {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : 'No stack trace'
     })
+  }
+}
+
+// Application form upload
+const applicationFormInput = ref<HTMLInputElement | null>(null)
+const uploadingApplicationForm = ref(false)
+
+const handleApplicationFormUpload = async (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  if (file.type !== 'application/pdf') {
+    saveStatus.value = 'Error: application form must be a PDF file'
+    setTimeout(() => saveStatus.value = '', 3000)
+    input.value = ''
+    return
+  }
+
+  // Uploads go through the API as base64, which has a ~4.5MB request limit
+  if (file.size > 3.5 * 1024 * 1024) {
+    saveStatus.value = 'Error: PDF must be smaller than 3.5MB'
+    setTimeout(() => saveStatus.value = '', 3000)
+    input.value = ''
+    return
+  }
+
+  uploadingApplicationForm.value = true
+  saveStatus.value = 'Uploading application form...'
+  try {
+    const { url } = await dataService.uploadApplicationForm(file)
+    content.value.applicationFormUrl = url
+    content.value.lastUpdated = new Date().toISOString()
+    const saved = await dataService.saveContent(content.value)
+    if (saved) {
+      emit('content-updated', content.value)
+      saveStatus.value = 'Application form updated successfully!'
+    } else {
+      saveStatus.value = 'Error saving application form'
+    }
+  } catch (error) {
+    console.error('❌ AdminPanel: Error uploading application form:', error)
+    saveStatus.value = 'Error uploading application form'
+  } finally {
+    uploadingApplicationForm.value = false
+    input.value = ''
+    setTimeout(() => saveStatus.value = '', 3000)
   }
 }
 

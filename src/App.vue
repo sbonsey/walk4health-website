@@ -3,7 +3,9 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import AdminPanel from './components/AdminPanel.vue'
 import { dataService, type EventsData, type ClubContent, type GalleryMeta, type LinkItem, type AnnouncementData } from './services/dataService'
 
-const applicationPdfUrl = new URL('./assets/application.pdf', import.meta.url).href
+// Bundled default form; replaced when the admin uploads one via the Content tab
+const defaultApplicationPdfUrl = new URL('./assets/application.pdf', import.meta.url).href
+const applicationPdfUrl = computed(() => clubContent.value.applicationFormUrl || defaultApplicationPdfUrl)
 
 // Types
 interface NewsItem {
@@ -280,6 +282,8 @@ const loadData = async () => {
         committee: contentData.committee || undefined,
         walkingStats: contentData.walkingStats || undefined,
         clubImageCaption: contentData.clubImageCaption || '',
+        contactInfo: contentData.contactInfo || undefined,
+        applicationFormUrl: contentData.applicationFormUrl || '',
         lastUpdated: contentData.lastUpdated || new Date().toISOString()
       }
     } else {
@@ -322,6 +326,8 @@ const loadData = async () => {
             committee: storedContent.committee || undefined,
             walkingStats: storedContent.walkingStats || undefined,
             clubImageCaption: storedContent.clubImageCaption || '',
+            contactInfo: storedContent.contactInfo || undefined,
+            applicationFormUrl: storedContent.applicationFormUrl || '',
             lastUpdated: storedContent.lastUpdated || new Date().toISOString()
           }
         }

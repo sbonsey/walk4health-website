@@ -45,6 +45,7 @@ export interface ClubContent {
     contactName: string
     contactPhone: string
   }
+  applicationFormUrl?: string
   lastUpdated: string
 }
 
@@ -417,6 +418,11 @@ class DataService {
       console.error('Error uploading image:', error)
       throw new Error('Failed to upload image')
     }
+  }
+
+  // Application form (PDF) upload - stored in Vercel Blob like images
+  async uploadApplicationForm(file: File): Promise<{ url: string; filename: string }> {
+    return this.uploadImage(file)
   }
 
   private async fileToBase64(file: File): Promise<string> {
